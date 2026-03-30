@@ -1,0 +1,5 @@
+﻿.clasp.json
+~$*.xlsx
+*.tmp
+Thumbs.db
+desktop.ini

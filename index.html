@@ -1,0 +1,2570 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f4f4;
+}
+
+header{
+background:#153244;
+color:white;
+padding:15px;
+font-size:22px;
+font-weight:bold;
+}
+
+.versionTag{
+font-size:12px;
+font-weight:normal;
+margin-left:12px;
+opacity:.85;
+}
+
+.panel{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+padding:15px;
+}
+
+.card{
+background:#8de2d6;
+padding:15px;
+border-radius:8px;
+min-width:140px;
+text-align:center;
+}
+
+.numero{
+font-size:24px;
+font-weight:bold;
+color:#153244;
+}
+
+.botonActualizar{
+background:#153244;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:6px;
+cursor:pointer;
+margin:10px;
+font-size:15px;
+transition:transform .15s;
+}
+
+.botonActualizar:active{
+transform:scale(.9);
+}
+
+.botonSupervisorActivo{
+background:#00c853;
+}
+
+.barraAcciones{
+display:flex;
+flex-wrap:wrap;
+align-items:center;
+gap:10px;
+padding:10px;
+}
+
+.grupoEspeciales{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+align-items:center;
+padding:10px;
+margin:0 10px 10px;
+background:#ffffff;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.grupoTitulo{
+font-size:13px;
+font-weight:bold;
+color:#153244;
+margin-right:4px;
+text-transform:uppercase;
+letter-spacing:.04em;
+}
+
+.botonEspecial{
+background:#ffcb00;
+color:#153244;
+border:none;
+padding:10px 14px;
+border-radius:999px;
+cursor:pointer;
+font-size:13px;
+font-weight:bold;
+transition:transform .18s,box-shadow .18s,background .18s;
+}
+
+.botonEspecial:hover{
+transform:translateY(-1px);
+box-shadow:0 4px 10px rgba(21,50,68,.18);
+}
+
+.botonEspecial:active{
+transform:scale(.96);
+}
+
+.contenedor{
+padding:15px;
+}
+
+.seccion{
+margin-bottom:30px;
+}
+
+.tituloSeccion{
+font-size:18px;
+margin-bottom:10px;
+font-weight:bold;
+color:#153244;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:15px;
+}
+
+.estacion{
+background:white;
+border-radius:8px;
+overflow:hidden;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.estacionHeader{
+background:#ffcb00;
+padding:10px;
+font-weight:bold;
+display:flex;
+align-items:center;
+gap:8px;
+cursor:pointer;
+}
+
+.profList{
+display:none;
+padding:10px;
+}
+
+.profesor{
+display:flex;
+justify-content:space-between;
+border-bottom:1px solid #eee;
+padding:4px 0;
+font-size:13px;
+}
+
+.luz{
+width:10px;
+height:10px;
+border-radius:50%;
+display:inline-block;
+}
+
+.verde{background:#00c853;}
+.amarillo{background:#ffd600;}
+.rojo{background:#d50000;}
+
+.tabla{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+.tabla th,.tabla td{
+border:1px solid #ddd;
+padding:6px;
+font-size:13px;
+}
+
+.tabla th{
+background:#153244;
+color:white;
+cursor:pointer;
+}
+
+details{
+margin-bottom:10px;
+background:white;
+padding:10px;
+border-radius:6px;
+}
+
+.modalOverlay{
+position:fixed;
+inset:0;
+background:rgba(21,50,68,.45);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+opacity:0;
+pointer-events:none;
+transition:opacity .25s ease;
+z-index:1000;
+}
+
+.modalOverlay.visible{
+opacity:1;
+pointer-events:auto;
+}
+
+.modalVentana{
+width:min(920px,96vw);
+max-height:85vh;
+background:#fff;
+border-radius:18px;
+overflow:hidden;
+box-shadow:0 20px 45px rgba(0,0,0,.22);
+transform:translateY(20px) scale(.96);
+transition:transform .28s ease;
+display:flex;
+flex-direction:column;
+}
+
+.modalOverlay.visible .modalVentana{
+transform:translateY(0) scale(1);
+}
+
+.modalHeader{
+background:linear-gradient(135deg,#153244,#24536d);
+color:white;
+padding:18px 22px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+}
+
+.modalTitulo{
+font-size:22px;
+font-weight:bold;
+}
+
+.modalSubtitulo{
+font-size:13px;
+opacity:.9;
+margin-top:4px;
+}
+
+.modalCerrar{
+border:none;
+background:rgba(255,255,255,.16);
+color:white;
+width:38px;
+height:38px;
+border-radius:50%;
+font-size:20px;
+cursor:pointer;
+}
+
+.modalBody{
+padding:22px;
+overflow:auto;
+background:linear-gradient(180deg,#f8fbfd 0%,#eef4f7 100%);
+}
+
+.resumenCards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+gap:14px;
+margin-bottom:20px;
+}
+
+.resumenCard{
+background:#ffffff;
+border-radius:14px;
+padding:16px;
+box-shadow:0 2px 10px rgba(21,50,68,.08);
+}
+
+.resumenLabel{
+font-size:12px;
+text-transform:uppercase;
+letter-spacing:.05em;
+color:#5f7381;
+margin-bottom:8px;
+}
+
+.resumenValor{
+font-size:28px;
+font-weight:bold;
+color:#153244;
+}
+
+.estadoVacio{
+background:white;
+padding:18px;
+border-radius:14px;
+color:#45606f;
+box-shadow:0 2px 10px rgba(21,50,68,.08);
+}
+
+.debugBox{
+background:#ffffff;
+padding:16px;
+border-radius:14px;
+color:#153244;
+box-shadow:0 2px 10px rgba(21,50,68,.08);
+font-size:15px;
+line-height:1.5;
+margin-bottom:16px;
+white-space:pre-wrap;
+}
+
+.filtrosResumen{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:14px;
+margin-bottom:18px;
+}
+
+.filtroBloque{
+background:#ffffff;
+border-radius:14px;
+padding:14px 16px;
+box-shadow:0 2px 10px rgba(21,50,68,.08);
+}
+
+.filtroBloque label{
+display:block;
+font-size:12px;
+text-transform:uppercase;
+letter-spacing:.05em;
+color:#5f7381;
+margin-bottom:8px;
+}
+
+.filtroBloque select{
+width:100%;
+padding:10px 12px;
+border:1px solid #c9d7df;
+border-radius:10px;
+font-size:14px;
+background:#f9fcfe;
+color:#153244;
+}
+
+.detalleResumen{
+display:grid;
+grid-template-columns:1.3fr .9fr;
+gap:16px;
+margin-bottom:18px;
+}
+
+.panelDetalle{
+background:#ffffff;
+border-radius:14px;
+padding:16px;
+box-shadow:0 2px 10px rgba(21,50,68,.08);
+}
+
+.panelDetalleTitulo{
+font-size:16px;
+font-weight:bold;
+color:#153244;
+margin-bottom:12px;
+}
+
+.miniResumen{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:12px;
+}
+
+.miniItem{
+padding:12px;
+border-radius:12px;
+background:#f4f9fc;
+}
+
+.miniItemValor{
+font-size:24px;
+font-weight:bold;
+color:#153244;
+}
+
+.miniItemLabel{
+font-size:12px;
+text-transform:uppercase;
+letter-spacing:.04em;
+color:#5f7381;
+margin-top:4px;
+}
+
+.listasResumen{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:14px;
+}
+
+.listaCompacta{
+width:100%;
+border-collapse:collapse;
+}
+
+.listaCompacta td{
+padding:8px 0;
+border-bottom:1px solid #e6eef2;
+font-size:14px;
+}
+
+.listaCompacta td:last-child{
+text-align:right;
+font-weight:bold;
+color:#153244;
+}
+
+.notaResumen{
+background:#fff8d6;
+border:1px solid #ecd774;
+border-radius:14px;
+padding:14px 16px;
+margin-bottom:18px;
+color:#5f4d00;
+box-shadow:0 2px 10px rgba(21,50,68,.05);
+line-height:1.45;
+}
+
+.accionesInformeIA{
+display:flex;
+justify-content:space-between;
+align-items:flex-end;
+gap:14px;
+flex-wrap:wrap;
+margin-bottom:18px;
+}
+
+.accionesCronograma{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:14px;
+flex-wrap:wrap;
+margin-bottom:18px;
+}
+
+.grupoBotonesCronograma{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+.resumenCard.ok{
+background:linear-gradient(180deg,#f2fff7 0%,#dff7ea 100%);
+border:1px solid #b9e6cb;
+}
+
+.resumenCard.alerta{
+background:linear-gradient(180deg,#fff7ef 0%,#ffe4c7 100%);
+border:1px solid #f1c48a;
+}
+
+.resumenCard.critica{
+background:linear-gradient(180deg,#fff3f3 0%,#ffd7d7 100%);
+border:1px solid #efb0b0;
+}
+
+.miniItem.ok{
+background:#edf9f1;
+border:1px solid #c4e7ce;
+}
+
+.miniItem.alerta{
+background:#fff4e7;
+border:1px solid #f1d0a1;
+}
+
+.miniItem.critica{
+background:#fff1f1;
+border:1px solid #efc0c0;
+}
+
+.badgeEstado{
+display:inline-flex;
+align-items:center;
+gap:6px;
+padding:6px 10px;
+border-radius:999px;
+font-size:12px;
+font-weight:bold;
+letter-spacing:.03em;
+}
+
+.badgeEstado.ok{
+background:#e5f7eb;
+color:#136f3a;
+}
+
+.badgeEstado.alerta{
+background:#fff1dc;
+color:#9b5b00;
+}
+
+.badgeEstado.critica{
+background:#ffe3e3;
+color:#a32020;
+}
+
+.filaCritica{
+background:#fff5f5;
+}
+
+.filaAlerta{
+background:#fff9ef;
+}
+
+.controlesComparacion{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:12px;
+flex:1;
+}
+
+.botonInformeIA{
+background:#153244;
+color:white;
+border:none;
+padding:10px 16px;
+border-radius:10px;
+cursor:pointer;
+font-size:14px;
+font-weight:bold;
+transition:transform .18s,opacity .18s;
+}
+
+.botonInformeIA:disabled{
+opacity:.6;
+cursor:wait;
+}
+
+.botonInformeIA:active{
+transform:scale(.98);
+}
+
+.botonSecundario{
+background:#ffffff;
+color:#153244;
+border:1px solid #b8cad6;
+padding:10px 16px;
+border-radius:10px;
+cursor:pointer;
+font-size:14px;
+font-weight:bold;
+transition:transform .18s,opacity .18s;
+}
+
+.botonSecundario:disabled{
+opacity:.6;
+cursor:wait;
+}
+
+.grupoBotonesInforme{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+.campoTexto{
+width:100%;
+padding:12px 14px;
+border:1px solid #c9d7df;
+border-radius:10px;
+font-size:14px;
+background:#f9fcfe;
+color:#153244;
+box-sizing:border-box;
+}
+
+.accionesPopup{
+display:flex;
+justify-content:flex-end;
+gap:10px;
+margin-top:18px;
+}
+
+@media (max-width:700px){
+.barraAcciones{
+padding-bottom:0;
+}
+
+.grupoEspeciales{
+margin-top:0;
+}
+
+.modalBody{
+padding:14px;
+}
+
+.modalTitulo{
+font-size:18px;
+}
+
+.detalleResumen{
+grid-template-columns:1fr;
+}
+}
+
+</style>
+
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+</head>
+
+<body>
+
+<header>Estaciones Saludables <span class="versionTag">v-debug-2026-03-25-02</span></header>
+
+<div class="barraAcciones">
+<button class="botonActualizar" onclick="cargarDatos()">Actualizar</button>
+
+<button class="botonActualizar" onclick="exportarExcel()">Exportar Excel</button>
+
+<button id="btnSupervision" class="botonActualizar" onclick="toggleSupervision()">Modo Supervisión</button>
+
+<input type="text" id="buscador"
+placeholder="Buscar estación o profesor..."
+onkeyup="filtrarEstaciones()"
+style="margin:10px;padding:8px;border-radius:6px;border:1px solid #ccc;width:260px;">
+
+<select id="filtroComuna" onchange="filtrarEstaciones()"
+style="margin:10px;padding:8px;border-radius:6px;border:1px solid #ccc;">
+<option value="">Todas las comunas</option>
+</select>
+</div>
+
+<div class="grupoEspeciales" id="grupoEspeciales">
+<div class="grupoTitulo">Nuevas solapas</div>
+</div>
+
+<div class="panel">
+
+<div class="card">
+<div class="numero" id="estaciones">0</div>
+Total Estaciones
+</div>
+
+<div class="card">
+<div class="numero" id="activas">0</div>
+Estaciones activas hoy
+</div>
+
+<div class="card">
+<div class="numero" id="pendientes">0</div>
+Estaciones por actualizar
+</div>
+
+</div>
+
+<div class="contenedor">
+
+<div class="seccion">
+<div class="tituloSeccion">🟢 Estaciones Activas</div>
+<div class="grid" id="verdes"></div>
+</div>
+
+<div class="seccion">
+<div class="tituloSeccion">🟡 Sin actividad hoy</div>
+<div class="grid" id="amarillas"></div>
+</div>
+
+<div class="seccion">
+<div class="tituloSeccion">🔴 Más de 7 días sin actividad</div>
+<div class="grid" id="rojas"></div>
+</div>
+
+<div class="seccion" id="panelSupervision" style="display:none">
+
+<div class="tituloSeccion">Panel Supervisión</div>
+
+<button class="botonActualizar" onclick="mostrarTablaCompleta()">
+Mostrar tabla completa
+</button>
+<div>
+
+<details>
+<summary>Top 5 estaciones más atrasadas</summary>
+<div id="topEstacionesAtrasadas"></div>
+</details>
+
+<details>
+<summary>Top 5 estaciones más actualizadas</summary>
+<div id="topEstacionesOk"></div>
+</details>
+
+<details>
+<summary>Top 10 profesores más atrasados</summary>
+<div id="topProfesAtrasados"></div>
+</details>
+
+<details>
+<summary>Top 10 profesores más actualizados</summary>
+<div id="topProfesOk"></div>
+</details>
+
+</div>
+
+<div id="tablaSupervision"></div>
+
+</div>
+
+</div>
+
+<div id="modalEspecial" class="modalOverlay" onclick="cerrarModalEspecial(event)">
+<div class="modalVentana" onclick="event.stopPropagation()">
+<div class="modalHeader">
+<div>
+<div class="modalTitulo" id="modalEspecialTitulo">Resumen</div>
+<div class="modalSubtitulo" id="modalEspecialSubtitulo">Cargas por fecha</div>
+</div>
+<button class="modalCerrar" onclick="cerrarModalEspecial()">×</button>
+</div>
+<div class="modalBody" id="modalEspecialBody"></div>
+</div>
+</div>
+
+<div id="modalEnvioInforme" class="modalOverlay" onclick="cerrarModalEnvioInforme(event)">
+<div class="modalVentana" style="width:min(560px,94vw);" onclick="event.stopPropagation()">
+<div class="modalHeader">
+<div>
+<div class="modalTitulo">Enviar Informe</div>
+<div class="modalSubtitulo">Envio del PDF por correo electronico</div>
+</div>
+<button class="modalCerrar" onclick="cerrarModalEnvioInforme()">×</button>
+</div>
+<div class="modalBody">
+<div class="filtroBloque">
+<label for="emailDestinoInforme">Correo destinatario</label>
+<input id="emailDestinoInforme" class="campoTexto" type="email" placeholder="nombre@dominio.com">
+</div>
+<div class="filtroBloque" style="margin-top:16px;">
+<label for="asuntoEnvioInforme">Asunto</label>
+<input id="asuntoEnvioInforme" class="campoTexto" type="text" placeholder="Asunto del correo">
+</div>
+<div class="filtroBloque" style="margin-top:16px;">
+<label for="mensajeEnvioInforme">Mensaje opcional</label>
+<textarea id="mensajeEnvioInforme" class="campoTexto" rows="5" placeholder="Mensaje adicional para el destinatario"></textarea>
+</div>
+<div class="estadoVacio" id="estadoEnvioInforme" style="display:none;margin-top:16px;"></div>
+<div class="accionesPopup">
+<button class="botonSecundario" onclick="cerrarModalEnvioInforme()">Cancelar</button>
+<button id="btnConfirmarEnvioInforme" class="botonInformeIA" onclick="confirmarEnvioInforme()">Enviar PDF</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+
+let estacionesGlobal=[]
+let datosTabla=[]
+let supervision=false
+let ordenAsc=true
+let columnaActual="dias"
+let resumenesEspecialesGlobal={}
+let resumenEspecialActual=""
+let resumenEspecialCargandoFiltros=false
+let informeIACargando=false
+let envioInformeCargando=false
+let resumenCronogramaActual=null
+let nombresSolapasEspeciales=[
+"CRONOGRAMA",
+"CLIC",
+"EVENTOS",
+"FESTEJOS",
+"COCINA",
+"ETZ",
+"VISITAS ESCOLARES",
+"EXPLORANDO CABA",
+"TALLERES"
+]
+
+let iconosEstaciones={
+
+"Aristóbulo del Valle":"📖",
+"Parque Rivadavia":"🌳",
+"Plaza Flores":"🌼",
+"Rubén Darío":"🖋️",
+"Parque Patricios":"🛡",
+"Sudamérica":"🌎",
+"Parque Chacabuco":"⛲",
+"Parque Saavedra":"🌳",
+"Plaza Almagro":"🪑",
+"Martín Fierro":"🤠",
+"Lagos de Palermo":"🌊",
+"Parque Avellaneda":"🎠",
+"Los Andes":"⛰",
+"Plaza Houssay":"🔬",
+"Parque Centenario":"🌊",
+"Plaza Manzana 66":"🍎",
+"Móvil 1":"🚗",
+"Móvil 2":"🚙"
+
+}
+
+function cargarDatos(){
+google.script.run.withSuccessHandler(render).obtenerDatos()
+}
+
+function render(data){
+
+estacionesGlobal=data.estaciones
+resumenesEspecialesGlobal=data.resumenesEspeciales || {}
+
+document.getElementById("estaciones").innerText=data.totalEstaciones
+document.getElementById("activas").innerText=data.estacionesActivas
+document.getElementById("pendientes").innerText=data.estacionesPorActualizar
+
+cargarFiltroComunas()
+pintarEstaciones(estacionesGlobal)
+renderBotonesEspeciales()
+
+generarDatosTabla()
+calcularRankings()
+renderTabla()
+
+}
+
+function cargarFiltroComunas(){
+
+let comunas=[...new Set(estacionesGlobal.map(e=>e.comuna))]
+comunas.sort()
+
+let select=document.getElementById("filtroComuna")
+
+select.innerHTML='<option value="">Todas las comunas</option>'
+
+comunas.forEach(c=>{
+let op=document.createElement("option")
+op.value=c
+op.textContent=c
+select.appendChild(op)
+})
+
+}
+
+function renderBotonesEspeciales(){
+
+let contenedor=document.getElementById("grupoEspeciales")
+
+contenedor.innerHTML='<div class="grupoTitulo">Nuevas solapas</div>'
+
+nombresSolapasEspeciales.forEach(nombre=>{
+let boton=document.createElement("button")
+boton.className="botonEspecial"
+boton.textContent=nombre
+boton.onclick=function(){
+solicitarResumenEspecial(nombre)
+}
+contenedor.appendChild(boton)
+})
+
+}
+
+function pintarEstaciones(lista){
+
+let verdes="",amarillas="",rojas=""
+
+lista.forEach(est=>{
+
+let tarjeta=crearTarjeta(est)
+
+if(est.estado==="verde") verdes+=tarjeta
+if(est.estado==="amarillo") amarillas+=tarjeta
+if(est.estado==="rojo") rojas+=tarjeta
+
+})
+
+document.getElementById("verdes").innerHTML=verdes
+document.getElementById("amarillas").innerHTML=amarillas
+document.getElementById("rojas").innerHTML=rojas
+
+}
+
+function crearTarjeta(est){
+
+let icono=iconosEstaciones[est.estacion] || "📍"
+
+let html=`<div class="estacion">
+
+<div class="estacionHeader" onclick="toggle(this)">
+
+<span class="luz ${est.estado}"></span>
+
+<div style="flex:1">
+
+<div>${icono} ${est.estacion}</div>
+
+<div style="font-size:11px">${est.comuna}</div>
+
+</div>
+
+<div style="font-size:12px;font-weight:bold">
+${est.profesoresConFecha} / ${est.totalProfesores}
+</div>
+
+</div>
+
+<div class="profList">`
+
+est.profesores.forEach(p=>{
+html+=`<div class="profesor">
+<div>${p.profesor}</div>
+<div>${p.fecha}</div>
+</div>`
+})
+
+html+=`</div></div>`
+
+return html
+
+}
+
+function toggle(el){
+let lista=el.nextElementSibling
+lista.style.display=lista.style.display==="block"?"none":"block"
+}
+
+function filtrarEstaciones(){
+
+let texto=document.getElementById("buscador").value.toLowerCase()
+let comuna=document.getElementById("filtroComuna").value
+
+let filtradas=estacionesGlobal.filter(est=>{
+
+let coincideTexto=
+est.estacion.toLowerCase().includes(texto) ||
+est.profesores.some(p=>p.profesor.toLowerCase().includes(texto))
+
+let coincideComuna = comuna==="" || est.comuna==comuna
+
+return coincideTexto && coincideComuna
+
+})
+
+pintarEstaciones(filtradas)
+
+}
+
+function generarDatosTabla(){
+
+let hoy=new Date().getTime()
+
+datosTabla=[]
+
+estacionesGlobal.forEach(est=>{
+
+est.profesores.forEach(p=>{
+
+let dias=0
+
+if(p.orden){
+dias=Math.floor((hoy-p.orden)/(1000*60*60*24))
+if(dias<0)dias=0
+}
+
+let estado="verde"
+
+if(dias>=7) estado="rojo"
+else if(dias>=1) estado="amarillo"
+
+datosTabla.push({
+sensor:estado,
+profesor:p.profesor,
+estacion:est.estacion,
+comuna:est.comuna,
+dias:dias
+})
+
+})
+
+})
+
+}
+
+function renderTabla(){
+
+let html='<table class="tabla"><tr>'
+
+html+='<th onclick="ordenar(\'sensor\')">●</th>'
+html+='<th onclick="ordenar(\'sensor\')">Estado</th>'
+html+='<th onclick="ordenar(\'profesor\')">Profesor</th>'
+html+='<th onclick="ordenar(\'estacion\')">Estación</th>'
+html+='<th onclick="ordenar(\'comuna\')">Comuna</th>'
+html+='<th onclick="ordenar(\'dias\')">Días</th>'
+
+html+='</tr>'
+
+datosTabla.forEach(r=>{
+
+html+=`<tr>
+
+<td style="text-align:center">
+<span class="luz ${r.sensor}"></span>
+</td>
+
+<td style="text-align:center">
+<span class="luz ${r.sensor}"></span>
+</td>
+
+<td>${r.profesor}</td>
+
+<td>${r.estacion}</td>
+
+<td>${r.comuna}</td>
+
+<td>${r.dias}</td>
+
+</tr>`
+
+})
+
+html+='</table>'
+
+document.getElementById("tablaSupervision").innerHTML=html
+
+}
+
+function ordenar(col){
+
+if(columnaActual===col){
+ordenAsc=!ordenAsc
+}else{
+ordenAsc=true
+columnaActual=col
+}
+
+datosTabla.sort((a,b)=>{
+
+if(a[col] < b[col]) return ordenAsc?-1:1
+if(a[col] > b[col]) return ordenAsc?1:-1
+return 0
+
+})
+
+renderTabla()
+
+}
+
+function toggleSupervision(){
+
+supervision=!supervision
+
+let panel=document.getElementById("panelSupervision")
+let btn=document.getElementById("btnSupervision")
+
+if(supervision){
+panel.style.display="block"
+btn.classList.add("botonSupervisorActivo")
+}else{
+panel.style.display="none"
+btn.classList.remove("botonSupervisorActivo")
+}
+
+}
+
+function solicitarResumenEspecial(nombre){
+
+let modal=document.getElementById("modalEspecial")
+let titulo=document.getElementById("modalEspecialTitulo")
+let subtitulo=document.getElementById("modalEspecialSubtitulo")
+let body=document.getElementById("modalEspecialBody")
+
+titulo.textContent=nombre
+subtitulo.textContent="Consultando datos en la hoja..."
+body.innerHTML='<div class="estadoVacio">Cargando resumen de '+nombre+'...</div>'
+modal.classList.add("visible")
+
+google.script.run
+.withSuccessHandler(function(data){
+try{
+resumenesEspecialesGlobal[nombre]=data || {}
+
+if(!data){
+subtitulo.textContent="La consulta no devolvio datos"
+body.innerHTML='<div class="estadoVacio">La hoja respondio vacia. Recarga la pagina e intenta nuevamente.</div>'
+return
+}
+
+let fechas=Array.isArray(data.fechas) ? data.fechas : []
+let primera=fechas.length ? fechas[0] : null
+body.innerHTML=
+'<div class="debugBox">'
++'Respuesta recibida de '+nombre+'\n'
++'Ultima fecha: '+(data.ultimaFechaCarga || '-')+'\n'
++'Cantidad de fechas: '+fechas.length+'\n'
++'Primer registro: '+(primera ? JSON.stringify(primera) : 'sin registros')
++'</div>'
+
+abrirModalEspecial(nombre)
+}catch(error){
+subtitulo.textContent="Se obtuvo la respuesta pero no se pudo mostrar"
+body.innerHTML='<div class="estadoVacio">'+(error && error.message ? error.message : "Ocurrio un error al dibujar el resumen.")+'</div>'
+}
+})
+.withFailureHandler(function(error){
+subtitulo.textContent="No se pudo obtener la informacion"
+body.innerHTML='<div class="estadoVacio">'+(error && error.message ? error.message : "Ocurrio un error al leer la solapa.")+'</div>'
+})
+.obtenerResumenSolapaEspecial(nombre)
+
+}
+
+function abrirModalEspecial(nombre){
+
+let data=resumenesEspecialesGlobal[nombre]
+let modal=document.getElementById("modalEspecial")
+let titulo=document.getElementById("modalEspecialTitulo")
+let subtitulo=document.getElementById("modalEspecialSubtitulo")
+let body=document.getElementById("modalEspecialBody")
+let fechas=Array.isArray(data && data.fechas) ? data.fechas : []
+
+resumenEspecialActual=nombre
+
+titulo.textContent=nombre
+
+if(!data){
+subtitulo.textContent="Resumen no disponible"
+body.innerHTML='<div class="estadoVacio">No llegaron datos para esta solapa.</div>'
+modal.classList.add("visible")
+return
+}
+
+if(data.tipoResumen==="cronograma"){
+abrirModalCronograma(data,modal,subtitulo,body)
+return
+}
+
+if(esResumenEspecialDetallado(data)){
+abrirModalClic(data,modal,subtitulo,body)
+return
+}
+
+subtitulo.textContent=data.ultimaFechaCarga
+? 'Ultima fecha de carga detectada: ' + data.ultimaFechaCarga
+: 'Sin fechas de carga detectadas'
+
+let totalPrestaciones=fechas.reduce((acc,item)=>acc + Number(item && item.prestaciones || 0),0)
+let ultimaCargaDetalle=fechas[0] || null
+
+let html=''
+html+='<div class="resumenCards">'
+html+='<div class="resumenCard"><div class="resumenLabel">Ultima carga</div><div class="resumenValor">'+(data.ultimaFechaCarga || "-")+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Personas en ultima carga</div><div class="resumenValor">'+(ultimaCargaDetalle ? ultimaCargaDetalle.personasUnicas : 0)+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Prestaciones en ultima carga</div><div class="resumenValor">'+(ultimaCargaDetalle ? ultimaCargaDetalle.prestaciones : 0)+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Fechas con carga</div><div class="resumenValor">'+fechas.length+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Prestaciones totales</div><div class="resumenValor">'+totalPrestaciones+'</div></div>'
+html+='</div>'
+
+if(data.mensaje){
+html+='<div class="estadoVacio">'+data.mensaje+'</div>'
+}else{
+html+='<table class="tabla"><tr>'
+html+='<th>Fecha de carga</th>'
+html+='<th>Personas unicas</th>'
+html+='<th>Prestaciones</th>'
+html+='</tr>'
+
+fechas.forEach(item=>{
+html+='<tr>'
+html+='<td>'+(item && item.fechaCarga ? item.fechaCarga : "-")+'</td>'
+html+='<td>'+Number(item && item.personasUnicas || 0)+'</td>'
+html+='<td>'+Number(item && item.prestaciones || 0)+'</td>'
+html+='</tr>'
+})
+
+html+='</table>'
+}
+
+body.innerHTML=html
+modal.classList.add("visible")
+
+}
+
+function abrirModalClic(data,modal,subtitulo,body){
+
+let meses=Array.isArray(data && data.meses) ? data.meses : []
+let etiquetas=obtenerEtiquetasResumenEspecial(data)
+
+subtitulo.textContent=data.ultimaFechaCarga
+? 'Ultima fecha de carga detectada: ' + data.ultimaFechaCarga
+: 'Sin fechas de carga detectadas'
+
+if(data.mensaje && !meses.length){
+body.innerHTML='<div class="estadoVacio">'+escapeHtml(data.mensaje)+'</div>'
+modal.classList.add("visible")
+return
+}
+
+let html=''
+html+='<div class="filtrosResumen">'
+html+='<div class="filtroBloque">'
+html+='<label for="clicFiltroMes">Mes base</label>'
+html+='<select id="clicFiltroMes" onchange="renderizarDetalleClic(true)">'
+
+meses.forEach(function(mes,index){
+html+='<option value="'+escapeHtml(mes.mesClave)+'"'+(index===0 ? ' selected' : '')+'>'+escapeHtml(mes.mesTexto)+'</option>'
+})
+
+html+='</select>'
+html+='</div>'
+html+='<div class="filtroBloque">'
+html+='<label for="clicFiltroDia">Dia base</label>'
+html+='<select id="clicFiltroDia" onchange="renderizarDetalleClic(false)"></select>'
+html+='</div>'
+html+='</div>'
+if(tieneFiltrosAvanzadosResumen(data)){
+html+='<div class="filtrosResumen">'
+html+='<div class="filtroBloque">'
+html+='<label for="clicFiltroEstacionAvanzado">Estacion</label>'
+html+='<select id="clicFiltroEstacionAvanzado" onchange="actualizarResumenEspecialFiltrado()"></select>'
+html+='</div>'
+html+='<div class="filtroBloque">'
+html+='<label for="clicFiltroProfesorAvanzado">'+escapeHtml(etiquetas.principal)+'</label>'
+html+='<select id="clicFiltroProfesorAvanzado" onchange="actualizarResumenEspecialFiltrado()"></select>'
+html+='</div>'
+html+='<div class="filtroBloque">'
+html+='<label for="clicFiltroActividadAvanzado">'+escapeHtml(etiquetas.secundaria)+'</label>'
+html+='<select id="clicFiltroActividadAvanzado" onchange="actualizarResumenEspecialFiltrado()"></select>'
+html+='</div>'
+html+='<div class="filtroBloque">'
+html+='<label for="clicFiltroSectorAvanzado">'+escapeHtml(etiquetas.terciaria)+'</label>'
+html+='<select id="clicFiltroSectorAvanzado" onchange="actualizarResumenEspecialFiltrado()"></select>'
+html+='</div>'
+html+='</div>'
+}
+html+='<div class="notaResumen"><strong>Seleccion base:</strong> primero definis el periodo principal del informe. Si activas comparacion, elegis en cuadros separados el periodo 1 y el periodo 2 del mismo tipo.</div>'
+html+='<div class="accionesInformeIA">'
+html+='<div class="controlesComparacion">'
+html+='<div class="filtroBloque">'
+html+='<label for="clicComparacionModo">Tipo de comparacion</label>'
+html+='<select id="clicComparacionModo" onchange="cambiarModoComparacionIA()">'
+html+='<option value="">Sin comparacion</option>'
+html+='<option value="mes">Comparar con otro mes</option>'
+html+='<option value="dia">Comparar con otro dia</option>'
+html+='</select>'
+html+='</div>'
+html+='<div class="filtroBloque" id="bloqueComparacionMesBase" style="display:none;">'
+html+='<label for="clicComparacionMesBase">Periodo A</label>'
+html+='<select id="clicComparacionMesBase" onchange="sincronizarComparacionMesBase();sincronizarComparacionDiaBase()"></select>'
+html+='</div>'
+html+='<div class="filtroBloque" id="bloqueComparacionMesComparado" style="display:none;">'
+html+='<label for="clicComparacionMesComparado">Periodo B</label>'
+html+='<select id="clicComparacionMesComparado" onchange="sincronizarComparacionDiaBase()"></select>'
+html+='</div>'
+html+='<div class="filtroBloque" id="bloqueComparacionDiaBase" style="display:none;">'
+html+='<label for="clicComparacionDiaBase">Dia A</label>'
+html+='<select id="clicComparacionDiaBase" onchange="sincronizarComparacionDiaBase()"></select>'
+html+='</div>'
+html+='<div class="filtroBloque" id="bloqueComparacionDiaComparado" style="display:none;">'
+html+='<label for="clicComparacionDiaComparado">Dia B</label>'
+html+='<select id="clicComparacionDiaComparado"></select>'
+html+='</div>'
+html+='</div>'
+html+='<div class="grupoBotonesInforme">'
+html+='<button id="btnEnviarInformeIA" class="botonSecundario" onclick="abrirModalEnvioInforme()">Enviar por mail</button>'
+html+='<button id="btnInformeIA" class="botonInformeIA" onclick="generarInformeIAActual()">Generar informe IA</button>'
+html+='</div>'
+html+='</div>'
+html+='<div class="notaResumen"><strong>Criterio de conteo:</strong> <strong>Personas unicas</strong> cuenta DNIs sin repetir dentro del filtro seleccionado. <strong>Participaciones / Prestaciones</strong> cuenta cada fila cargada, aunque el mismo DNI aparezca varias veces en el mismo dia o dentro del mismo '+escapeHtml(etiquetas.principal.toLowerCase())+' / '+escapeHtml(etiquetas.secundaria.toLowerCase())+'.</div>'
+html+='<div id="clicResumenPrincipal"></div>'
+html+='<div class="detalleResumen">'
+html+='<div id="clicDetalleDia"></div>'
+html+='<div id="clicListasDia"></div>'
+html+='</div>'
+html+='<div id="clicTablaDias"></div>'
+
+body.innerHTML=html
+modal.classList.add("visible")
+inicializarFiltrosAvanzadosResumen(data)
+renderizarDetalleClic(true)
+inicializarComparacionIA()
+
+}
+
+function abrirModalCronograma(data,modal,subtitulo,body){
+
+let totales=data && data.totales ? data.totales : {}
+let mensaje=data && data.mensaje ? data.mensaje : ""
+resumenCronogramaActual=data || null
+
+subtitulo.textContent=data && data.ultimaFechaCarga
+? 'Ultima fecha real detectada: ' + data.ultimaFechaCarga
+: 'Seguimiento de cumplimiento del cronograma'
+
+let html=''
+html+='<div class="accionesCronograma">'
+html+='<div class="badgeEstado '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0),Number(totales.fueraCronograma || 0))+'">'+escapeHtml(obtenerTextoEstadoCronograma(totales))+'</div>'
+html+='<div class="grupoBotonesCronograma">'
+html+='<button class="botonSecundario" onclick="exportarCronogramaResumenExcel()">Exportar Excel</button>'
+html+='<button class="botonInformeIA" onclick="imprimirCronogramaResumen()">Descargar PDF</button>'
+html+='</div>'
+html+='</div>'
+html+='<div class="filtrosResumen">'
+html+='<div class="filtroBloque"><label for="cronogramaFiltroEstacion">Estacion</label><select id="cronogramaFiltroEstacion" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
+html+='<div class="filtroBloque"><label for="cronogramaFiltroActividad">Actividad</label><select id="cronogramaFiltroActividad" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
+html+='<div class="filtroBloque"><label for="cronogramaFiltroDia">Dia</label><select id="cronogramaFiltroDia" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
+html+='<div class="filtroBloque"><label for="cronogramaFiltroResultado">Resultado</label><select id="cronogramaFiltroResultado" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
+html+='</div>'
+html+='<div class="resumenCards">'
+html+='<div class="resumenCard"><div class="resumenLabel">Clases programadas</div><div class="resumenValor">'+Number(totales.totalProgramadas || 0)+'</div></div>'
+html+='<div class="resumenCard ok"><div class="resumenLabel">Realizadas</div><div class="resumenValor">'+Number(totales.realizadas || 0)+'</div></div>'
+html+='<div class="resumenCard critica"><div class="resumenLabel">No cargadas</div><div class="resumenValor">'+Number(totales.noCargadas || 0)+'</div></div>'
+html+='<div class="resumenCard alerta"><div class="resumenLabel">Fuera de cronograma</div><div class="resumenValor">'+Number(totales.fueraCronograma || 0)+'</div></div>'
+html+='<div class="resumenCard alerta"><div class="resumenLabel">Profesor distinto</div><div class="resumenValor">'+Number(totales.profesorDistinto || 0)+'</div></div>'
+html+='<div class="resumenCard '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0),Number(totales.fueraCronograma || 0))+'"><div class="resumenLabel">% cumplimiento</div><div class="resumenValor">'+Number(totales.cumplimientoPorcentaje || 0).toFixed(1)+'%</div></div>'
+html+='</div>'
+
+if(mensaje){
+html+='<div class="estadoVacio">'+escapeHtml(mensaje)+'</div>'
+}
+
+html+='<div class="detalleResumen">'
+html+='<div id="cronogramaPanelPrincipal"></div>'
+html+='<div id="cronogramaPanelResultados"></div>'
+html+='</div>'
+html+='<div class="detalleResumen">'
+html+='<div id="cronogramaPanelEstaciones"></div>'
+html+='<div id="cronogramaPanelActividades"></div>'
+html+='</div>'
+html+='<div class="detalleResumen">'
+html+='<div id="cronogramaPanelDias"></div>'
+html+='<div id="cronogramaPanelFechas"></div>'
+html+='</div>'
+html+='<div id="cronogramaPanelIncidencias"></div>'
+
+body.innerHTML=html
+modal.classList.add("visible")
+
+renderizarOpcionesFiltroAvanzado("cronogramaFiltroEstacion",data && data.filtrosDisponibles ? data.filtrosDisponibles.estaciones : [],"Todas las estaciones")
+renderizarOpcionesFiltroAvanzado("cronogramaFiltroActividad",data && data.filtrosDisponibles ? data.filtrosDisponibles.actividades : [],"Todas las actividades")
+renderizarOpcionesFiltroAvanzado("cronogramaFiltroDia",data && data.filtrosDisponibles ? data.filtrosDisponibles.dias : [],"Todos los dias")
+renderizarOpcionesFiltroAvanzado("cronogramaFiltroResultado",data && data.filtrosDisponibles ? data.filtrosDisponibles.resultados : [],"Todos los resultados")
+
+let filtros=data && data.filtrosAplicados ? data.filtrosAplicados : {}
+if(filtros.estacion && document.getElementById("cronogramaFiltroEstacion")) document.getElementById("cronogramaFiltroEstacion").value=filtros.estacion
+if(filtros.actividad && document.getElementById("cronogramaFiltroActividad")) document.getElementById("cronogramaFiltroActividad").value=filtros.actividad
+if(filtros.dia && document.getElementById("cronogramaFiltroDia")) document.getElementById("cronogramaFiltroDia").value=filtros.dia
+if(filtros.resultado && document.getElementById("cronogramaFiltroResultado")) document.getElementById("cronogramaFiltroResultado").value=filtros.resultado
+
+document.getElementById("cronogramaPanelPrincipal").innerHTML=armarPanelPrincipalCronograma(data)
+document.getElementById("cronogramaPanelResultados").innerHTML=armarPanelResultadosCronograma(data)
+document.getElementById("cronogramaPanelEstaciones").innerHTML=armarPanelTablaCronograma("Estaciones con mayor desvio",data && data.estaciones ? data.estaciones : [])
+document.getElementById("cronogramaPanelActividades").innerHTML=armarPanelTablaCronograma("Actividades",data && data.actividades ? data.actividades : [])
+document.getElementById("cronogramaPanelDias").innerHTML=armarPanelTablaCronograma("Dias de semana",data && data.dias ? data.dias : [])
+document.getElementById("cronogramaPanelFechas").innerHTML=armarPanelFechasCronograma(data && data.fechas ? data.fechas : [])
+document.getElementById("cronogramaPanelIncidencias").innerHTML=armarPanelIncidenciasCronograma(data && data.incidencias ? data.incidencias : [])
+
+}
+
+function armarPanelPrincipalCronograma(data){
+let totales=data && data.totales ? data.totales : {}
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">Lectura rapida</div>'
+html+='<div class="miniResumen">'
+html+='<div class="miniItem ok"><div class="miniItemValor">'+Number((totales.totalProgramadas || 0) - (totales.noCargadas || 0))+'</div><div class="miniItemLabel">Programadas con alguna carga</div></div>'
+html+='<div class="miniItem critica"><div class="miniItemValor">'+Number(totales.noCargadas || 0)+'</div><div class="miniItemLabel">Huecos a revisar</div></div>'
+html+='<div class="miniItem alerta"><div class="miniItemValor">'+Number(totales.fueraCronograma || 0)+'</div><div class="miniItemLabel">Cargas fuera de plan</div></div>'
+html+='<div class="miniItem alerta"><div class="miniItemValor">'+Number(totales.profesorDistinto || 0)+'</div><div class="miniItemLabel">Profesor distinto</div></div>'
+html+='</div>'
+html+='</div>'
+return html
+}
+
+function armarPanelResultadosCronograma(data){
+let items=Array.isArray(data && data.resultados) ? data.resultados : []
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">Resultados del cruce</div>'
+html+=armarTablaConteosClic(items,'No hay resultados para mostrar.')
+html+='</div>'
+return html
+}
+
+function armarPanelTablaCronograma(titulo,items){
+let lista=(Array.isArray(items) ? items : []).slice(0,15)
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">'+escapeHtml(titulo)+'</div>'
+
+if(!lista.length){
+html+='<div class="estadoVacio">No hay datos para mostrar.</div>'
+html+='</div>'
+return html
+}
+
+html+='<table class="tabla"><tr>'
+html+='<th>Nombre</th><th>Prog.</th><th>Real.</th><th>No carg.</th><th>Fuera</th><th>%</th>'
+html+='</tr>'
+
+lista.forEach(function(item){
+html+='<tr class="'+obtenerClaseFilaCronograma(item)+'">'
+html+='<td>'+escapeHtml(item.nombre || "-")+'</td>'
+html+='<td>'+Number(item.programadas || 0)+'</td>'
+html+='<td>'+Number(item.realizadas || 0)+'</td>'
+html+='<td>'+Number(item.noCargadas || 0)+'</td>'
+html+='<td>'+Number(item.fueraCronograma || 0)+'</td>'
+html+='<td>'+Number(item.cumplimientoPorcentaje || 0).toFixed(1)+'%</td>'
+html+='</tr>'
+})
+
+html+='</table>'
+html+='</div>'
+return html
+}
+
+function armarPanelFechasCronograma(items){
+let lista=(Array.isArray(items) ? items : []).slice(0,20)
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">Fechas recientes con carga real</div>'
+
+if(!lista.length){
+html+='<div class="estadoVacio">No hay fechas reales para mostrar.</div>'
+html+='</div>'
+return html
+}
+
+html+='<table class="tabla"><tr><th>Fecha</th><th>Realizadas</th><th>Fuera</th><th>Profesor distinto</th></tr>'
+lista.forEach(function(item){
+html+='<tr class="'+(Number(item.fueraCronograma || 0)>0 || Number(item.profesorDistinto || 0)>0 ? 'filaAlerta' : '')+'">'
+html+='<td>'+escapeHtml(item.fecha || "-")+'</td>'
+html+='<td>'+Number(item.realizadas || 0)+'</td>'
+html+='<td>'+Number(item.fueraCronograma || 0)+'</td>'
+html+='<td>'+Number(item.profesorDistinto || 0)+'</td>'
+html+='</tr>'
+})
+html+='</table>'
+html+='</div>'
+return html
+}
+
+function armarPanelIncidenciasCronograma(items){
+let lista=(Array.isArray(items) ? items : []).slice(0,40)
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">Incidencias recientes</div>'
+
+if(!lista.length){
+html+='<div class="estadoVacio">No se detectaron incidencias en el filtro actual.</div>'
+html+='</div>'
+return html
+}
+
+html+='<table class="tabla"><tr><th>Fecha</th><th>Estacion</th><th>Dia</th><th>Hora</th><th>Actividad</th><th>Resultado</th><th>Detalle</th></tr>'
+lista.forEach(function(item){
+html+='<tr class="'+(item.resultado==="PROGRAMADO_NO_CARGADO" ? 'filaCritica' : 'filaAlerta')+'">'
+html+='<td>'+escapeHtml(item.fecha || "-")+'</td>'
+html+='<td>'+escapeHtml(item.estacion || "-")+'</td>'
+html+='<td>'+escapeHtml(item.dia || "-")+'</td>'
+html+='<td>'+escapeHtml(item.hora || "-")+'</td>'
+html+='<td>'+escapeHtml(item.actividad || "-")+'</td>'
+html+='<td>'+escapeHtml(item.resultado || "-")+'</td>'
+html+='<td>'+escapeHtml(item.detalle || "-")+'</td>'
+html+='</tr>'
+})
+html+='</table>'
+html+='</div>'
+return html
+}
+
+function obtenerClaseEstadoCronograma(cumplimiento,noCargadas,fueraCronograma){
+if(noCargadas>0 || cumplimiento<70) return "critica"
+if(fueraCronograma>0 || cumplimiento<90) return "alerta"
+return "ok"
+}
+
+function obtenerTextoEstadoCronograma(totales){
+let cumplimiento=Number(totales && totales.cumplimientoPorcentaje || 0)
+let noCargadas=Number(totales && totales.noCargadas || 0)
+let fueraCronograma=Number(totales && totales.fueraCronograma || 0)
+
+if(noCargadas>0 || cumplimiento<70) return "Seguimiento critico"
+if(fueraCronograma>0 || cumplimiento<90) return "Seguimiento con alertas"
+return "Seguimiento saludable"
+}
+
+function obtenerClaseFilaCronograma(item){
+if(Number(item && item.noCargadas || 0)>0) return "filaCritica"
+if(Number(item && item.fueraCronograma || 0)>0 || Number(item && item.profesorDistinto || 0)>0) return "filaAlerta"
+return ""
+}
+
+function exportarCronogramaResumenExcel(){
+let data=resumenCronogramaActual
+if(!data){
+alert("No hay resumen de cronograma cargado.")
+return
+}
+
+let wb=XLSX.utils.book_new()
+let totales=data.totales || {}
+let resumenSheet=XLSX.utils.json_to_sheet([
+{"Indicador":"Clases programadas","Valor":Number(totales.totalProgramadas || 0)},
+{"Indicador":"Realizadas","Valor":Number(totales.realizadas || 0)},
+{"Indicador":"No cargadas","Valor":Number(totales.noCargadas || 0)},
+{"Indicador":"Fuera de cronograma","Valor":Number(totales.fueraCronograma || 0)},
+{"Indicador":"Profesor distinto","Valor":Number(totales.profesorDistinto || 0)},
+{"Indicador":"Cumplimiento %","Valor":Number(totales.cumplimientoPorcentaje || 0)}
+])
+XLSX.utils.book_append_sheet(wb,resumenSheet,"Resumen")
+
+XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.estaciones || []).map(function(item){
+return {
+Nombre:item.nombre || "",
+Programadas:Number(item.programadas || 0),
+Realizadas:Number(item.realizadas || 0),
+No_Cargadas:Number(item.noCargadas || 0),
+Fuera_Cronograma:Number(item.fueraCronograma || 0),
+Profesor_Distinto:Number(item.profesorDistinto || 0),
+Cumplimiento:Number(item.cumplimientoPorcentaje || 0)
+}
+})),"Estaciones")
+
+XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.actividades || []).map(function(item){
+return {
+Nombre:item.nombre || "",
+Programadas:Number(item.programadas || 0),
+Realizadas:Number(item.realizadas || 0),
+No_Cargadas:Number(item.noCargadas || 0),
+Fuera_Cronograma:Number(item.fueraCronograma || 0),
+Profesor_Distinto:Number(item.profesorDistinto || 0),
+Cumplimiento:Number(item.cumplimientoPorcentaje || 0)
+}
+})),"Actividades")
+
+XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.dias || []).map(function(item){
+return {
+Nombre:item.nombre || "",
+Programadas:Number(item.programadas || 0),
+Realizadas:Number(item.realizadas || 0),
+No_Cargadas:Number(item.noCargadas || 0),
+Fuera_Cronograma:Number(item.fueraCronograma || 0),
+Profesor_Distinto:Number(item.profesorDistinto || 0),
+Cumplimiento:Number(item.cumplimientoPorcentaje || 0)
+}
+})),"Dias")
+
+XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.incidencias || []).map(function(item){
+return {
+Fecha:item.fecha || "",
+Estacion:item.estacion || "",
+Dia:item.dia || "",
+Hora:item.hora || "",
+Actividad:item.actividad || "",
+Resultado:item.resultado || "",
+Detalle:item.detalle || "",
+Profesor_Programado:item.profesorProgramado || "",
+Profesor_Real:item.profesorReal || ""
+}
+})),"Incidencias")
+
+XLSX.writeFile(wb,"cronograma_seguimiento.xlsx")
+}
+
+function imprimirCronogramaResumen(){
+let contenido=document.getElementById("modalEspecialBody")
+if(!contenido){
+alert("No hay contenido para imprimir.")
+return
+}
+
+let ventana=window.open("","_blank","width=1200,height=900")
+if(!ventana){
+alert("El navegador bloqueo la ventana de impresion.")
+return
+}
+
+ventana.document.write('<html><head><title>Resumen Cronograma</title><style>body{font-family:Arial;padding:24px;color:#153244} table{width:100%;border-collapse:collapse;margin-top:12px} th,td{border:1px solid #cfd8dc;padding:8px;font-size:12px;text-align:left} th{background:#153244;color:#fff} .panelDetalle,.resumenCard,.filtroBloque,.notaResumen{break-inside:avoid;margin-bottom:14px} .resumenCards,.detalleResumen{display:block} .resumenCard,.panelDetalle{border:1px solid #d8e2e8;border-radius:12px;padding:14px;margin-bottom:14px} .estadoVacio{border:1px solid #d8e2e8;border-radius:12px;padding:14px} .badgeEstado{display:inline-block;padding:8px 12px;border-radius:999px;background:#edf9f1;font-weight:bold;margin-bottom:14px}.grupoBotonesCronograma,.filtrosResumen{display:none}</style></head><body>'+contenido.innerHTML+'</body></html>')
+ventana.document.close()
+ventana.focus()
+setTimeout(function(){
+ventana.print()
+},400)
+}
+
+function tieneFiltrosAvanzadosResumen(data){
+return !!(data && data.tieneFiltrosAvanzados)
+}
+
+function inicializarFiltrosAvanzadosResumen(data){
+if(!tieneFiltrosAvanzadosResumen(data)) return
+
+let filtros=data && data.filtrosAplicados ? data.filtrosAplicados : {}
+
+renderizarOpcionesFiltroAvanzado("clicFiltroEstacionAvanzado",data && data.filtrosDisponibles ? data.filtrosDisponibles.estaciones : [],"Todas las estaciones")
+renderizarOpcionesFiltroAvanzado("clicFiltroProfesorAvanzado",data && data.filtrosDisponibles ? data.filtrosDisponibles.profesores : [],"Todos")
+renderizarOpcionesFiltroAvanzado("clicFiltroActividadAvanzado",data && data.filtrosDisponibles ? data.filtrosDisponibles.actividades : [],"Todas")
+renderizarOpcionesFiltroAvanzado("clicFiltroSectorAvanzado",data && data.filtrosDisponibles ? data.filtrosDisponibles.sectores : [],"Todos")
+
+if(filtros.estacion && document.getElementById("clicFiltroEstacionAvanzado")) document.getElementById("clicFiltroEstacionAvanzado").value=filtros.estacion
+if(filtros.profesor && document.getElementById("clicFiltroProfesorAvanzado")) document.getElementById("clicFiltroProfesorAvanzado").value=filtros.profesor
+if(filtros.actividad && document.getElementById("clicFiltroActividadAvanzado")) document.getElementById("clicFiltroActividadAvanzado").value=filtros.actividad
+if(filtros.sector && document.getElementById("clicFiltroSectorAvanzado")) document.getElementById("clicFiltroSectorAvanzado").value=filtros.sector
+}
+
+function renderizarOpcionesFiltroAvanzado(id,opciones,placeholder){
+let select=document.getElementById(id)
+if(!select) return
+
+let actual=select.value
+let html='<option value="">'+escapeHtml(placeholder || "Todos")+'</option>';
+
+(Array.isArray(opciones) ? opciones : []).forEach(function(opcion){
+html+='<option value="'+escapeHtml(opcion)+'">'+escapeHtml(opcion)+'</option>'
+})
+
+select.innerHTML=html
+
+if(actual && (Array.isArray(opciones) ? opciones : []).indexOf(actual)!==-1){
+select.value=actual
+}
+}
+
+function obtenerFiltrosAvanzadosResumenActual(){
+return {
+estacion:(document.getElementById("clicFiltroEstacionAvanzado") || {}).value || "",
+profesor:(document.getElementById("clicFiltroProfesorAvanzado") || {}).value || "",
+actividad:(document.getElementById("clicFiltroActividadAvanzado") || {}).value || "",
+sector:(document.getElementById("clicFiltroSectorAvanzado") || {}).value || ""
+}
+}
+
+function obtenerResumenEspecialProcesadoActual(){
+return resumenesEspecialesGlobal[resumenEspecialActual]
+}
+
+function actualizarResumenEspecialFiltrado(){
+if(resumenEspecialCargandoFiltros || !resumenEspecialActual) return
+
+let filtros=obtenerFiltrosResumenActual()
+let body=document.getElementById("modalEspecialBody")
+let subtitulo=document.getElementById("modalEspecialSubtitulo")
+
+resumenEspecialCargandoFiltros=true
+
+if(subtitulo){
+subtitulo.textContent="Actualizando resumen segun filtros..."
+}
+
+if(body){
+body.style.opacity="0.6"
+}
+
+google.script.run
+.withSuccessHandler(function(data){
+resumenEspecialCargandoFiltros=false
+
+if(body){
+body.style.opacity="1"
+}
+
+resumenesEspecialesGlobal[resumenEspecialActual]=data || {}
+abrirModalEspecial(resumenEspecialActual)
+})
+.withFailureHandler(function(error){
+resumenEspecialCargandoFiltros=false
+
+if(body){
+body.style.opacity="1"
+}
+
+if(subtitulo){
+subtitulo.textContent="No se pudieron actualizar los filtros"
+}
+
+alert(error && error.message ? error.message : "No se pudo actualizar el resumen filtrado.")
+})
+.obtenerResumenSolapaEspecial(resumenEspecialActual,filtros)
+}
+
+function obtenerFiltrosResumenActual(){
+let data=obtenerResumenEspecialProcesadoActual()
+
+if(data && data.tipoResumen==="cronograma"){
+return {
+estacion:(document.getElementById("cronogramaFiltroEstacion") || {}).value || "",
+actividad:(document.getElementById("cronogramaFiltroActividad") || {}).value || "",
+dia:(document.getElementById("cronogramaFiltroDia") || {}).value || "",
+resultado:(document.getElementById("cronogramaFiltroResultado") || {}).value || ""
+}
+}
+
+return obtenerFiltrosAvanzadosResumenActual()
+}
+
+function renderizarDetalleClic(recargarDias){
+
+let data=obtenerResumenEspecialProcesadoActual()
+let meses=Array.isArray(data && data.meses) ? data.meses : []
+let selectMes=document.getElementById("clicFiltroMes")
+let selectDia=document.getElementById("clicFiltroDia")
+
+if(!data || !selectMes || !selectDia) return
+
+if(!meses.length){
+selectMes.innerHTML=""
+selectDia.innerHTML='<option value="">Sin fechas disponibles</option>'
+document.getElementById("clicResumenPrincipal").innerHTML='<div class="estadoVacio">'+escapeHtml(data && data.mensaje ? data.mensaje : "No hay datos para mostrar.")+'</div>'
+document.getElementById("clicDetalleDia").innerHTML=""
+document.getElementById("clicListasDia").innerHTML=""
+document.getElementById("clicTablaDias").innerHTML=""
+inicializarComparacionIA()
+return
+}
+
+if(![].slice.call(selectMes.options).some(function(option){ return option.value===selectMes.value })){
+let opcionesMes=""
+meses.forEach(function(mes,index){
+opcionesMes+='<option value="'+escapeHtml(mes.mesClave)+'"'+(index===0 ? ' selected' : '')+'>'+escapeHtml(mes.mesTexto)+'</option>'
+})
+selectMes.innerHTML=opcionesMes
+}
+
+let mesSeleccionado=meses.find(function(item){
+return item.mesClave===selectMes.value
+}) || meses[0]
+
+if(recargarDias){
+let opciones='<option value="">Todos los dias del mes</option>'
+
+mesSeleccionado.dias.forEach(function(dia,index){
+opciones+='<option value="'+escapeHtml(dia.fechaPlanilla)+'"'+(index===0 ? ' selected' : '')+'>'+escapeHtml(dia.fechaPlanilla)+'</option>'
+})
+
+selectDia.innerHTML=opciones
+}
+
+let diaSeleccionado=mesSeleccionado.dias.find(function(item){
+return item.fechaPlanilla===selectDia.value
+}) || null
+
+document.getElementById("clicResumenPrincipal").innerHTML=armarResumenMensualClic(data,mesSeleccionado,diaSeleccionado)
+document.getElementById("clicDetalleDia").innerHTML=armarPanelDetalleClic(mesSeleccionado,diaSeleccionado)
+document.getElementById("clicListasDia").innerHTML=armarListasClic(mesSeleccionado,diaSeleccionado)
+document.getElementById("clicTablaDias").innerHTML=armarTablaDiasClic(mesSeleccionado)
+sincronizarVistaBaseConComparacion(mesSeleccionado,diaSeleccionado)
+
+}
+
+function inicializarComparacionIA(){
+let data=obtenerResumenEspecialProcesadoActual()
+let meses=Array.isArray(data && data.meses) ? data.meses : []
+let selectModo=document.getElementById("clicComparacionModo")
+let selectMesBaseComparacion=document.getElementById("clicComparacionMesBase")
+let selectMesComparado=document.getElementById("clicComparacionMesComparado")
+
+if(!selectModo || !selectMesBaseComparacion || !selectMesComparado){
+return
+}
+
+if(!meses.length){
+selectMesBaseComparacion.innerHTML=""
+selectMesComparado.innerHTML=""
+return
+}
+
+let opcionesMes=""
+
+meses.forEach(function(mes,index){
+opcionesMes+='<option value="'+escapeHtml(mes.mesClave)+'"'+(index===0 ? ' selected' : '')+'>'+escapeHtml(mes.mesTexto)+'</option>'
+})
+
+selectMesBaseComparacion.innerHTML=opcionesMes
+selectMesComparado.innerHTML=opcionesMes
+
+if(meses.length>1){
+selectMesComparado.value=meses[1].mesClave
+}
+
+cambiarModoComparacionIA()
+}
+
+function cambiarModoComparacionIA(){
+let selectModo=document.getElementById("clicComparacionModo")
+let bloqueMesBase=document.getElementById("bloqueComparacionMesBase")
+let bloqueMesComparado=document.getElementById("bloqueComparacionMesComparado")
+let bloqueDiaBase=document.getElementById("bloqueComparacionDiaBase")
+let bloqueDiaComparado=document.getElementById("bloqueComparacionDiaComparado")
+
+if(!selectModo || !bloqueMesBase || !bloqueMesComparado || !bloqueDiaBase || !bloqueDiaComparado){
+return
+}
+
+let modo=selectModo.value
+
+bloqueMesBase.style.display=modo==="mes" || modo==="dia" ? "block" : "none"
+bloqueMesComparado.style.display=modo==="mes" || modo==="dia" ? "block" : "none"
+bloqueDiaBase.style.display=modo==="dia" ? "block" : "none"
+bloqueDiaComparado.style.display=modo==="dia" ? "block" : "none"
+
+sincronizarComparacionMesBase()
+sincronizarComparacionDiaBase()
+}
+
+function sincronizarVistaBaseConComparacion(mesSeleccionado,diaSeleccionado){
+let selectMesBaseComparacion=document.getElementById("clicComparacionMesBase")
+let selectDiaBaseComparacion=document.getElementById("clicComparacionDiaBase")
+
+if(selectMesBaseComparacion && mesSeleccionado && mesSeleccionado.mesClave){
+selectMesBaseComparacion.value=mesSeleccionado.mesClave
+}
+
+if(selectDiaBaseComparacion){
+let opcionesDiaBase='<option value="">Seleccionar dia</option>'
+
+if(mesSeleccionado && Array.isArray(mesSeleccionado.dias)){
+mesSeleccionado.dias.forEach(function(dia){
+opcionesDiaBase+='<option value="'+escapeHtml(dia.fechaPlanilla)+'">'+escapeHtml(dia.fechaPlanilla)+'</option>'
+})
+}
+
+selectDiaBaseComparacion.innerHTML=opcionesDiaBase
+selectDiaBaseComparacion.value=diaSeleccionado && diaSeleccionado.fechaPlanilla ? diaSeleccionado.fechaPlanilla : ""
+}
+
+sincronizarComparacionMesBase()
+sincronizarComparacionDiaBase()
+}
+
+function sincronizarComparacionMesBase(){
+let selectMesBaseComparacion=document.getElementById("clicComparacionMesBase")
+let selectMesComparado=document.getElementById("clicComparacionMesComparado")
+
+if(!selectMesBaseComparacion || !selectMesComparado) return
+
+if(selectMesBaseComparacion.value===selectMesComparado.value){
+let alternativa=[].slice.call(selectMesComparado.options).find(function(option){
+return option.value!==selectMesBaseComparacion.value
+})
+
+if(alternativa){
+selectMesComparado.value=alternativa.value
+}
+}
+}
+
+function sincronizarComparacionDiaBase(){
+let data=obtenerResumenEspecialProcesadoActual()
+let meses=Array.isArray(data && data.meses) ? data.meses : []
+let selectMesBaseComparacion=document.getElementById("clicComparacionMesBase")
+let selectMesComparado=document.getElementById("clicComparacionMesComparado")
+let selectDiaBaseComparacion=document.getElementById("clicComparacionDiaBase")
+let selectDiaComparado=document.getElementById("clicComparacionDiaComparado")
+
+if(!selectMesBaseComparacion || !selectMesComparado || !selectDiaBaseComparacion || !selectDiaComparado) return
+
+let mesBase=meses.find(function(item){
+return item.mesClave===selectMesBaseComparacion.value
+}) || null
+
+let mesComparado=meses.find(function(item){
+return item.mesClave===selectMesComparado.value
+}) || null
+
+let opcionesDiaComparado='<option value="">Seleccionar dia</option>'
+
+if(mesComparado && Array.isArray(mesComparado.dias)){
+mesComparado.dias.forEach(function(dia){
+opcionesDiaComparado+='<option value="'+escapeHtml(dia.fechaPlanilla)+'">'+escapeHtml(dia.fechaPlanilla)+'</option>'
+})
+}
+
+selectDiaComparado.innerHTML=opcionesDiaComparado
+
+if(mesBase && mesComparado && selectDiaBaseComparacion.value && selectDiaBaseComparacion.value===selectDiaComparado.value && selectMesBaseComparacion.value===selectMesComparado.value){
+selectDiaComparado.value=""
+}
+}
+
+function encontrarPrimerMesComparable(meses,mesBaseClave){
+return meses.find(function(item){
+return item.mesClave!==mesBaseClave
+}) || null
+}
+
+function encontrarPrimerDiaComparable(dias,diaBase,evitarMismaFecha){
+return dias.find(function(item){
+return !evitarMismaFecha || item.fechaPlanilla!==diaBase
+}) || null
+}
+
+function armarResumenMensualClic(data,mes,dia){
+
+let html='<div class="resumenCards">'
+html+='<div class="resumenCard"><div class="resumenLabel">Ultima carga</div><div class="resumenValor">'+escapeHtml(data.ultimaFechaCarga || "-")+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Participaciones del mes (filas)</div><div class="resumenValor">'+Number(mes && mes.prestacionesTotales || 0)+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Personas unicas del mes (DNI)</div><div class="resumenValor">'+Number(mes && mes.personasUnicasMes || 0)+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Fechas con carga del mes</div><div class="resumenValor">'+Number(mes && mes.fechasConCarga || 0)+'</div></div>'
+
+if(dia){
+html+='<div class="resumenCard"><div class="resumenLabel">Personas unicas del dia (DNI)</div><div class="resumenValor">'+Number(dia.personasUnicas || 0)+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Participaciones del dia (filas)</div><div class="resumenValor">'+Number(dia.prestaciones || 0)+'</div></div>'
+}else{
+html+='<div class="resumenCard"><div class="resumenLabel">Mes seleccionado</div><div class="resumenValor" style="font-size:22px;">'+escapeHtml(mes && mes.mesTexto || "-")+'</div></div>'
+html+='<div class="resumenCard"><div class="resumenLabel">Total general de participaciones (filas)</div><div class="resumenValor">'+Number(data && data.totalPrestacionesArchivo || 0)+'</div></div>'
+}
+
+html+='</div>'
+return html
+
+}
+
+function armarPanelDetalleClic(mes,dia){
+
+let data=resumenesEspecialesGlobal[resumenEspecialActual]
+let etiquetas=obtenerEtiquetasResumenEspecial(data)
+
+if(!mes){
+return '<div class="estadoVacio">No hay meses disponibles para mostrar.</div>'
+}
+
+let titulo=dia ? 'Detalle del dia ' + dia.fechaPlanilla : 'Detalle mensual de ' + mes.mesTexto
+let personas=dia ? dia.personasUnicas : mes.personasUnicasMes
+let prestaciones=dia ? dia.prestaciones : mes.prestacionesTotales
+let origen=dia || mes
+let estaciones=((origen && Array.isArray(origen.estaciones)) ? origen.estaciones : []).length
+let profesores=((origen && Array.isArray(origen.profesores)) ? origen.profesores : []).length
+let actividades=((origen && Array.isArray(origen.actividades)) ? origen.actividades : []).length
+let sectores=((origen && Array.isArray(origen.sectores)) ? origen.sectores : []).length
+let mostrarEstaciones=estaciones>0
+let mostrarSectores=sectores>0
+
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">'+escapeHtml(titulo)+'</div>'
+html+='<div class="miniResumen">'
+html+='<div class="miniItem"><div class="miniItemValor">'+Number(personas || 0)+'</div><div class="miniItemLabel">Personas unicas (DNI)</div></div>'
+html+='<div class="miniItem"><div class="miniItemValor">'+Number(prestaciones || 0)+'</div><div class="miniItemLabel">Participaciones (filas)</div></div>'
+if(mostrarEstaciones){
+html+='<div class="miniItem"><div class="miniItemValor">'+Number(estaciones || 0)+'</div><div class="miniItemLabel">'+escapeHtml(etiquetas.cuartaPlural)+'</div></div>'
+}
+html+='<div class="miniItem"><div class="miniItemValor">'+Number(profesores || 0)+'</div><div class="miniItemLabel">'+escapeHtml(etiquetas.principalPlural)+'</div></div>'
+html+='<div class="miniItem"><div class="miniItemValor">'+Number(actividades || 0)+'</div><div class="miniItemLabel">'+escapeHtml(etiquetas.secundariaPlural)+'</div></div>'
+if(mostrarSectores){
+html+='<div class="miniItem"><div class="miniItemValor">'+Number(sectores || 0)+'</div><div class="miniItemLabel">'+escapeHtml(etiquetas.terciariaPlural)+'</div></div>'
+}
+html+='</div>'
+html+='</div>'
+return html
+
+}
+
+function armarListasClic(mes,dia){
+
+let origen=dia || mes
+let data=resumenesEspecialesGlobal[resumenEspecialActual]
+let etiquetas=obtenerEtiquetasResumenEspecial(data)
+
+if(!origen){
+return '<div class="estadoVacio">No hay detalle disponible.</div>'
+}
+
+let html=''
+if(Array.isArray(origen.estaciones) && origen.estaciones.length){
+html+='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">'+escapeHtml(etiquetas.cuartaPlural)+'</div>'
+html+=armarTablaConteosClic(origen.estaciones,'No hay '+etiquetas.cuartaPlural.toLowerCase()+' para mostrar.')
+html+='</div>'
+html+='<div class="panelDetalle" style="margin-top:16px;">'
+}else{
+html+='<div class="panelDetalle">'
+}
+html+='<div class="panelDetalleTitulo">'+escapeHtml(etiquetas.principalPlural)+'</div>'
+html+=armarTablaConteosClic(origen.profesores,'No hay '+etiquetas.principalPlural.toLowerCase()+' para mostrar.')
+html+='</div>'
+html+='<div class="panelDetalle" style="margin-top:16px;">'
+html+='<div class="panelDetalleTitulo">'+escapeHtml(etiquetas.secundariaPlural)+'</div>'
+html+=armarTablaConteosClic(origen.actividades,'No hay '+etiquetas.secundariaPlural.toLowerCase()+' para mostrar.')
+html+='</div>'
+if(Array.isArray(origen.sectores) && origen.sectores.length){
+html+='<div class="panelDetalle" style="margin-top:16px;">'
+html+='<div class="panelDetalleTitulo">'+escapeHtml(etiquetas.terciariaPlural)+'</div>'
+html+=armarTablaConteosClic(origen.sectores,'No hay '+etiquetas.terciariaPlural.toLowerCase()+' para mostrar.')
+html+='</div>'
+}
+
+return html
+
+}
+
+function armarTablaConteosClic(items,mensajeVacio){
+
+if(!Array.isArray(items) || !items.length){
+return '<div class="estadoVacio">'+escapeHtml(mensajeVacio)+'</div>'
+}
+
+let html='<table class="listaCompacta">'
+
+items.forEach(function(item){
+html+='<tr><td>'+escapeHtml(item.nombre || "-")+'</td><td>'+Number(item.cantidad || 0)+'</td></tr>'
+})
+
+html+='</table>'
+return html
+
+}
+
+function armarTablaDiasClic(mes){
+
+if(!mes || !Array.isArray(mes.dias) || !mes.dias.length){
+return '<div class="estadoVacio">No hay fechas del mes para mostrar.</div>'
+}
+
+let html='<div class="panelDetalle">'
+html+='<div class="panelDetalleTitulo">Fechas del mes</div>'
+html+='<table class="tabla"><tr>'
+html+='<th>Fecha planilla</th>'
+html+='<th>Personas unicas (DNI)</th>'
+html+='<th>Participaciones (filas)</th>'
+html+='</tr>'
+
+mes.dias.forEach(function(dia){
+html+='<tr>'
+html+='<td>'+escapeHtml(dia.fechaPlanilla || "-")+'</td>'
+html+='<td>'+Number(dia.personasUnicas || 0)+'</td>'
+html+='<td>'+Number(dia.prestaciones || 0)+'</td>'
+html+='</tr>'
+})
+
+html+='</table>'
+html+='</div>'
+return html
+
+}
+
+function generarInformeIAActual(){
+
+if(informeIACargando || !resumenEspecialActual) return
+
+let boton=document.getElementById("btnInformeIA")
+let parametros=obtenerParametrosInformeActual()
+if(!parametros) return
+
+informeIACargando=true
+
+if(boton){
+boton.disabled=true
+boton.textContent="Generando informe..."
+}
+
+google.script.run
+.withSuccessHandler(function(resultado){
+informeIACargando=false
+
+if(boton){
+boton.disabled=false
+boton.textContent="Generar informe IA"
+}
+
+if(!resultado || !resultado.contenido){
+alert("La IA no devolvio un informe para descargar.")
+return
+}
+
+if(resultado.origenInforme && resultado.origenInforme!=="ia"){
+let motivo=resultado.motivoRespaldo ? "\n\nMotivo: " + resultado.motivoRespaldo : ""
+alert("El informe se genero como dato duro, no con asistencia de IA." + motivo)
+}
+
+if(resultado.base64 && resultado.mimeType){
+descargarArchivoBase64(resultado.archivo || "informe_ia.pdf",resultado.base64,resultado.mimeType)
+return
+}
+
+descargarTexto(resultado.archivo || "informe_ia.txt",resultado.contenido)
+})
+.withFailureHandler(function(error){
+informeIACargando=false
+
+if(boton){
+boton.disabled=false
+boton.textContent="Generar informe IA"
+}
+
+alert(error && error.message ? error.message : "No se pudo generar el informe con IA.")
+})
+.generarInformeEspecialIA(resumenEspecialActual,parametros.mesClave,parametros.fechaPlanilla,parametros.comparacion,parametros.filtros)
+
+}
+
+function obtenerParametrosInformeActual(){
+
+let selectMes=document.getElementById("clicFiltroMes")
+let selectDia=document.getElementById("clicFiltroDia")
+let selectComparacionModo=document.getElementById("clicComparacionModo")
+let mesClave=selectMes ? selectMes.value : ""
+let fechaPlanilla=selectDia ? selectDia.value : ""
+let comparacionModo=selectComparacionModo ? selectComparacionModo.value : ""
+let comparacion=null
+
+if(comparacionModo==="mes"){
+let selectMesBaseComparacion=document.getElementById("clicComparacionMesBase")
+let selectMesComparado=document.getElementById("clicComparacionMesComparado")
+
+if(!selectMesBaseComparacion || !selectMesComparado){
+alert("No se pudieron leer los meses para comparar.")
+return null
+}
+
+if(selectMesBaseComparacion.value===selectMesComparado.value){
+alert("Elegi dos meses distintos para la comparacion.")
+return null
+}
+
+mesClave=selectMesBaseComparacion.value
+fechaPlanilla=""
+comparacion={
+tipo:"mes",
+mesClave:selectMesComparado.value,
+fechaPlanilla:""
+}
+}
+
+if(comparacionModo==="dia"){
+let selectMesBaseComparacion=document.getElementById("clicComparacionMesBase")
+let selectMesComparado=document.getElementById("clicComparacionMesComparado")
+let selectDiaBaseComparacion=document.getElementById("clicComparacionDiaBase")
+let selectDiaComparado=document.getElementById("clicComparacionDiaComparado")
+
+if(!selectMesBaseComparacion || !selectMesComparado || !selectDiaBaseComparacion || !selectDiaComparado){
+alert("No se pudieron leer los dias para comparar.")
+return null
+}
+
+if(!selectDiaBaseComparacion.value || !selectDiaComparado.value){
+alert("Elegi un dia en cada cuadro para hacer la comparacion.")
+return null
+}
+
+if(
+selectMesBaseComparacion.value===selectMesComparado.value &&
+selectDiaBaseComparacion.value===selectDiaComparado.value
+){
+alert("Elegi dos dias distintos para la comparacion.")
+return null
+}
+
+mesClave=selectMesBaseComparacion.value
+fechaPlanilla=selectDiaBaseComparacion.value
+comparacion={
+tipo:"dia",
+mesClave:selectMesComparado.value,
+fechaPlanilla:selectDiaComparado.value
+}
+}
+
+return {
+mesClave:mesClave,
+fechaPlanilla:fechaPlanilla,
+comparacion:comparacion,
+filtros:obtenerFiltrosAvanzadosResumenActual()
+}
+
+}
+
+function descargarTexto(nombreArchivo,contenido){
+
+let blob=new Blob([contenido],{type:"text/plain;charset=utf-8"})
+let url=URL.createObjectURL(blob)
+let link=document.createElement("a")
+
+link.href=url
+link.download=nombreArchivo || "informe.txt"
+document.body.appendChild(link)
+link.click()
+document.body.removeChild(link)
+
+setTimeout(function(){
+URL.revokeObjectURL(url)
+},1000)
+
+}
+
+function descargarArchivoBase64(nombreArchivo,base64,mimeType){
+
+let bytes=atob(base64)
+let array=new Uint8Array(bytes.length)
+
+for(let i=0;i<bytes.length;i++){
+array[i]=bytes.charCodeAt(i)
+}
+
+let blob=new Blob([array],{type:mimeType || "application/octet-stream"})
+let url=URL.createObjectURL(blob)
+let link=document.createElement("a")
+
+link.href=url
+link.download=nombreArchivo || "archivo"
+document.body.appendChild(link)
+link.click()
+document.body.removeChild(link)
+
+setTimeout(function(){
+URL.revokeObjectURL(url)
+},1000)
+
+}
+
+function abrirModalEnvioInforme(){
+
+if(!resumenEspecialActual) return
+
+let modal=document.getElementById("modalEnvioInforme")
+let estado=document.getElementById("estadoEnvioInforme")
+let input=document.getElementById("emailDestinoInforme")
+let inputAsunto=document.getElementById("asuntoEnvioInforme")
+let inputMensaje=document.getElementById("mensajeEnvioInforme")
+
+if(estado){
+estado.style.display="none"
+estado.textContent=""
+}
+
+if(input){
+input.value=""
+setTimeout(function(){
+input.focus()
+},50)
+}
+
+if(inputAsunto){
+inputAsunto.value=""
+}
+
+if(inputMensaje){
+inputMensaje.value=""
+}
+
+modal.classList.add("visible")
+
+}
+
+function cerrarModalEnvioInforme(event){
+
+if(event && event.target && event.target.id!=="modalEnvioInforme") return
+
+if(envioInformeCargando) return
+
+document.getElementById("modalEnvioInforme").classList.remove("visible")
+
+}
+
+function confirmarEnvioInforme(){
+
+if(envioInformeCargando || !resumenEspecialActual) return
+
+let input=document.getElementById("emailDestinoInforme")
+let inputAsunto=document.getElementById("asuntoEnvioInforme")
+let inputMensaje=document.getElementById("mensajeEnvioInforme")
+let boton=document.getElementById("btnConfirmarEnvioInforme")
+let estado=document.getElementById("estadoEnvioInforme")
+let email=(input ? input.value : "").trim()
+let asunto=(inputAsunto ? inputAsunto.value : "").trim()
+let mensaje=(inputMensaje ? inputMensaje.value : "").trim()
+let parametros=obtenerParametrosInformeActual()
+
+if(!parametros) return
+
+if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+if(estado){
+estado.style.display="block"
+estado.textContent="Ingresa un correo valido para enviar el informe."
+}
+return
+}
+
+envioInformeCargando=true
+
+if(estado){
+estado.style.display="block"
+estado.textContent="Enviando informe..."
+}
+
+if(boton){
+boton.disabled=true
+boton.textContent="Enviando..."
+}
+
+google.script.run
+.withSuccessHandler(function(resultado){
+envioInformeCargando=false
+
+if(boton){
+boton.disabled=false
+boton.textContent="Enviar PDF"
+}
+
+if(estado){
+estado.style.display="block"
+estado.textContent="Informe enviado a " + (resultado && resultado.destino ? resultado.destino : email) + "."
+}
+
+setTimeout(function(){
+cerrarModalEnvioInforme()
+},1200)
+})
+.withFailureHandler(function(error){
+envioInformeCargando=false
+
+if(boton){
+boton.disabled=false
+boton.textContent="Enviar PDF"
+}
+
+if(estado){
+estado.style.display="block"
+estado.textContent=error && error.message ? error.message : "No se pudo enviar el informe por correo."
+}
+})
+.enviarInformeEspecialIA(resumenEspecialActual,parametros.mesClave,parametros.fechaPlanilla,parametros.comparacion,parametros.filtros,email,asunto,mensaje)
+
+}
+
+function escapeHtml(texto){
+return String(texto || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#39;")
+}
+
+function esResumenEspecialDetallado(data){
+return !!(data && (data.tipoResumen==="clic" || data.tipoResumen==="especial_detallado"))
+}
+
+function obtenerEtiquetasResumenEspecial(data){
+let cuarta=(data && data.etiquetas && data.etiquetas.cuarta!=null) ? String(data.etiquetas.cuarta) : "Estacion"
+let principal=(data && data.etiquetas && data.etiquetas.principal!=null) ? String(data.etiquetas.principal) : "Referente"
+let secundaria=(data && data.etiquetas && data.etiquetas.secundaria!=null) ? String(data.etiquetas.secundaria) : "Actividad"
+let terciaria=(data && data.etiquetas && data.etiquetas.terciaria!=null) ? String(data.etiquetas.terciaria) : "Sector"
+
+return {
+cuarta:cuarta,
+principal:principal,
+secundaria:secundaria,
+terciaria:terciaria,
+cuartaPlural:pluralizarEtiqueta(cuarta),
+principalPlural:pluralizarEtiqueta(principal),
+secundariaPlural:pluralizarEtiqueta(secundaria),
+terciariaPlural:pluralizarEtiqueta(terciaria)
+}
+}
+
+function pluralizarEtiqueta(texto){
+let valor=String(texto || "").trim()
+if(!valor) return "Items"
+
+let lower=valor.toLowerCase()
+let ultimo=lower.slice(-1)
+if(ultimo==="s") return valor
+if(ultimo==="z") return valor.slice(0,-1)+"ces"
+if(/[aeiouáéíóú]$/i.test(valor)) return valor+"s"
+return valor+"es"
+}
+
+function cerrarModalEspecial(event){
+
+if(event && event.target && event.target.id!=="modalEspecial") return
+
+document.getElementById("modalEspecial").classList.remove("visible")
+
+}
+
+function calcularRankings(){
+
+let estaciones={}
+let profes=[]
+
+datosTabla.forEach(r=>{
+
+profes.push(r)
+
+if(!estaciones[r.estacion]){
+estaciones[r.estacion]={total:0,dias:0}
+}
+
+estaciones[r.estacion].total++
+estaciones[r.estacion].dias+=r.dias
+
+})
+
+let estArray=Object.entries(estaciones).map(e=>{
+return{
+estacion:e[0],
+promedio:e[1].dias/e[1].total
+}
+})
+
+estArray.sort((a,b)=>b.promedio-a.promedio)
+let atrasadas=estArray.slice(0,5)
+
+estArray.sort((a,b)=>a.promedio-b.promedio)
+let ok=estArray.slice(0,5)
+
+profes.sort((a,b)=>b.dias-a.dias)
+let profAtras=profes.slice(0,10)
+
+profes.sort((a,b)=>a.dias-b.dias)
+let profOk=profes.slice(0,10)
+
+renderRankings(atrasadas,ok,profAtras,profOk)
+
+}
+
+function renderRankings(estA,estOk,profA,profOk){
+
+document.getElementById("topEstacionesAtrasadas").innerHTML=
+estA.map(e=>`<div style="cursor:pointer;color:#c62828;font-weight:bold"
+onclick="filtrarTablaEstacion('${e.estacion}')">
+${e.estacion} (${e.promedio.toFixed(1)} días)
+</div>`).join("")
+
+document.getElementById("topEstacionesOk").innerHTML=
+estOk.map(e=>`<div style="cursor:pointer;color:#2e7d32;font-weight:bold"
+onclick="filtrarTablaEstacion('${e.estacion}')">
+${e.estacion} (${e.promedio.toFixed(1)} días)
+</div>`).join("")
+
+document.getElementById("topProfesAtrasados").innerHTML=
+profA.map(e=>`<div style="cursor:pointer;color:#c62828;font-weight:bold"
+onclick="filtrarTablaProfesor('${e.profesor}')">
+${e.profesor} - ${e.dias} días
+</div>`).join("")
+
+document.getElementById("topProfesOk").innerHTML=
+profOk.map(e=>`<div style="cursor:pointer;color:#2e7d32;font-weight:bold"
+onclick="filtrarTablaProfesor('${e.profesor}')">
+${e.profesor} - ${e.dias} días
+</div>`).join("")
+
+}
+
+function filtrarTablaEstacion(nombre){
+
+let filtrados = datosTabla.filter(r => r.estacion === nombre)
+
+renderTablaFiltrada(filtrados)
+}
+
+function mostrarTablaCompleta(){
+
+renderTabla()
+
+}
+
+function filtrarTablaProfesor(nombre){
+
+let filtrados = datosTabla.filter(r => r.profesor === nombre)
+
+renderTablaFiltrada(filtrados)
+
+}
+
+function renderTablaFiltrada(lista){
+
+let html='<table class="tabla"><tr>'
+
+html+='<th>●</th>'
+html+='<th>Estado</th>'
+html+='<th>Profesor</th>'
+html+='<th>Estación</th>'
+html+='<th>Comuna</th>'
+html+='<th>Días</th>'
+
+html+='</tr>'
+
+lista.forEach(r=>{
+
+html+=`<tr>
+
+<td style="text-align:center">
+<span class="luz ${r.sensor}"></span>
+</td>
+
+<td style="text-align:center">
+<span class="luz ${r.sensor}"></span>
+</td>
+
+<td>${r.profesor}</td>
+
+<td>${r.estacion}</td>
+
+<td>${r.comuna}</td>
+
+<td>${r.dias}</td>
+
+</tr>`
+
+})
+
+html+='</table>'
+
+document.getElementById("tablaSupervision").innerHTML=html
+
+}
+
+
+function exportarExcel(){
+
+let filas=[]
+let hoy=new Date().getTime()
+
+estacionesGlobal.forEach(est=>{
+
+est.profesores.forEach(p=>{
+
+let dias=0
+
+if(p.orden){
+dias=Math.floor((hoy-p.orden)/(1000*60*60*24))
+if(dias<0)dias=0
+}
+
+filas.push({
+Estacion:est.estacion,
+Profesor:p.profesor,
+Fecha:p.fecha || "",
+Comuna:est.comuna,
+Estado: dias>=7 ? "rojo" : dias>=1 ? "amarillo" : "verde",
+"Dias sin carga":dias
+})
+
+})
+
+})
+
+let ws=XLSX.utils.json_to_sheet(filas)
+let wb=XLSX.utils.book_new()
+
+XLSX.utils.book_append_sheet(wb,ws,"Reporte")
+
+XLSX.writeFile(wb,"reporte_estaciones.xlsx")
+
+}
+
+document.addEventListener("keydown",function(event){
+if(event.key==="Escape"){
+document.getElementById("modalEspecial").classList.remove("visible")
+}
+})
+
+cargarDatos()
+
+</script>
+
+</body>
+</html>
