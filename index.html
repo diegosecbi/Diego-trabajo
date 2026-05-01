@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -25,6 +25,95 @@ font-size:12px;
 font-weight:normal;
 margin-left:12px;
 opacity:.85;
+}
+
+.loginOverlay{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:rgba(21,50,68,.78);
+z-index:2000;
+}
+
+.loginOverlay.oculto{
+display:none;
+}
+
+.loginCard{
+width:min(520px,100%);
+background:white;
+border-radius:18px;
+padding:28px;
+box-shadow:0 20px 40px rgba(0,0,0,.18);
+}
+
+.loginTitulo{
+font-size:30px;
+font-weight:bold;
+color:#153244;
+margin-bottom:10px;
+}
+
+.loginTexto{
+font-size:16px;
+line-height:1.45;
+color:#35566d;
+}
+
+.loginFila{
+display:flex;
+flex-wrap:wrap;
+gap:12px;
+margin-top:18px;
+}
+
+.loginInput{
+flex:1;
+min-width:240px;
+padding:12px 14px;
+border-radius:10px;
+border:1px solid #c6d5df;
+font-size:16px;
+}
+
+.loginMensaje{
+min-height:22px;
+margin-top:14px;
+font-size:14px;
+color:#153244;
+}
+
+.sesionBar{
+display:none;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:12px 15px;
+background:white;
+border-bottom:1px solid #d8e1e6;
+box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.sesionDatos{
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+
+.sesionRol{
+font-size:12px;
+font-weight:bold;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#153244;
+}
+
+.sesionCorreo{
+font-size:14px;
+color:#35566d;
 }
 
 .panel{
@@ -632,6 +721,26 @@ grid-template-columns:1fr;
 
 <header>Estaciones Saludables <span class="versionTag">v-debug-2026-03-25-02</span></header>
 
+<div id="loginOverlay" class="loginOverlay">
+<div class="loginCard">
+<div class="loginTitulo">Acceso al Sistema</div>
+<div class="loginTexto">Ingresa tu correo institucional. Tu acceso y funciones dependen de tu perfil configurado en la solapa USUARIOS.</div>
+<div class="loginFila">
+<input id="loginCorreo" class="loginInput" type="email" placeholder="tu-correo@dominio.com" autocomplete="email" autocapitalize="off" onkeydown="if(event.key==='Enter'){iniciarSesionManual()}">
+<button class="botonActualizar" onclick="iniciarSesionManual()">Ingresar</button>
+</div>
+<div id="loginMensaje" class="loginMensaje">Ingresa tu correo para continuar.</div>
+</div>
+</div>
+
+<div id="sesionBar" class="sesionBar">
+<div class="sesionDatos">
+<div class="sesionRol">Admin</div>
+<div id="sesionCorreo" class="sesionCorreo"></div>
+</div>
+<button class="botonActualizar" onclick="cerrarSesionManual()">Cerrar sesion</button>
+</div>
+
 <div class="barraAcciones">
 <button class="botonActualizar" onclick="cargarDatos()">Actualizar</button>
 
@@ -784,80 +893,276 @@ let resumenEspecialCargandoFiltros=false
 let informeIACargando=false
 let envioInformeCargando=false
 let resumenCronogramaActual=null
-let nombresSolapasEspeciales=[
-"CRONOGRAMA",
-"CLIC",
-"EVENTOS",
-"FESTEJOS",
-"COCINA",
-"ETZ",
-"VISITAS ESCOLARES",
-"EXPLORANDO CABA",
-"TALLERES"
-]
+let sesionActual=null
+let nombresSolapasEspeciales=[];
 
-let iconosEstaciones={
+let iconosEstaciones = {
+  "Aristóbulo del Valle": "📖",
+  "Parque Rivadavia": "🌳",
+  "Plaza Flores": "🌼",
+  "Rubén Darío": "🖋️",
+  "Parque Patricios": "🛡",
+  "Sudamérica": "🌎",
+  "Parque Chacabuco": "⛲",
+  "Parque Saavedra": "🌳",
+  "Plaza Almagro": "🪑",
+  "Martín Fierro": "🤠",
+  "Lagos de Palermo": "🌊",
+  "Parque Avellaneda": "🎠",
+  "Los Andes": "⛰",
+  "Plaza Houssay": "🔬",
+  "Parque Centenario": "🌊",
+  "Plaza Manzana 66": "🍎",
+  "Móvil 1": "🚗",
+  "Móvil 2": "🚙"
+};
 
-"Aristóbulo del Valle":"📖",
-"Parque Rivadavia":"🌳",
-"Plaza Flores":"🌼",
-"Rubén Darío":"🖋️",
-"Parque Patricios":"🛡",
-"Sudamérica":"🌎",
-"Parque Chacabuco":"⛲",
-"Parque Saavedra":"🌳",
-"Plaza Almagro":"🪑",
-"Martín Fierro":"🤠",
-"Lagos de Palermo":"🌊",
-"Parque Avellaneda":"🎠",
-"Los Andes":"⛰",
-"Plaza Houssay":"🔬",
-"Parque Centenario":"🌊",
-"Plaza Manzana 66":"🍎",
-"Móvil 1":"🚗",
-"Móvil 2":"🚙"
+function iniciarAplicacion(){
+let input=document.getElementById("loginCorreo")
 
+if(input){
+input.value=""
+}
+
+mostrarPantallaLogin("Ingresa tu correo para continuar.")
+}
+
+function iniciarSesionManual(){
+let input=document.getElementById("loginCorreo")
+let correo=input ? input.value : ""
+iniciarSesionConCorreoFrontend(correo)
+}
+
+function iniciarSesionConCorreoFrontend(correo){
+let email=String(correo || "").trim().toLowerCase()
+
+if(!email){
+mostrarPantallaLogin("Ingresa tu correo para continuar.")
+return
+}
+
+if(typeof google==="undefined" || !google.script || !google.script.run){
+mostrarPantallaLogin("No se pudo iniciar la aplicacion.")
+return
+}
+
+let mensaje=document.getElementById("loginMensaje")
+if(mensaje){
+mensaje.textContent="Validando acceso..."
+}
+
+google.script.run
+.withSuccessHandler(function(respuesta){
+if(!respuesta || !respuesta.ok){
+mostrarPantallaLogin(respuesta && respuesta.mensaje ? respuesta.mensaje : "Comunicarse con el administrador.")
+return
+}
+
+sesionActual=respuesta
+mostrarAplicacion()
+cargarDatos()
+})
+.withFailureHandler(function(error){
+mostrarPantallaLogin(error && error.message ? error.message : "No se pudo validar el acceso.")
+})
+.iniciarSesionConCorreo(email)
+}
+
+function mostrarPantallaLogin(mensaje){
+sesionActual=null
+
+let overlay=document.getElementById("loginOverlay")
+let barra=document.getElementById("sesionBar")
+let texto=document.getElementById("loginMensaje")
+let input=document.getElementById("loginCorreo")
+
+if(overlay){
+overlay.classList.remove("oculto")
+}
+
+if(barra){
+barra.style.display="none"
+}
+
+if(texto){
+texto.textContent=mensaje || "Ingresa tu correo para continuar."
+}
+
+if(input){
+setTimeout(function(){ input.focus() },30)
+}
+}
+
+function mostrarAplicacion(){
+let overlay=document.getElementById("loginOverlay")
+let barra=document.getElementById("sesionBar")
+
+if(overlay){
+overlay.classList.add("oculto")
+}
+
+if(barra){
+barra.style.display="flex"
+}
+
+actualizarSesionVisual()
+}
+
+function actualizarSesionVisual(){
+let nodoCorreo=document.getElementById("sesionCorreo")
+let nodoRol=document.querySelector(".sesionRol")
+
+if(nodoCorreo){
+nodoCorreo.textContent=sesionActual && sesionActual.email ? sesionActual.email : ""
+}
+
+if(nodoRol && sesionActual && sesionActual.perfil){
+let perfil = sesionActual.perfil
+nodoRol.textContent = perfil.charAt(0).toUpperCase() + perfil.slice(1)
+if(sesionActual.colorPerfil){
+nodoRol.style.color = sesionActual.colorPerfil
+}
+}
+}
+
+function aplicarPermisosUI(puede){
+if(!puede) return;
+
+// Dashboard Completo (Tarjetas de resumen arriba)
+if(puede.verDashboardCompleto === false){
+const dashboard = document.querySelector(".panel")
+if(dashboard) dashboard.style.display = "none"
+}
+
+// Modos de Supervisión (Tablas avanzadas)
+if(!puede.verModosSupervision){
+const btn = document.getElementById("btnSupervision")
+if(btn) btn.style.display = "none"
+const panel = document.getElementById("panelSupervision")
+if(panel) panel.style.display = "none"
+}
+
+// Exportación
+if(!puede.verExportarExcel){
+const btns = document.querySelectorAll("button[onclick*='exportarExcel']")
+btns.forEach(b => b.style.display = "none")
+}
+
+// Filtros y Buscadores
+if(!puede.verFiltrosAvanzados){
+const buscador = document.getElementById("buscador")
+if(buscador) buscador.style.display = "none"
+const filtroComuna = document.getElementById("filtroComuna")
+if(filtroComuna) filtroComuna.style.display = "none"
+}
+
+// Botones Especiales (Sección de Nuevas Solapas)
+if(!puede.verBotonesEspeciales){
+const seccionEspeciales = document.getElementById("grupoEspeciales")
+if(seccionEspeciales) seccionEspeciales.style.display = "none"
+}
+}
+
+function actualizarSesionVisual_OLD(){
+let nodo=document.getElementById("sesionCorreo")
+if(nodo){
+nodo.textContent=sesionActual && sesionActual.email ? sesionActual.email : ""
+}
+}
+
+function cerrarSesionManual(){
+sesionActual=null
+let input=document.getElementById("loginCorreo")
+if(input){
+input.value=""
+}
+mostrarPantallaLogin("Ingresa tu correo para continuar.")
 }
 
 function cargarDatos(){
-google.script.run.withSuccessHandler(render).obtenerDatos()
+  if(!sesionActual || !sesionActual.email){
+    return;
+  }
+
+  // Feedback visual para el botón Actualizar
+  const btn = document.querySelector("button[onclick='cargarDatos()']");
+  const originalText = btn ? btn.innerText : "Actualizar";
+  if(btn) {
+    btn.disabled = true;
+    btn.innerText = "⏳ Cargando...";
+  }
+
+  google.script.run
+    .withSuccessHandler(function(data){
+      if(btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+      render(data);
+    })
+    .withFailureHandler(function(error){
+      if(btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+      mostrarPantallaLogin(error && error.message ? error.message : "No se pudieron cargar los datos.");
+    })
+    .obtenerDatos(sesionActual.email);
 }
 
 function render(data){
+  estacionesGlobal = data.estaciones;
+  
+  // Guardar selección actual antes de reconstruir el filtro
+  const select = document.getElementById("filtroComuna");
+  const valAnterior = select ? select.value : "";
+  
+  cargarFiltroComunas();
+  
+  // Restaurar selección si existe
+  if(select && valAnterior) select.value = valAnterior;
 
-estacionesGlobal=data.estaciones
-resumenesEspecialesGlobal=data.resumenesEspeciales || {}
+  resumenesEspecialesGlobal = data.resumenesEspeciales || {};
+  nombresSolapasEspeciales = data.solapasEspeciales || [];
 
-document.getElementById("estaciones").innerText=data.totalEstaciones
-document.getElementById("activas").innerText=data.estacionesActivas
-document.getElementById("pendientes").innerText=data.estacionesPorActualizar
+  pintarEstaciones(estacionesGlobal);
+  renderBotonesEspeciales();
 
-cargarFiltroComunas()
-pintarEstaciones(estacionesGlobal)
-renderBotonesEspeciales()
+  generarDatosTabla();
+  calcularRankings();
+  renderTabla();
 
-generarDatosTabla()
-calcularRankings()
-renderTabla()
-
+  if(data.usuario && data.usuario.permisos){
+    aplicarPermisosUI(data.usuario.permisos);
+  }
 }
 
 function cargarFiltroComunas(){
+  const select = document.getElementById("filtroComuna");
+  if(!select) return;
+  
+  const valAnterior = select.value;
 
-let comunas=[...new Set(estacionesGlobal.map(e=>e.comuna))]
-comunas.sort()
+  let rawComunas = [...new Set(estacionesGlobal.map(e => String(e.comuna || "").trim()))];
+  // Filtro estricto: Solo valores que empiezan con "comuna", números, y exclusión de "Prof"
+  let comunas = rawComunas.filter(c => {
+    let low = c.toLowerCase();
+    return (low.startsWith("comuna") || (!isNaN(c) && c !== "")) && low !== "prof";
+  });
+  
+  comunas.sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
 
-let select=document.getElementById("filtroComuna")
+  select.innerHTML = '<option value="">Todas las comunas</option>';
 
-select.innerHTML='<option value="">Todas las comunas</option>'
-
-comunas.forEach(c=>{
-let op=document.createElement("option")
-op.value=c
-op.textContent=c
-select.appendChild(op)
-})
-
+  comunas.forEach(c => {
+    let op = document.createElement("option");
+    op.value = c;
+    op.textContent = c;
+    select.appendChild(op);
+  });
+  
+  // Restaurar el valor para que no se resetee al actualizar datos
+  if(valAnterior) select.value = valAnterior;
 }
 
 function renderBotonesEspeciales(){
@@ -879,62 +1184,77 @@ contenedor.appendChild(boton)
 }
 
 function pintarEstaciones(lista){
+  let verdes="", amarillas="", rojas="";
+  let cTotal = 0, cActivas = 0, cPendientes = 0;
+  
+  const busqueda = document.getElementById("buscador") ? document.getElementById("buscador").value : "";
 
-let verdes="",amarillas="",rojas=""
+  lista.forEach(function(est){
+    // Normalizamos ambos nombres para ignorar tildes
+    var nH = normalizarParaBusqueda(est.estacion);
+    var enc = null;
 
-lista.forEach(est=>{
+    for(var k in iconosEstaciones){
+      var nK = normalizarParaBusqueda(k);
+      if(nH.indexOf(nK) !== -1 || nK.indexOf(nH) !== -1){
+        enc = k;
+        break;
+      }
+    }
 
-let tarjeta=crearTarjeta(est)
+    if(!enc) return;
+    est.estacionOficial = enc;
+    cTotal++;
 
-if(est.estado==="verde") verdes+=tarjeta
-if(est.estado==="amarillo") amarillas+=tarjeta
-if(est.estado==="rojo") rojas+=tarjeta
+    let tarjeta = crearTarjeta(est, busqueda);
 
-})
+    if(est.estado === "verde"){
+      verdes += tarjeta;
+      cActivas++;
+    } else if(est.estado === "amarillo") {
+      amarillas += tarjeta;
+    } else {
+      rojas += tarjeta;
+    }
+  });
 
-document.getElementById("verdes").innerHTML=verdes
-document.getElementById("amarillas").innerHTML=amarillas
-document.getElementById("rojas").innerHTML=rojas
+  document.getElementById("estaciones").innerText = cTotal;
+  document.getElementById("activas").innerText = cActivas;
+  document.getElementById("pendientes").innerText = cTotal - cActivas;
 
+  document.getElementById("verdes").innerHTML = verdes;
+  document.getElementById("amarillas").innerHTML = amarillas;
+  document.getElementById("rojas").innerHTML = rojas;
 }
 
-function crearTarjeta(est){
+function normalizarParaBusqueda(t) {
+  if(!t) return "";
+  return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
 
-let icono=iconosEstaciones[est.estacion] || "📍"
-
-let html=`<div class="estacion">
-
-<div class="estacionHeader" onclick="toggle(this)">
-
-<span class="luz ${est.estado}"></span>
-
-<div style="flex:1">
-
-<div>${icono} ${est.estacion}</div>
-
-<div style="font-size:11px">${est.comuna}</div>
-
-</div>
-
-<div style="font-size:12px;font-weight:bold">
-${est.profesoresConFecha} / ${est.totalProfesores}
-</div>
-
-</div>
-
-<div class="profList">`
-
-est.profesores.forEach(p=>{
-html+=`<div class="profesor">
-<div>${p.profesor}</div>
-<div>${p.fecha}</div>
-</div>`
-})
-
-html+=`</div></div>`
-
-return html
-
+function crearTarjeta(est, busqueda){
+  let icono = iconosEstaciones[est.estacionOficial || est.estacion] || "📍";
+  const resaltar = (texto) => {
+    if (!busqueda || busqueda.trim().length < 2) return texto;
+    const b = busqueda.trim().replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&");
+    const regex = new RegExp(`(${b})`, "gi");
+    return String(texto).replace(regex, '<mark style="background:#ccff00;color:black;font-weight:bold;padding:0 2px;border-radius:3px;">$1</mark>');
+  };
+  let html = `<div class="estacion">` +
+    `<div class="estacionHeader" onclick="toggle(this)">` +
+    `<span class="luz ${est.estado}"></span>` +
+    `<div style="flex:1">` +
+    `<div>${icono} ${resaltar(est.estacion)}</div>` +
+    `<div style="font-size:11px">${est.comuna}</div>` +
+    `</div>` +
+    `<div style="font-size:12px;font-weight:bold">${est.profesoresConFecha} / ${est.totalProfesores}</div>` +
+    `</div>` +
+    `<div class="profList">`;
+  est.profesores.forEach(p => {
+    html += `<div class="profesor"><div>${resaltar(p.profesor)}</div><div>${p.fecha}</div></div>`;
+  });
+  html += `</div></div>`;
+  return html;
 }
 
 function toggle(el){
@@ -943,24 +1263,14 @@ lista.style.display=lista.style.display==="block"?"none":"block"
 }
 
 function filtrarEstaciones(){
-
-let texto=document.getElementById("buscador").value.toLowerCase()
-let comuna=document.getElementById("filtroComuna").value
-
-let filtradas=estacionesGlobal.filter(est=>{
-
-let coincideTexto=
-est.estacion.toLowerCase().includes(texto) ||
-est.profesores.some(p=>p.profesor.toLowerCase().includes(texto))
-
-let coincideComuna = comuna==="" || est.comuna==comuna
-
-return coincideTexto && coincideComuna
-
-})
-
-pintarEstaciones(filtradas)
-
+  let texto = (document.getElementById("buscador") ? document.getElementById("buscador").value : "").toLowerCase().trim();
+  let comuna = document.getElementById("filtroComuna") ? document.getElementById("filtroComuna").value : "";
+  let filtradas = estacionesGlobal.filter(est=>{
+    let coincideTexto = !texto || est.estacion.toLowerCase().includes(texto) || est.profesores.some(p => p.profesor.toLowerCase().includes(texto));
+    let coincideComuna = !comuna || String(est.comuna).toLowerCase().trim() === String(comuna).toLowerCase().trim();
+    return coincideTexto && coincideComuna;
+  });
+  pintarEstaciones(filtradas);
 }
 
 function generarDatosTabla(){
@@ -1123,7 +1433,7 @@ body.innerHTML='<div class="estadoVacio">'+(error && error.message ? error.messa
 subtitulo.textContent="No se pudo obtener la informacion"
 body.innerHTML='<div class="estadoVacio">'+(error && error.message ? error.message : "Ocurrio un error al leer la solapa.")+'</div>'
 })
-.obtenerResumenSolapaEspecial(nombre)
+.obtenerResumenSolapaEspecial(nombre,null,sesionActual ? sesionActual.email : "")
 
 }
 
@@ -1311,7 +1621,7 @@ subtitulo.textContent=data && data.ultimaFechaCarga
 
 let html=''
 html+='<div class="accionesCronograma">'
-html+='<div class="badgeEstado '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0),Number(totales.fueraCronograma || 0))+'">'+escapeHtml(obtenerTextoEstadoCronograma(totales))+'</div>'
+html+='<div class="badgeEstado '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0))+'">'+escapeHtml(obtenerTextoEstadoCronograma(totales))+'</div>'
 html+='<div class="grupoBotonesCronograma">'
 html+='<button class="botonSecundario" onclick="exportarCronogramaResumenExcel()">Exportar Excel</button>'
 html+='<button class="botonInformeIA" onclick="imprimirCronogramaResumen()">Descargar PDF</button>'
@@ -1321,15 +1631,13 @@ html+='<div class="filtrosResumen">'
 html+='<div class="filtroBloque"><label for="cronogramaFiltroEstacion">Estacion</label><select id="cronogramaFiltroEstacion" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
 html+='<div class="filtroBloque"><label for="cronogramaFiltroActividad">Actividad</label><select id="cronogramaFiltroActividad" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
 html+='<div class="filtroBloque"><label for="cronogramaFiltroDia">Dia</label><select id="cronogramaFiltroDia" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
-html+='<div class="filtroBloque"><label for="cronogramaFiltroResultado">Resultado</label><select id="cronogramaFiltroResultado" onchange="actualizarResumenEspecialFiltrado()"></select></div>'
 html+='</div>'
+html+='<div class="notaResumen"><strong>Lectura:</strong> esta vista muestra solo el cumplimiento de lo programado en cronograma. Las cargas fuera de cronograma no forman parte del porcentaje principal.</div>'
 html+='<div class="resumenCards">'
 html+='<div class="resumenCard"><div class="resumenLabel">Clases programadas</div><div class="resumenValor">'+Number(totales.totalProgramadas || 0)+'</div></div>'
-html+='<div class="resumenCard ok"><div class="resumenLabel">Realizadas</div><div class="resumenValor">'+Number(totales.realizadas || 0)+'</div></div>'
-html+='<div class="resumenCard critica"><div class="resumenLabel">No cargadas</div><div class="resumenValor">'+Number(totales.noCargadas || 0)+'</div></div>'
-html+='<div class="resumenCard alerta"><div class="resumenLabel">Fuera de cronograma</div><div class="resumenValor">'+Number(totales.fueraCronograma || 0)+'</div></div>'
-html+='<div class="resumenCard alerta"><div class="resumenLabel">Profesor distinto</div><div class="resumenValor">'+Number(totales.profesorDistinto || 0)+'</div></div>'
-html+='<div class="resumenCard '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0),Number(totales.fueraCronograma || 0))+'"><div class="resumenLabel">% cumplimiento</div><div class="resumenValor">'+Number(totales.cumplimientoPorcentaje || 0).toFixed(1)+'%</div></div>'
+html+='<div class="resumenCard ok"><div class="resumenLabel">Clases cumplidas</div><div class="resumenValor">'+Number(totales.realizadas || 0)+'</div></div>'
+html+='<div class="resumenCard critica"><div class="resumenLabel">Pendientes</div><div class="resumenValor">'+Number(totales.noCargadas || 0)+'</div></div>'
+html+='<div class="resumenCard '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0))+'"><div class="resumenLabel">% cumplimiento</div><div class="resumenValor">'+Number(totales.cumplimientoPorcentaje || 0).toFixed(1)+'%</div></div>'
 html+='</div>'
 
 if(mensaje){
@@ -1338,17 +1646,11 @@ html+='<div class="estadoVacio">'+escapeHtml(mensaje)+'</div>'
 
 html+='<div class="detalleResumen">'
 html+='<div id="cronogramaPanelPrincipal"></div>'
-html+='<div id="cronogramaPanelResultados"></div>'
 html+='</div>'
 html+='<div class="detalleResumen">'
 html+='<div id="cronogramaPanelEstaciones"></div>'
 html+='<div id="cronogramaPanelActividades"></div>'
 html+='</div>'
-html+='<div class="detalleResumen">'
-html+='<div id="cronogramaPanelDias"></div>'
-html+='<div id="cronogramaPanelFechas"></div>'
-html+='</div>'
-html+='<div id="cronogramaPanelIncidencias"></div>'
 
 body.innerHTML=html
 modal.classList.add("visible")
@@ -1356,49 +1658,33 @@ modal.classList.add("visible")
 renderizarOpcionesFiltroAvanzado("cronogramaFiltroEstacion",data && data.filtrosDisponibles ? data.filtrosDisponibles.estaciones : [],"Todas las estaciones")
 renderizarOpcionesFiltroAvanzado("cronogramaFiltroActividad",data && data.filtrosDisponibles ? data.filtrosDisponibles.actividades : [],"Todas las actividades")
 renderizarOpcionesFiltroAvanzado("cronogramaFiltroDia",data && data.filtrosDisponibles ? data.filtrosDisponibles.dias : [],"Todos los dias")
-renderizarOpcionesFiltroAvanzado("cronogramaFiltroResultado",data && data.filtrosDisponibles ? data.filtrosDisponibles.resultados : [],"Todos los resultados")
 
 let filtros=data && data.filtrosAplicados ? data.filtrosAplicados : {}
 if(filtros.estacion && document.getElementById("cronogramaFiltroEstacion")) document.getElementById("cronogramaFiltroEstacion").value=filtros.estacion
 if(filtros.actividad && document.getElementById("cronogramaFiltroActividad")) document.getElementById("cronogramaFiltroActividad").value=filtros.actividad
 if(filtros.dia && document.getElementById("cronogramaFiltroDia")) document.getElementById("cronogramaFiltroDia").value=filtros.dia
-if(filtros.resultado && document.getElementById("cronogramaFiltroResultado")) document.getElementById("cronogramaFiltroResultado").value=filtros.resultado
 
 document.getElementById("cronogramaPanelPrincipal").innerHTML=armarPanelPrincipalCronograma(data)
-document.getElementById("cronogramaPanelResultados").innerHTML=armarPanelResultadosCronograma(data)
-document.getElementById("cronogramaPanelEstaciones").innerHTML=armarPanelTablaCronograma("Estaciones con mayor desvio",data && data.estaciones ? data.estaciones : [])
-document.getElementById("cronogramaPanelActividades").innerHTML=armarPanelTablaCronograma("Actividades",data && data.actividades ? data.actividades : [])
-document.getElementById("cronogramaPanelDias").innerHTML=armarPanelTablaCronograma("Dias de semana",data && data.dias ? data.dias : [])
-document.getElementById("cronogramaPanelFechas").innerHTML=armarPanelFechasCronograma(data && data.fechas ? data.fechas : [])
-document.getElementById("cronogramaPanelIncidencias").innerHTML=armarPanelIncidenciasCronograma(data && data.incidencias ? data.incidencias : [])
+document.getElementById("cronogramaPanelEstaciones").innerHTML=armarPanelTablaCronograma("Cumplimiento por estacion",data && data.estaciones ? data.estaciones : [])
+document.getElementById("cronogramaPanelActividades").innerHTML=armarPanelTablaCronograma("Cumplimiento por actividad",data && data.actividades ? data.actividades : [])
 
 }
 
 function armarPanelPrincipalCronograma(data){
 let totales=data && data.totales ? data.totales : {}
 let html='<div class="panelDetalle">'
-html+='<div class="panelDetalleTitulo">Lectura rapida</div>'
+html+='<div class="panelDetalleTitulo">Lectura principal</div>'
 html+='<div class="miniResumen">'
-html+='<div class="miniItem ok"><div class="miniItemValor">'+Number((totales.totalProgramadas || 0) - (totales.noCargadas || 0))+'</div><div class="miniItemLabel">Programadas con alguna carga</div></div>'
-html+='<div class="miniItem critica"><div class="miniItemValor">'+Number(totales.noCargadas || 0)+'</div><div class="miniItemLabel">Huecos a revisar</div></div>'
-html+='<div class="miniItem alerta"><div class="miniItemValor">'+Number(totales.fueraCronograma || 0)+'</div><div class="miniItemLabel">Cargas fuera de plan</div></div>'
-html+='<div class="miniItem alerta"><div class="miniItemValor">'+Number(totales.profesorDistinto || 0)+'</div><div class="miniItemLabel">Profesor distinto</div></div>'
+html+='<div class="miniItem ok"><div class="miniItemValor">'+Number(totales.realizadas || 0)+'</div><div class="miniItemLabel">Clases cumplidas</div></div>'
+html+='<div class="miniItem critica"><div class="miniItemValor">'+Number(totales.noCargadas || 0)+'</div><div class="miniItemLabel">Clases pendientes</div></div>'
+html+='<div class="miniItem '+obtenerClaseEstadoCronograma(Number(totales.cumplimientoPorcentaje || 0),Number(totales.noCargadas || 0))+'"><div class="miniItemValor">'+Number(totales.cumplimientoPorcentaje || 0).toFixed(1)+'%</div><div class="miniItemLabel">Eficiencia del cronograma</div></div>'
 html+='</div>'
-html+='</div>'
-return html
-}
-
-function armarPanelResultadosCronograma(data){
-let items=Array.isArray(data && data.resultados) ? data.resultados : []
-let html='<div class="panelDetalle">'
-html+='<div class="panelDetalleTitulo">Resultados del cruce</div>'
-html+=armarTablaConteosClic(items,'No hay resultados para mostrar.')
 html+='</div>'
 return html
 }
 
 function armarPanelTablaCronograma(titulo,items){
-let lista=(Array.isArray(items) ? items : []).slice(0,15)
+let lista=(Array.isArray(items) ? items : []).slice(0,20)
 let html='<div class="panelDetalle">'
 html+='<div class="panelDetalleTitulo">'+escapeHtml(titulo)+'</div>'
 
@@ -1409,7 +1695,7 @@ return html
 }
 
 html+='<table class="tabla"><tr>'
-html+='<th>Nombre</th><th>Prog.</th><th>Real.</th><th>No carg.</th><th>Fuera</th><th>%</th>'
+html+='<th>Nombre</th><th>Prog.</th><th>Cumpl.</th><th>Pend.</th><th>%</th>'
 html+='</tr>'
 
 lista.forEach(function(item){
@@ -1418,7 +1704,6 @@ html+='<td>'+escapeHtml(item.nombre || "-")+'</td>'
 html+='<td>'+Number(item.programadas || 0)+'</td>'
 html+='<td>'+Number(item.realizadas || 0)+'</td>'
 html+='<td>'+Number(item.noCargadas || 0)+'</td>'
-html+='<td>'+Number(item.fueraCronograma || 0)+'</td>'
 html+='<td>'+Number(item.cumplimientoPorcentaje || 0).toFixed(1)+'%</td>'
 html+='</tr>'
 })
@@ -1428,78 +1713,24 @@ html+='</div>'
 return html
 }
 
-function armarPanelFechasCronograma(items){
-let lista=(Array.isArray(items) ? items : []).slice(0,20)
-let html='<div class="panelDetalle">'
-html+='<div class="panelDetalleTitulo">Fechas recientes con carga real</div>'
-
-if(!lista.length){
-html+='<div class="estadoVacio">No hay fechas reales para mostrar.</div>'
-html+='</div>'
-return html
-}
-
-html+='<table class="tabla"><tr><th>Fecha</th><th>Realizadas</th><th>Fuera</th><th>Profesor distinto</th></tr>'
-lista.forEach(function(item){
-html+='<tr class="'+(Number(item.fueraCronograma || 0)>0 || Number(item.profesorDistinto || 0)>0 ? 'filaAlerta' : '')+'">'
-html+='<td>'+escapeHtml(item.fecha || "-")+'</td>'
-html+='<td>'+Number(item.realizadas || 0)+'</td>'
-html+='<td>'+Number(item.fueraCronograma || 0)+'</td>'
-html+='<td>'+Number(item.profesorDistinto || 0)+'</td>'
-html+='</tr>'
-})
-html+='</table>'
-html+='</div>'
-return html
-}
-
-function armarPanelIncidenciasCronograma(items){
-let lista=(Array.isArray(items) ? items : []).slice(0,40)
-let html='<div class="panelDetalle">'
-html+='<div class="panelDetalleTitulo">Incidencias recientes</div>'
-
-if(!lista.length){
-html+='<div class="estadoVacio">No se detectaron incidencias en el filtro actual.</div>'
-html+='</div>'
-return html
-}
-
-html+='<table class="tabla"><tr><th>Fecha</th><th>Estacion</th><th>Dia</th><th>Hora</th><th>Actividad</th><th>Resultado</th><th>Detalle</th></tr>'
-lista.forEach(function(item){
-html+='<tr class="'+(item.resultado==="PROGRAMADO_NO_CARGADO" ? 'filaCritica' : 'filaAlerta')+'">'
-html+='<td>'+escapeHtml(item.fecha || "-")+'</td>'
-html+='<td>'+escapeHtml(item.estacion || "-")+'</td>'
-html+='<td>'+escapeHtml(item.dia || "-")+'</td>'
-html+='<td>'+escapeHtml(item.hora || "-")+'</td>'
-html+='<td>'+escapeHtml(item.actividad || "-")+'</td>'
-html+='<td>'+escapeHtml(item.resultado || "-")+'</td>'
-html+='<td>'+escapeHtml(item.detalle || "-")+'</td>'
-html+='</tr>'
-})
-html+='</table>'
-html+='</div>'
-return html
-}
-
-function obtenerClaseEstadoCronograma(cumplimiento,noCargadas,fueraCronograma){
+function obtenerClaseEstadoCronograma(cumplimiento,noCargadas){
 if(noCargadas>0 || cumplimiento<70) return "critica"
-if(fueraCronograma>0 || cumplimiento<90) return "alerta"
+if(cumplimiento<90) return "alerta"
 return "ok"
 }
 
 function obtenerTextoEstadoCronograma(totales){
 let cumplimiento=Number(totales && totales.cumplimientoPorcentaje || 0)
 let noCargadas=Number(totales && totales.noCargadas || 0)
-let fueraCronograma=Number(totales && totales.fueraCronograma || 0)
 
-if(noCargadas>0 || cumplimiento<70) return "Seguimiento critico"
-if(fueraCronograma>0 || cumplimiento<90) return "Seguimiento con alertas"
-return "Seguimiento saludable"
+if(noCargadas>0 || cumplimiento<70) return "Cumplimiento critico"
+if(cumplimiento<90) return "Cumplimiento con alertas"
+return "Cumplimiento saludable"
 }
 
 function obtenerClaseFilaCronograma(item){
 if(Number(item && item.noCargadas || 0)>0) return "filaCritica"
-if(Number(item && item.fueraCronograma || 0)>0 || Number(item && item.profesorDistinto || 0)>0) return "filaAlerta"
+if(Number(item && item.cumplimientoPorcentaje || 0)<90) return "filaAlerta"
 return ""
 }
 
@@ -1514,10 +1745,8 @@ let wb=XLSX.utils.book_new()
 let totales=data.totales || {}
 let resumenSheet=XLSX.utils.json_to_sheet([
 {"Indicador":"Clases programadas","Valor":Number(totales.totalProgramadas || 0)},
-{"Indicador":"Realizadas","Valor":Number(totales.realizadas || 0)},
-{"Indicador":"No cargadas","Valor":Number(totales.noCargadas || 0)},
-{"Indicador":"Fuera de cronograma","Valor":Number(totales.fueraCronograma || 0)},
-{"Indicador":"Profesor distinto","Valor":Number(totales.profesorDistinto || 0)},
+{"Indicador":"Clases cumplidas","Valor":Number(totales.realizadas || 0)},
+{"Indicador":"Clases pendientes","Valor":Number(totales.noCargadas || 0)},
 {"Indicador":"Cumplimiento %","Valor":Number(totales.cumplimientoPorcentaje || 0)}
 ])
 XLSX.utils.book_append_sheet(wb,resumenSheet,"Resumen")
@@ -1526,10 +1755,8 @@ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.estaciones || [])
 return {
 Nombre:item.nombre || "",
 Programadas:Number(item.programadas || 0),
-Realizadas:Number(item.realizadas || 0),
-No_Cargadas:Number(item.noCargadas || 0),
-Fuera_Cronograma:Number(item.fueraCronograma || 0),
-Profesor_Distinto:Number(item.profesorDistinto || 0),
+Cumplidas:Number(item.realizadas || 0),
+Pendientes:Number(item.noCargadas || 0),
 Cumplimiento:Number(item.cumplimientoPorcentaje || 0)
 }
 })),"Estaciones")
@@ -1538,41 +1765,13 @@ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.actividades || []
 return {
 Nombre:item.nombre || "",
 Programadas:Number(item.programadas || 0),
-Realizadas:Number(item.realizadas || 0),
-No_Cargadas:Number(item.noCargadas || 0),
-Fuera_Cronograma:Number(item.fueraCronograma || 0),
-Profesor_Distinto:Number(item.profesorDistinto || 0),
+Cumplidas:Number(item.realizadas || 0),
+Pendientes:Number(item.noCargadas || 0),
 Cumplimiento:Number(item.cumplimientoPorcentaje || 0)
 }
 })),"Actividades")
 
-XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.dias || []).map(function(item){
-return {
-Nombre:item.nombre || "",
-Programadas:Number(item.programadas || 0),
-Realizadas:Number(item.realizadas || 0),
-No_Cargadas:Number(item.noCargadas || 0),
-Fuera_Cronograma:Number(item.fueraCronograma || 0),
-Profesor_Distinto:Number(item.profesorDistinto || 0),
-Cumplimiento:Number(item.cumplimientoPorcentaje || 0)
-}
-})),"Dias")
-
-XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet((data.incidencias || []).map(function(item){
-return {
-Fecha:item.fecha || "",
-Estacion:item.estacion || "",
-Dia:item.dia || "",
-Hora:item.hora || "",
-Actividad:item.actividad || "",
-Resultado:item.resultado || "",
-Detalle:item.detalle || "",
-Profesor_Programado:item.profesorProgramado || "",
-Profesor_Real:item.profesorReal || ""
-}
-})),"Incidencias")
-
-XLSX.writeFile(wb,"cronograma_seguimiento.xlsx")
+XLSX.writeFile(wb,"cronograma_cumplimiento.xlsx")
 }
 
 function imprimirCronogramaResumen(){
@@ -1688,7 +1887,7 @@ subtitulo.textContent="No se pudieron actualizar los filtros"
 
 alert(error && error.message ? error.message : "No se pudo actualizar el resumen filtrado.")
 })
-.obtenerResumenSolapaEspecial(resumenEspecialActual,filtros)
+.obtenerResumenSolapaEspecial(resumenEspecialActual,filtros,sesionActual ? sesionActual.email : "")
 }
 
 function obtenerFiltrosResumenActual(){
@@ -2562,7 +2761,7 @@ document.getElementById("modalEspecial").classList.remove("visible")
 }
 })
 
-cargarDatos()
+iniciarAplicacion()
 
 </script>
 

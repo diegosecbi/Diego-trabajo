@@ -12,9 +12,26 @@ const SOLAPAS_ESPECIALES = [
 
 const SOLAPAS_EXCLUIDAS_SUPERVISION = [
   "DATOS",
+  "USUARIOS",
+  "Rol",
   "CRONOGRAMA_NORMALIZADO",
   "CONTROL_CUMPLIMIENTO",
-  "DIAGNOSTICO_CRONOGRAMA"
+  "DIAGNOSTICO_CRONOGRAMA",
+  "AUDITORIA_CODIGOS_CRUCE",
+  "AUDITORIA_CRONOGRAMA_CUMPLIMIENTO",
+  "ROSETA_ACTIVIDADES_CRONOGRAMA",
+  "CATALOGO_ACTIVIDADES",
+  "actividades_x_estacion",
+  "actividades_x_estación",
+  "profesores_estacion",
+  "profesores_en_feriados",
+  "CLIC",
+  "ETZ",
+  "EVENTOS",
+  "FESTEJOS",
+  "COCINA",
+  "VISITAS ESCOLARES",
+  "EXPLORANDO CABA"
 ];
 
 const FUENTES_ESPECIALES_EXTERNAS = {
@@ -25,8 +42,69 @@ const FUENTES_ESPECIALES_EXTERNAS = {
   }
 };
 
+const ESTACIONES_SALUDABLES_VISIBLES = [
+  "Estaci\u00f3n Saludable Arist\u00f3bulo del Valle",
+  "Estaci\u00f3n Saludable Indoamericano",
+  "Estaci\u00f3n Saludable Lago de Palermo",
+  "Estaci\u00f3n Saludable Manzana 66",
+  "Estaci\u00f3n Saludable M\u00f3vil 1",
+  "Estaci\u00f3n Saludable M\u00f3vil 2",
+  "Estaci\u00f3n Saludable Parque Avellaneda",
+  "Estaci\u00f3n Saludable Parque Centenario",
+  "Estaci\u00f3n Saludable Parque Chacabuco",
+  "Estaci\u00f3n Saludable Parque Los Andes",
+  "Estaci\u00f3n Saludable Parque Patricios",
+  "Estaci\u00f3n Saludable Parque Rivadavia",
+  "Estaci\u00f3n Saludable Parque Saavedra",
+  "Estaci\u00f3n Saludable Plaza Almagro",
+  "Estaci\u00f3n Saludable Plaza de los Periodistas",
+  "Estaci\u00f3n Saludable Plaza Dr. Bernardo A. Houssay",
+  "Estaci\u00f3n Saludable Plaza Flores",
+  "Estaci\u00f3n Saludable Plaza Martin Fierro",
+  "Estaci\u00f3n Saludable Parque de la Ciudad",
+  "Estaci\u00f3n Saludable Plaza Rub\u00e9n Dar\u00edo",
+  "Estaci\u00f3n Saludable Sudam\u00e9rica",
+  "Barrio Juan XXIII",
+  "Estaci\u00f3n Saludable Rosedal",
+  "Programa Estaciones Saludables",
+  "Dep\u00f3sito Estaciones Saludables",
+  "Eventos fuera ES",
+  "Estaciones Saludables Clic"
+];
+
+const ALIAS_ESTACIONES_SALUDABLES_VISIBLES = {
+  "Estaci\u00f3n Saludable Arist\u00f3bulo del Valle": ["Arist\u00f3bulo del Valle", "Aristobulo del Valle"],
+  "Estaci\u00f3n Saludable Indoamericano": ["Indoamericano"],
+  "Estaci\u00f3n Saludable Lago de Palermo": ["Lago de Palermo", "Lagos de Palermo", "Palermo"],
+  "Estaci\u00f3n Saludable Manzana 66": ["Manzana 66", "Plaza Manzana 66"],
+  "Estaci\u00f3n Saludable M\u00f3vil 1": ["M\u00f3vil 1", "Movil 1", "Movil1", "M\u00f3vil1", "Plaza Sudamerica", "Movil 1 Plaza Sudamerica", "M\u00f3vil 1 Plaza Sudamerica", "Plaza Echeverria", "Movil 1 Plaza Echeverria", "M\u00f3vil 1 Plaza Echeverria", "Belgrano", "Movil 1 Belgrano", "M\u00f3vil 1 Belgrano", "Parque Lezama", "Movil 1 Parque Lezama", "M\u00f3vil 1 Parque Lezama", "Plaza La Redonda", "Movil 1 Plaza La Redonda", "M\u00f3vil 1 Plaza La Redonda"],
+  "Estaci\u00f3n Saludable M\u00f3vil 2": ["M\u00f3vil 2", "Movil 2", "Movil2", "M\u00f3vil2", "Corralon de Floresta", "Corral\u00f3n de Floresta", "Movil 2 Corralon de Floresta", "M\u00f3vil 2 Corralon de Floresta", "Plaza Democracia", "Movil 2 Plaza Democracia", "M\u00f3vil 2 Plaza Democracia", "Parque Ferroviario", "Movil 2 Parque Ferroviario", "M\u00f3vil 2 Parque Ferroviario", "Plaza Garay", "Movil 2 Plaza Garay", "M\u00f3vil 2 Plaza Garay", "Plaza Irlanda", "Movil 2 Plaza Irlanda", "M\u00f3vil 2 Plaza Irlanda"],
+  "Estaci\u00f3n Saludable Parque Avellaneda": ["Parque Avellaneda", "Avellaneda"],
+  "Estaci\u00f3n Saludable Parque Centenario": ["Parque Centenario", "Centenario"],
+  "Estaci\u00f3n Saludable Parque Chacabuco": ["Parque Chacabuco", "Chacabuco"],
+  "Estaci\u00f3n Saludable Parque Los Andes": ["Parque Los Andes", "Los Andes"],
+  "Estaci\u00f3n Saludable Parque Patricios": ["Parque Patricios", "Patricios"],
+  "Estaci\u00f3n Saludable Parque Rivadavia": ["Parque Rivadavia", "Rivadavia"],
+  "Estaci\u00f3n Saludable Parque Saavedra": ["Parque Saavedra", "Saavedra"],
+  "Estaci\u00f3n Saludable Plaza Almagro": ["Plaza Almagro", "Almagro"],
+  "Estaci\u00f3n Saludable Plaza de los Periodistas": ["Plaza de los Periodistas", "Periodistas"],
+  "Estaci\u00f3n Saludable Plaza Dr. Bernardo A. Houssay": ["Plaza Houssay", "Houssay", "Plaza Dr Bernardo A Houssay"],
+  "Estaci\u00f3n Saludable Plaza Flores": ["Plaza Flores", "Flores"],
+  "Estaci\u00f3n Saludable Plaza Martin Fierro": ["Plaza Martin Fierro", "Plaza Mart\u00edn Fierro", "Martin Fierro", "Mart\u00edn Fierro"],
+  "Estaci\u00f3n Saludable Parque de la Ciudad": ["Parque de la Ciudad"],
+  "Estaci\u00f3n Saludable Plaza Rub\u00e9n Dar\u00edo": ["Plaza Rub\u00e9n Dar\u00edo", "Plaza Ruben Dario", "Rub\u00e9n Dar\u00edo", "Ruben Dario"],
+  "Estaci\u00f3n Saludable Sudam\u00e9rica": ["Sudam\u00e9rica", "Sudamerica"],
+  "Barrio Juan XXIII": ["Juan XXIII", "Barrio Juan XXIII"],
+  "Estaci\u00f3n Saludable Rosedal": ["Rosedal"],
+  "Programa Estaciones Saludables": ["Programa Estaciones Saludables"],
+  "Dep\u00f3sito Estaciones Saludables": ["Deposito Estaciones Saludables", "Dep\u00f3sito Estaciones Saludables"],
+  "Eventos fuera ES": ["Eventos fuera ES"],
+  "Estaciones Saludables Clic": ["Estaciones Saludables Clic", "Clic", "CLIC"]
+};
+
 const PERFILES_USUARIOS = {
   admin: [],
+  gerencia: [],
   coordinacion: [],
   operativo: []
 };
@@ -79,6 +157,16 @@ const CABECERAS_CONTROL_CUMPLIMIENTO = [
   "CODIGO_PROGRAMADO"
 ];
 
+const CABECERAS_TALLERES = [
+  "DNI",
+  "FECHA ACTIVIDAD",
+  "ESTACION",
+  "PROFESOR",
+  "ACTIVIDAD",
+  "SECTOR DE CARGA",
+  "CODIGO_CRUCE"
+];
+
 const CABECERAS_DIAGNOSTICO_CRONOGRAMA = [
   "FILA_ORIGEN",
   "TIPO_DETECCION",
@@ -92,6 +180,19 @@ const CABECERAS_DIAGNOSTICO_CRONOGRAMA = [
   "TEXTO_FILA"
 ];
 
+const CABECERAS_AUDITORIA_CODIGOS_CRUCE = [
+  "FECHA_PROGRAMADA",
+  "ESTACION_PROGRAMADA",
+  "ACTIVIDAD_PROGRAMADA",
+  "CLAVE_ESTACION",
+  "CLAVE_ACTIVIDAD",
+  "CODIGO_CRONOGRAMA",
+  "REGISTROS_TALLERES_CON_MISMO_CODIGO",
+  "ESTADO",
+  "MUESTRA_ESTACION_TALLERES",
+  "MUESTRA_ACTIVIDAD_TALLERES"
+];
+
 const FUENTE_CRONOGRAMA = {
   spreadsheetId: "1Bqoe1OC10jfXZ5t0CAuF_oko3Y5vZnK5ad4O4Vck2tM",
   sheetId: 1547157225,
@@ -99,6 +200,13 @@ const FUENTE_CRONOGRAMA = {
   rangoLectura: "A1:W567",
   anioObjetivo: 2026,
   mesObjetivo: 3
+};
+
+const FUENTE_TALLERES_DESDE_DATOS = {
+  hojaDatos: "DATOS",
+  rangoIds: "A54:L54",
+  sheetName: "SEGUIMIENTO",
+  rangoLectura: "B:J"
 };
 
 const DIAS_SEMANA_CRONOGRAMA = [
@@ -628,7 +736,11 @@ BIBLIOTECA ESTACION`;
 
 let cacheEquivalenciasEstacionesDatos_ = null;
 let cacheCatalogoActividades_ = null;
+let cacheCatalogoActividadesLista_ = null;
+let cacheRosetaActividades_ = null;
 let cacheProfesoresBase_ = null;
+let cacheEquivalenciasEstacionesCombinadas_ = null;
+let cacheMapaEstacionesVisibles_ = null;
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile("index");
@@ -638,15 +750,20 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Administracion")
     .addItem("Preparar Hoja De Usuarios", "prepararHojaUsuarios")
+    .addItem("🔍 Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
     .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi()
         .createMenu("Cronograma")
         .addItem("Preparar Solapas De Control", "prepararSolapasControlCronograma")
+        .addItem("Sincronizar TALLERES Desde Seguimiento", "sincronizarTalleresDesdeSeguimiento")
         .addItem("Importar Cronograma Normalizado", "importarCronogramaNormalizado")
         .addItem("Diagnosticar Importacion De Cronograma", "diagnosticarImportacionCronograma")
         .addItem("Generar Control De Cumplimiento", "generarControlCumplimiento")
+        .addItem("Auditar Codigos De Cruce", "auditarCodigosCruceCronograma")
     )
+    .addSeparator()
+    .addItem("⚙️ Configurar OpenRouter (Claude)", "configurarOpenRouter")
     .addToUi();
 }
 
@@ -669,7 +786,7 @@ function prepararHojaUsuarios() {
 
   hoja.getRange("B2:B").setDataValidation(
     SpreadsheetApp.newDataValidation()
-      .requireValueInList(["admin", "coordinacion", "operativo"], true)
+      .requireValueInList(["admin", "gerencia", "coordinacion", "operativo"], true)
       .setAllowInvalid(false)
       .build()
   );
@@ -684,7 +801,7 @@ function prepararHojaUsuarios() {
   hoja.autoResizeColumns(1, CABECERAS_USUARIOS.length);
 
   SpreadsheetApp.getUi().alert(
-    "La hoja USUARIOS esta lista. Completa EMAIL, PERFIL y ACTIVO para habilitar accesos."
+    "La hoja USUARIOS esta lista. Completa EMAIL, PERFIL (admin/gerencia/coordinacion/operativo) y ACTIVO para habilitar accesos."
   );
 }
 
@@ -710,32 +827,181 @@ function prepararSolapasControlCronograma() {
   );
 }
 
+function sincronizarTalleresDesdeSeguimiento() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const origenes = obtenerFuentesTalleresDesdeDatos_(ss);
+
+  if (!origenes.length) {
+    throw new Error("No se encontraron IDs o URLs de seguimiento en DATOS!A54:L54.");
+  }
+
+  let hojaDestino = ss.getSheetByName("TALLERES");
+  if (!hojaDestino) {
+    hojaDestino = ss.insertSheet("TALLERES");
+  }
+
+  let filasOrigen = [];
+
+  origenes.forEach(function(origen) {
+    try {
+      const libroExterno = SpreadsheetApp.openById(origen.spreadsheetId);
+      const hojaOrigen = libroExterno.getSheetByName(FUENTE_TALLERES_DESDE_DATOS.sheetName);
+      if (!hojaOrigen) return;
+
+      const ultimaFilaOrigen = hojaOrigen.getLastRow();
+      if (ultimaFilaOrigen < 2) return;
+
+      const datosFuente = hojaOrigen.getRange(2, 2, ultimaFilaOrigen - 1, 9).getValues();
+      datosFuente.forEach(function(fila) {
+        if (!fila || !fila.length) return;
+
+        const fechaValor = fila[0] || "";
+        if (!fechaValor) return;
+
+        filasOrigen.push({
+          fechaValor: fechaValor,
+          estacion: limpiarTexto_(fila[1]),
+          profesor: limpiarTexto_(fila[2]),
+          actividad: limpiarTexto_(fila[3]),
+          dni: fila[5] || "",
+          sector: limpiarTexto_(fila[8]),
+          fuente: origen.spreadsheetId
+        });
+      });
+    } catch (error) {}
+  });
+
+  const filas = filasOrigen.map(function(fila) {
+    const dni = fila.dni || "";
+    const fechaValor = fila.fechaValor || "";
+    const fechaTexto = normalizarFechaTalleresControl_(fechaValor);
+    const estacion = fila.estacion || "";
+    const profesor = fila.profesor || "";
+    const actividad = fila.actividad || "";
+    const sector = fila.sector || "";
+    const codigo = construirCodigoComparacionVisible_(fechaTexto, estacion, actividad);
+
+    return [
+      dni,
+      fechaValor,
+      estacion,
+      profesor,
+      actividad,
+      sector,
+      codigo
+    ];
+  }).filter(function(fila) {
+    return fila[1] && fila[2] && fila[4];
+  });
+
+  hojaDestino.getRange(1, 1, 1, CABECERAS_TALLERES.length).setValues([CABECERAS_TALLERES]);
+
+  const ultimaFilaDestino = hojaDestino.getLastRow();
+  if (ultimaFilaDestino > 1) {
+    hojaDestino.getRange(2, 1, ultimaFilaDestino - 1, CABECERAS_TALLERES.length).clearContent();
+  }
+
+  const lote = 500;
+  for (let i = 0; i < filas.length; i += lote) {
+    const bloque = filas.slice(i, i + lote);
+    hojaDestino.getRange(2 + i, 1, bloque.length, CABECERAS_TALLERES.length).setValues(bloque);
+  }
+
+  if (filas.length) {
+    hojaDestino.getRange(2, 2, filas.length, 1).setNumberFormat("dd/MM/yyyy");
+  }
+
+  hojaDestino.setFrozenRows(1);
+  hojaDestino.getRange(1, 1, 1, CABECERAS_TALLERES.length)
+    .setBackground("#153244")
+    .setFontColor("#ffffff")
+    .setFontWeight("bold");
+
+  SpreadsheetApp.getUi().alert(
+    "TALLERES sincronizada. Filas copiadas: " + filas.length
+  );
+}
+
+function obtenerFuentesTalleresDesdeDatos_(ss) {
+  const hoja = ss.getSheetByName(FUENTE_TALLERES_DESDE_DATOS.hojaDatos);
+  if (!hoja) {
+    return [];
+  }
+
+  const valores = hoja.getRange(FUENTE_TALLERES_DESDE_DATOS.rangoIds).getDisplayValues();
+  const celdas = (valores[0] || []).map(function(valor) {
+    return limpiarTexto_(valor);
+  }).filter(Boolean);
+  const vistos = {};
+  const salida = [];
+
+  celdas.forEach(function(valor) {
+    const spreadsheetId = extraerSpreadsheetIdDesdeTexto_(valor);
+    if (!spreadsheetId || vistos[spreadsheetId]) {
+      return;
+    }
+
+    vistos[spreadsheetId] = true;
+    salida.push({
+      spreadsheetId: spreadsheetId
+    });
+  });
+
+  return salida;
+}
+
+function extraerSpreadsheetIdDesdeTexto_(texto) {
+  const limpio = limpiarTexto_(texto || "");
+  if (!limpio) return "";
+
+  const matchUrl = limpio.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/i);
+  if (matchUrl && matchUrl[1]) {
+    return matchUrl[1];
+  }
+
+  const matchId = limpio.match(/^[a-zA-Z0-9-_]{20,}$/);
+  if (matchId) {
+    return limpio;
+  }
+
+  return "";
+}
+
 function prepararSolapaEstructural_(ss, nombreSolapa, cabeceras, descripcion) {
   let hoja = ss.getSheetByName(nombreSolapa);
+  let creada = false;
 
   if (!hoja) {
     hoja = ss.insertSheet(nombreSolapa);
+    creada = true;
   }
 
-  hoja.clear();
+  const ultimaFila = hoja.getLastRow();
+  const ultimaColumna = hoja.getLastColumn();
+
+  if (ultimaFila > 1 && ultimaColumna > 0) {
+    hoja.getRange(2, 1, ultimaFila - 1, Math.max(cabeceras.length, ultimaColumna)).clearContent();
+  }
+
   hoja.getRange(1, 1, 1, cabeceras.length).setValues([cabeceras]);
   hoja.setFrozenRows(1);
   hoja.getRange(1, 1, 1, cabeceras.length)
     .setBackground("#153244")
     .setFontColor("#ffffff")
     .setFontWeight("bold");
-  hoja.autoResizeColumns(1, cabeceras.length);
 
-  if (descripcion) {
+  if (descripcion && (creada || !hoja.getRange(1, 1).getNote())) {
     hoja.getRange(1, 1).setNote(descripcion);
   }
 }
 
 function asegurarSolapaEstructural_(ss, nombreSolapa, cabeceras, descripcion) {
   let hoja = ss.getSheetByName(nombreSolapa);
+  let creada = false;
 
   if (!hoja) {
     hoja = ss.insertSheet(nombreSolapa);
+    creada = true;
   }
 
   const rangoCabecera = hoja.getRange(1, 1, 1, cabeceras.length);
@@ -762,13 +1028,34 @@ function asegurarSolapaEstructural_(ss, nombreSolapa, cabeceras, descripcion) {
     .setBackground("#153244")
     .setFontColor("#ffffff")
     .setFontWeight("bold");
-  hoja.autoResizeColumns(1, cabeceras.length);
 
-  if (descripcion) {
+  if (descripcion && (creada || !hoja.getRange(1, 1).getNote())) {
     hoja.getRange(1, 1).setNote(descripcion);
   }
 
   return hoja;
+}
+
+function limpiarYEscribirBloqueEnHoja_(hoja, cabeceras, filas) {
+  const ultimaFila = hoja.getLastRow();
+  const ultimaColumna = hoja.getLastColumn();
+  const ancho = cabeceras.length;
+
+  hoja.getRange(1, 1, 1, ancho).setValues([cabeceras]);
+
+  if (ultimaFila > 1) {
+    hoja.getRange(2, 1, ultimaFila - 1, Math.max(ancho, ultimaColumna)).clearContent();
+  }
+
+  if (!filas || !filas.length) {
+    return;
+  }
+
+  const lote = 200;
+  for (let i = 0; i < filas.length; i += lote) {
+    const bloque = filas.slice(i, i + lote);
+    hoja.getRange(2 + i, 1, bloque.length, ancho).setValues(bloque);
+  }
 }
 
 function importarCronogramaNormalizado() {
@@ -776,25 +1063,20 @@ function importarCronogramaNormalizado() {
   prepararSolapasControlCronogramaSilencioso_(ss);
 
   const hojaDestino = ss.getSheetByName("CRONOGRAMA_NORMALIZADO");
+  hojaDestino.getRange(1, 1, 1, CABECERAS_CRONOGRAMA_NORMALIZADO.length)
+    .setValues([CABECERAS_CRONOGRAMA_NORMALIZADO]);
+
   const hojaOrigen = obtenerHojaCronogramaExterna_();
   const datos = leerDatosCronogramaExterno_(hojaOrigen);
   const filas = construirFilasCronogramaNormalizado_(datos);
 
-  hojaDestino.clear();
-  hojaDestino.getRange(1, 1, 1, CABECERAS_CRONOGRAMA_NORMALIZADO.length)
-    .setValues([CABECERAS_CRONOGRAMA_NORMALIZADO]);
-
-  if (filas.length) {
-    hojaDestino.getRange(2, 1, filas.length, CABECERAS_CRONOGRAMA_NORMALIZADO.length)
-      .setValues(filas);
-  }
+  limpiarYEscribirBloqueEnHoja_(hojaDestino, CABECERAS_CRONOGRAMA_NORMALIZADO, filas);
 
   hojaDestino.setFrozenRows(1);
   hojaDestino.getRange(1, 1, 1, CABECERAS_CRONOGRAMA_NORMALIZADO.length)
     .setBackground("#153244")
     .setFontColor("#ffffff")
     .setFontWeight("bold");
-  hojaDestino.autoResizeColumns(1, CABECERAS_CRONOGRAMA_NORMALIZADO.length);
 
   SpreadsheetApp.getUi().alert(
     "Cronograma importado. Filas generadas: " + filas.length
@@ -813,24 +1095,54 @@ function diagnosticarImportacionCronograma() {
     "Diagnostico del parser del cronograma para identificar filas detectadas como estaciones, encabezados y entradas."
   );
 
-  hojaDestino.clear();
-  hojaDestino.getRange(1, 1, 1, CABECERAS_DIAGNOSTICO_CRONOGRAMA.length)
-    .setValues([CABECERAS_DIAGNOSTICO_CRONOGRAMA]);
-
-  if (diagnostico.length) {
-    hojaDestino.getRange(2, 1, diagnostico.length, CABECERAS_DIAGNOSTICO_CRONOGRAMA.length)
-      .setValues(diagnostico);
-  }
+  limpiarYEscribirBloqueEnHoja_(hojaDestino, CABECERAS_DIAGNOSTICO_CRONOGRAMA, diagnostico);
 
   hojaDestino.setFrozenRows(1);
   hojaDestino.getRange(1, 1, 1, CABECERAS_DIAGNOSTICO_CRONOGRAMA.length)
     .setBackground("#153244")
     .setFontColor("#ffffff")
     .setFontWeight("bold");
-  hojaDestino.autoResizeColumns(1, CABECERAS_DIAGNOSTICO_CRONOGRAMA.length);
-
   SpreadsheetApp.getUi().alert(
     "Diagnostico generado. Filas analizadas: " + diagnostico.length
+  );
+}
+
+function auditarCodigosCruceCronograma() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hojaCronograma = ss.getSheetByName("CRONOGRAMA_NORMALIZADO");
+
+  if (!hojaCronograma) {
+    throw new Error("No existe la solapa CRONOGRAMA_NORMALIZADO.");
+  }
+
+  const cronograma = leerCronogramaNormalizado_(hojaCronograma).filter(function(item) {
+    return !item.excluidaCruce;
+  });
+  const talleres = leerRegistrosTalleresControl_(ss).filter(function(item) {
+    return !item.excluidaCruce;
+  });
+  const hojaDestino = asegurarSolapaEstructural_(
+    ss,
+    "AUDITORIA_CODIGOS_CRUCE",
+    CABECERAS_AUDITORIA_CODIGOS_CRUCE,
+    "Verificacion del codigo final de cruce: compara cada clase programada contra los codigos detectados en TALLERES."
+  );
+  const filas = construirFilasAuditoriaCodigosCruce_(cronograma, talleres);
+
+  limpiarYEscribirBloqueEnHoja_(hojaDestino, CABECERAS_AUDITORIA_CODIGOS_CRUCE, filas);
+
+  hojaDestino.setFrozenRows(1);
+  hojaDestino.getRange(1, 1, 1, CABECERAS_AUDITORIA_CODIGOS_CRUCE.length)
+    .setBackground("#153244")
+    .setFontColor("#ffffff")
+    .setFontWeight("bold");
+  const coincidencias = filas.filter(function(fila) {
+    return fila[7] === "COINCIDE";
+  }).length;
+
+  SpreadsheetApp.getUi().alert(
+    "Auditoria generada. Codigos programados: " + filas.length +
+    " | Coinciden con TALLERES: " + coincidencias
   );
 }
 
@@ -893,21 +1205,13 @@ function generarControlCumplimiento() {
   const talleres = leerRegistrosTalleresControl_(ss);
   const filas = construirFilasControlCumplimiento_(talleres, cronograma);
 
-  hojaDestino.clear();
-  hojaDestino.getRange(1, 1, 1, CABECERAS_CONTROL_CUMPLIMIENTO.length)
-    .setValues([CABECERAS_CONTROL_CUMPLIMIENTO]);
-
-  if (filas.length) {
-    hojaDestino.getRange(2, 1, filas.length, CABECERAS_CONTROL_CUMPLIMIENTO.length)
-      .setValues(filas);
-  }
+  limpiarYEscribirBloqueEnHoja_(hojaDestino, CABECERAS_CONTROL_CUMPLIMIENTO, filas);
 
   hojaDestino.setFrozenRows(1);
   hojaDestino.getRange(1, 1, 1, CABECERAS_CONTROL_CUMPLIMIENTO.length)
     .setBackground("#153244")
     .setFontColor("#ffffff")
     .setFontWeight("bold");
-  hojaDestino.autoResizeColumns(1, CABECERAS_CONTROL_CUMPLIMIENTO.length);
 
   SpreadsheetApp.getUi().alert(
     "Control generado. Filas cargadas: " + filas.length
@@ -926,26 +1230,24 @@ function leerCronogramaNormalizado_(hoja) {
 
   return datos.map(function(fila) {
     const estacionProgramada = limpiarTexto_(fila[0]);
-    const actividadMeta = obtenerMetadatosActividad_(fila[4]);
-    const profesorCanonico = obtenerProfesorCanonico_(fila[5]);
     return {
       estacionProgramada: estacionProgramada,
       diaSemanaProgramado: limpiarTexto_(fila[1]).toUpperCase(),
       horaInicioProgramada: limpiarTexto_(fila[2]),
       horaFinProgramada: limpiarTexto_(fila[3]),
-      actividadProgramada: actividadMeta.nombreCanonico || limpiarTexto_(fila[4]),
-      profesorProgramado: profesorCanonico || limpiarTexto_(fila[5]),
+      actividadProgramada: limpiarTexto_(fila[4]),
+      profesorProgramado: limpiarTexto_(fila[5]),
       claveEstacion: limpiarTexto_(fila[9]),
-      claveEstacionCanonica: obtenerClaveEstacionCanonica_(estacionProgramada),
+      claveEstacionCanonica: limpiarTexto_(fila[9]) || obtenerClaveEstacionCanonica_(estacionProgramada),
       claveActividad: limpiarTexto_(fila[10]),
-      claveProfesor: limpiarTexto_(fila[11]) || obtenerClaveProfesorCanonica_(fila[5]),
+      claveProfesor: limpiarTexto_(fila[11]),
       fechaProgramada: normalizarFechaCarga_(fila[12]),
-      categoriaActividad: limpiarTexto_(fila[13]) || actividadMeta.categoria || "",
-      excluidaCruce: limpiarTexto_(fila[14]) === "SI" || actividadMeta.excluida,
+      categoriaActividad: limpiarTexto_(fila[13]),
+      excluidaCruce: limpiarTexto_(fila[14]) === "SI",
       codigoCruce: limpiarTexto_(fila[15])
     };
   }).filter(function(item) {
-    return item.estacionProgramada && item.diaSemanaProgramado && item.actividadProgramada && item.fechaProgramada;
+    return item.estacionProgramada && item.actividadProgramada && item.fechaProgramada;
   });
 }
 
@@ -978,32 +1280,39 @@ function leerRegistrosTalleresDesdeHoja_(hoja) {
     return [];
   }
 
-  const datos = hoja.getRange(2, 1, ultimaFila - 1, 6).getValues();
+  const ancho = Math.min(Math.max(7, 6), ultimaColumna);
+  const datos = hoja.getRange(2, 1, ultimaFila - 1, ancho).getValues();
 
   return datos.map(function(fila) {
     const fecha = normalizarFechaTalleresControl_(fila[1]);
     const diaSemana = obtenerDiaSemanaDesdeFechaTexto_(fecha);
     const estacion = limpiarTexto_(fila[2]);
-    const profesor = obtenerProfesorCanonico_(fila[3]);
-    const actividadMeta = obtenerMetadatosActividad_(fila[4]);
+    const profesor = limpiarTexto_(fila[3]);
+    const actividadVisible = limpiarTexto_(fila[4]);
     const sector = limpiarTexto_(fila[5]);
-    const claveEstacionCanonica = obtenerClaveEstacionCanonica_(estacion);
-    const claveActividad = normalizarTexto_(actividadMeta.nombreCanonico || fila[4]).toUpperCase();
+    const codigoHoja = limpiarTexto_(fila[6]);
+    const actividadTextoExclusion = limpiarTexto_(fila[4]);
+    const actividadNormalizada = normalizarTexto_(actividadTextoExclusion).toUpperCase();
+    const sectorNormalizado = normalizarTexto_(sector).toUpperCase();
+    const excluidaCruce = PATRONES_EXCLUSION_CRONOGRAMA.some(function(patron) {
+      const patronNormalizado = normalizarTexto_(patron).toUpperCase();
+      return actividadNormalizada.indexOf(patronNormalizado) !== -1 || sectorNormalizado.indexOf(patronNormalizado) !== -1;
+    });
 
     return {
       fechaReal: fecha,
       diaSemanaReal: diaSemana,
       estacionReal: estacion,
-      actividadReal: actividadMeta.nombreCanonico || limpiarTexto_(fila[4]),
+      actividadReal: actividadVisible,
       profesorReal: profesor,
       sectorDeCarga: sector,
-      claveEstacion: normalizarTexto_(estacion).toUpperCase(),
-      claveEstacionCanonica: claveEstacionCanonica,
-      claveActividad: claveActividad,
-      claveProfesor: obtenerClaveProfesorCanonica_(profesor),
-      categoriaActividad: actividadMeta.categoria || "",
-      excluidaCruce: !!actividadMeta.excluida,
-      codigoCruce: construirCodigoCruce_(fecha, claveEstacionCanonica || normalizarTexto_(estacion).toUpperCase(), claveActividad)
+      claveEstacion: "",
+      claveEstacionCanonica: "",
+      claveActividad: "",
+      claveProfesor: normalizarTexto_(profesor).toUpperCase(),
+      categoriaActividad: "",
+      excluidaCruce: excluidaCruce,
+      codigoCruce: codigoHoja || construirCodigoComparacionVisible_(fecha, estacion, actividadVisible)
     };
   }).filter(function(item) {
     return item.fechaReal && item.diaSemanaReal && item.estacionReal && item.actividadReal;
@@ -1049,95 +1358,137 @@ function construirFilasControlCumplimiento_(talleres, cronograma) {
   const programados = (Array.isArray(cronograma) ? cronograma : []).filter(function(item) {
     return !item.excluidaCruce;
   });
-  const indiceCronograma = {};
+  const indiceTalleres = {};
   const filas = [];
 
-  programados.forEach(function(item, indice) {
-    item._idCumplimiento = "P" + indice;
-    item._cumplido = false;
-    const clave = item.codigoCruce || construirCodigoCruce_(
-      item.fechaProgramada,
-      item.claveEstacionCanonica || item.claveEstacion,
-      item.claveActividad
-    );
-
-    if (!indiceCronograma[clave]) {
-      indiceCronograma[clave] = [];
-    }
-    indiceCronograma[clave].push(item);
-  });
-
   reales.forEach(function(item) {
-    const claveReal = item.codigoCruce || construirCodigoCruce_(
+    const codigoVisible = item.codigoCruce || construirCodigoComparacionVisible_(
       item.fechaReal,
-      item.claveEstacionCanonica || item.claveEstacion,
-      item.claveActividad
+      item.estacionReal,
+      item.actividadReal
     );
-    const programado = buscarMejorCoincidenciaCronograma_(indiceCronograma, claveReal);
-    const claveProgramada = programado
-      ? (programado.codigoCruce || construirCodigoCruce_(programado.fechaProgramada, programado.claveEstacionCanonica || programado.claveEstacion, programado.claveActividad))
-      : "";
+    const clave = obtenerClaveCodigoComparacion_(codigoVisible, item.fechaReal, item.estacionReal, item.actividadReal);
+    if (!clave) return;
 
-    if (programado) {
-      programado._cumplido = true;
+    if (!indiceTalleres[clave]) {
+      indiceTalleres[clave] = [];
+    }
+    indiceTalleres[clave].push(item);
+  });
+
+  const gruposProgramados = {};
+  programados.forEach(function(programado) {
+    const codigoVisible = programado.codigoCruce || construirCodigoComparacionVisible_(
+      programado.fechaProgramada,
+      programado.estacionProgramada,
+      programado.actividadProgramada
+    );
+    const clave = obtenerClaveCodigoComparacion_(
+      codigoVisible,
+      programado.fechaProgramada,
+      programado.estacionProgramada,
+      programado.actividadProgramada
+    );
+    if (!clave) return;
+    if (!gruposProgramados[clave]) {
+      gruposProgramados[clave] = [];
+    }
+    gruposProgramados[clave].push(programado);
+  });
+
+  Object.keys(gruposProgramados).forEach(function(claveProgramada) {
+    const grupo = gruposProgramados[claveProgramada];
+    const programado = grupo[0];
+    const codigoVisibleProgramado = programado.codigoCruce || construirCodigoComparacionVisible_(
+      programado.fechaProgramada,
+      programado.estacionProgramada,
+      programado.actividadProgramada
+    );
+    const coincidencias = indiceTalleres[claveProgramada] || [];
+    const real = coincidencias.length ? coincidencias[0] : null;
+    const repeticiones = grupo.length;
+    let detalle = construirDetalleCumplimiento_(real, programado);
+    if (repeticiones > 1) {
+      detalle += " Programaciones repetidas unificadas: " + repeticiones + ".";
     }
 
     filas.push([
-      item.fechaReal,
-      item.diaSemanaReal,
-      item.estacionReal,
-      item.actividadReal,
-      item.profesorReal,
-      item.sectorDeCarga,
-      programado ? programado.estacionProgramada : "",
-      programado ? programado.diaSemanaProgramado : "",
-      programado ? programado.horaInicioProgramada : "",
-      programado ? programado.horaFinProgramada : "",
-      programado ? programado.actividadProgramada : "",
-      programado ? programado.profesorProgramado : "",
-      programado ? "PROGRAMADO_Y_REALIZADO" : "CARGADO_FUERA_DE_CRONOGRAMA",
-      construirDetalleCumplimiento_(item, programado),
-      claveProgramada || claveReal,
-      item.categoriaActividad || "",
-      item.excluidaCruce ? "SI" : "NO",
-      claveReal,
-      claveProgramada
-    ]);
-  });
-
-  programados.forEach(function(programado) {
-    if (programado._cumplido) return;
-
-    const clave = programado.codigoCruce || construirCodigoCruce_(
-      programado.fechaProgramada,
-      programado.claveEstacionCanonica || programado.claveEstacion,
-      programado.claveActividad
-    );
-
-    filas.push([
+      real ? real.fechaReal : programado.fechaProgramada,
+      real ? real.diaSemanaReal : programado.diaSemanaProgramado,
+      real ? real.estacionReal : "",
+      real ? real.actividadReal : "",
       "",
-      "",
-      "",
-      "",
-      "",
-      "",
+      real ? real.sectorDeCarga : "",
       programado.estacionProgramada,
       programado.diaSemanaProgramado,
       programado.horaInicioProgramada,
       programado.horaFinProgramada,
       programado.actividadProgramada,
-      programado.profesorProgramado,
-      "PROGRAMADO_NO_CARGADO",
-      "No se encontraron registros en TALLERES para esta fecha, estacion y actividad.",
-      clave,
       "",
+      real ? "PROGRAMADO_Y_REALIZADO" : "PROGRAMADO_NO_CARGADO",
+      detalle,
+      codigoVisibleProgramado,
+      real ? (real.categoriaActividad || "") : "",
       "NO",
-      "",
-      clave
+      real ? (real.codigoCruce || codigoVisibleProgramado) : "",
+      codigoVisibleProgramado
     ]);
   });
 
   return filas;
+}
+
+function construirFilasAuditoriaCodigosCruce_(cronograma, talleres) {
+  const indiceTalleres = {};
+
+  (Array.isArray(talleres) ? talleres : []).forEach(function(item) {
+    const codigo = item.codigoCruce || construirCodigoComparacionVisible_(
+      item.fechaReal,
+      item.estacionReal || (item.claveEstacionCanonica || item.claveEstacion),
+      item.actividadReal || item.claveActividad
+    );
+    const clave = obtenerClaveCodigoComparacion_(codigo, item.fechaReal, item.estacionReal, item.actividadReal);
+    if (!clave) return;
+
+    if (!indiceTalleres[clave]) {
+      indiceTalleres[clave] = {
+        cantidad: 0,
+        muestraEstacion: item.estacionReal || "",
+        muestraActividad: item.actividadReal || ""
+      };
+    }
+
+    indiceTalleres[clave].cantidad++;
+  });
+
+  return (Array.isArray(cronograma) ? cronograma : []).map(function(item) {
+    const codigo = item.codigoCruce || construirCodigoComparacionVisible_(
+      item.fechaProgramada,
+      item.estacionProgramada || (item.claveEstacionCanonica || item.claveEstacion),
+      item.actividadProgramada || item.claveActividad
+    );
+    const clave = obtenerClaveCodigoComparacion_(codigo, item.fechaProgramada, item.estacionProgramada, item.actividadProgramada);
+    const coincidencia = indiceTalleres[clave] || null;
+
+    return [
+      item.fechaProgramada || "",
+      item.estacionProgramada || "",
+      item.actividadProgramada || "",
+      item.claveEstacionCanonica || item.claveEstacion || "",
+      item.claveActividad || "",
+      codigo,
+      coincidencia ? coincidencia.cantidad : 0,
+      coincidencia ? "COINCIDE" : "NO COINCIDE",
+      coincidencia ? coincidencia.muestraEstacion : "",
+      coincidencia ? coincidencia.muestraActividad : ""
+    ];
+  });
+}
+
+function obtenerClaveCodigoComparacion_(codigo, fecha, estacion, actividad) {
+  const codigoBase = limpiarTexto_(codigo || construirCodigoComparacionVisible_(fecha, estacion, actividad));
+  if (!codigoBase) return "";
+  return normalizarTexto_(codigoBase).replace(/\s+/g, "");
 }
 
 function buscarMejorCoincidenciaCronograma_(indiceCronograma, clave) {
@@ -1169,8 +1520,8 @@ function construirDetalleCumplimiento_(real, programado) {
     return "La actividad cargada no encontro coincidencia en el cronograma por fecha, estacion y actividad.";
   }
 
-  if (real.claveProfesor && programado.claveProfesor && real.claveProfesor !== programado.claveProfesor) {
-    return "Cumple cronograma por fecha, estacion y actividad. Profesor distinto al programado.";
+  if (!real) {
+    return "No se encontraron registros en TALLERES para esta fecha, estacion y actividad.";
   }
 
   return "Cumple cronograma por fecha, estacion y actividad.";
@@ -1213,28 +1564,30 @@ function construirFilasCronogramaNormalizado_(datos) {
       let entradas = extraerEntradasCronogramaDeCelda_(contenido, horaFallback);
       entradas.forEach(function(entrada) {
         let actividadMeta = obtenerMetadatosActividad_(entrada.actividad || contenido);
-        let profesorCanonico = obtenerProfesorCanonico_(entrada.profesor || "");
-        let claves = construirClavesCronograma_(estacionActual, actividadMeta.nombreCanonico || entrada.actividad || contenido, profesorCanonico);
+        let actividadVisible = limpiarTexto_(actividadMeta.nombreCanonico || "");
+        if (!actividadVisible) return;
+        let estacionVisible = obtenerNombreEstacionCanonicoSeguimiento_(estacionActual) || limpiarTexto_(estacionActual);
+        let claves = construirClavesCronograma_(estacionVisible, actividadVisible, "");
         let fechasProgramadas = fechasPorDia[mapeoDias[columna]] || [];
 
         fechasProgramadas.forEach(function(fechaProgramada) {
           resultado.push([
-            estacionActual,
+            estacionVisible,
             mapeoDias[columna],
             entrada.horaInicio || "",
             entrada.horaFin || "",
-            actividadMeta.nombreCanonico || entrada.actividad || contenido,
-            profesorCanonico || "",
+            actividadVisible,
+            limpiarTexto_(entrada.profesor || ""),
             entrada.tipo || "",
             FUENTE_CRONOGRAMA.nombreReferencia,
             entrada.observaciones || "",
             claves.estacion,
             claves.actividad,
-            claves.profesor,
+            "",
             fechaProgramada,
             actividadMeta.categoria || "",
             actividadMeta.excluida ? "SI" : "NO",
-            construirCodigoCruce_(fechaProgramada, claves.estacion, claves.actividad)
+            construirCodigoComparacionVisible_(fechaProgramada, estacionVisible, actividadVisible)
           ]);
         });
       });
@@ -1569,16 +1922,17 @@ function parsearDetalleCronograma_(texto) {
 }
 
 function construirClavesCronograma_(estacion, actividad, profesor) {
+  const claveEstacion = obtenerClaveEstacionCanonica_(estacion) || normalizarTexto_(estacion).toUpperCase();
   return {
-    estacion: normalizarTexto_(estacion).toUpperCase(),
+    estacion: claveEstacion,
     actividad: normalizarTexto_(actividad).toUpperCase(),
     profesor: normalizarTexto_(profesor).toUpperCase()
   };
 }
 
 function obtenerClaveEstacionCanonica_(estacion) {
-  const variantes = obtenerVariantesClaveEstacion_(estacion);
-  return variantes.length ? variantes[0] : "";
+  const nombreCanonico = obtenerNombreEstacionVisible_(estacion);
+  return nombreCanonico ? normalizarTexto_(nombreCanonico).toUpperCase() : "";
 }
 
 function obtenerVariantesClaveEstacion_(estacion, claveCanonica) {
@@ -1634,6 +1988,10 @@ function obtenerEquivalenciasManualesEstacion_(estacion) {
 }
 
 function combinarEquivalenciasEstaciones_() {
+  if (cacheEquivalenciasEstacionesCombinadas_) {
+    return cacheEquivalenciasEstacionesCombinadas_;
+  }
+
   const combinadas = {};
 
   function agregar(canonica, alias) {
@@ -1657,7 +2015,7 @@ function combinarEquivalenciasEstaciones_() {
     });
   });
 
-  ESTACIONES_SALUDABLES_OFICIALES.forEach(function(canonica) {
+  ESTACIONES_SALUDABLES_VISIBLES.forEach(function(canonica) {
     agregar(canonica, canonica);
 
     const base = limpiarTexto_(canonica)
@@ -1668,7 +2026,7 @@ function combinarEquivalenciasEstaciones_() {
     agregar(canonica, base);
     agregar(canonica, simplificarNombreEstacionParaCruce_(base));
 
-    (ALIAS_ESTACIONES_SALUDABLES[canonica] || []).forEach(function(alias) {
+    (ALIAS_ESTACIONES_SALUDABLES_VISIBLES[canonica] || []).forEach(function(alias) {
       agregar(canonica, alias);
       agregar(canonica, simplificarNombreEstacionParaCruce_(alias));
     });
@@ -1682,6 +2040,7 @@ function combinarEquivalenciasEstaciones_() {
     });
   });
 
+  cacheEquivalenciasEstacionesCombinadas_ = combinadas;
   return combinadas;
 }
 
@@ -1741,8 +2100,13 @@ function obtenerCatalogoActividades_() {
     return cacheCatalogoActividades_;
   }
 
-  const actividades = ACTIVIDADES_CATALOGO_TEXTO.split(/\r?\n/).map(limpiarTexto_).filter(Boolean);
-  const categorias = ACTIVIDADES_CATEGORIAS_TEXTO.split(/\r?\n/).map(limpiarTexto_).filter(Boolean);
+  const actividadesDesdeHoja = obtenerCatalogoActividadesLista_();
+  const actividades = actividadesDesdeHoja.length
+    ? actividadesDesdeHoja.map(function(item) { return item.nombre; })
+    : ACTIVIDADES_CATALOGO_TEXTO.split(/\r?\n/).map(limpiarTexto_).filter(Boolean);
+  const categorias = actividadesDesdeHoja.length
+    ? actividadesDesdeHoja.map(function(item) { return item.categoria; })
+    : ACTIVIDADES_CATEGORIAS_TEXTO.split(/\r?\n/).map(limpiarTexto_).filter(Boolean);
   const mapa = {};
 
   actividades.forEach(function(nombre, indice) {
@@ -1757,6 +2121,67 @@ function obtenerCatalogoActividades_() {
   return mapa;
 }
 
+function obtenerCatalogoActividadesLista_() {
+  if (cacheCatalogoActividadesLista_) {
+    return cacheCatalogoActividadesLista_;
+  }
+
+  const actividadesDesdeHoja = obtenerCatalogoActividadesDesdeHoja_();
+  const base = actividadesDesdeHoja.length
+    ? actividadesDesdeHoja
+    : ACTIVIDADES_CATALOGO_TEXTO.split(/\r?\n/).map(function(nombre, indice) {
+        return {
+          nombre: limpiarTexto_(nombre),
+          categoria: limpiarTexto_((ACTIVIDADES_CATEGORIAS_TEXTO.split(/\r?\n/)[indice]) || "")
+        };
+      }).filter(function(item) {
+        return item.nombre;
+      });
+
+  cacheCatalogoActividadesLista_ = base.map(function(item) {
+    const nombre = limpiarTexto_(item.nombre);
+    const normalizada = normalizarTexto_(nombre);
+    const compacta = normalizada.replace(/[^a-z0-9]/g, "");
+    const tokens = normalizada.split(/[^a-z0-9]+/).filter(Boolean);
+    return {
+      nombre: nombre,
+      categoria: limpiarTexto_(item.categoria || ""),
+      normalizada: normalizada,
+      compacta: compacta,
+      tokens: tokens
+    };
+  }).filter(function(item) {
+    return item.nombre;
+  });
+
+  return cacheCatalogoActividadesLista_;
+}
+
+function obtenerCatalogoActividadesDesdeHoja_() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const hoja = ss.getSheetByName("CATALOGO_ACTIVIDADES");
+    if (!hoja || hoja.getLastRow() < 2) {
+      return [];
+    }
+
+    const ultimaFila = hoja.getLastRow();
+    const ultimaColumna = Math.max(1, hoja.getLastColumn());
+    const datos = hoja.getRange(2, 1, ultimaFila - 1, Math.min(2, ultimaColumna)).getDisplayValues();
+
+    return datos.map(function(fila) {
+      return {
+        nombre: limpiarTexto_(fila[0]),
+        categoria: limpiarTexto_(fila[1] || "")
+      };
+    }).filter(function(item) {
+      return item.nombre;
+    });
+  } catch (error) {
+    return [];
+  }
+}
+
 function normalizarNombreActividadBase_(actividad) {
   return limpiarTexto_(actividad || "")
     .replace(/\s+\d+$/, "")
@@ -1764,29 +2189,161 @@ function normalizarNombreActividadBase_(actividad) {
     .trim();
 }
 
-function obtenerMetadatosActividad_(actividad) {
-  const original = limpiarTexto_(actividad || "");
-  const catalogo = obtenerCatalogoActividades_();
-  const candidatos = [
-    original,
-    normalizarNombreActividadBase_(original)
-  ];
+function obtenerRosetaActividades_() {
+  if (cacheRosetaActividades_) {
+    return cacheRosetaActividades_;
+  }
 
-  for (let i = 0; i < candidatos.length; i++) {
-    const clave = normalizarTexto_(candidatos[i]);
-    if (catalogo[clave]) {
-      return {
-        nombreCanonico: catalogo[clave].nombre,
-        categoria: catalogo[clave].categoria || "",
-        excluida: esActividadExcluidaDeCronograma_(catalogo[clave].nombre, catalogo[clave].categoria || "")
-      };
+  const mapa = {};
+
+  function registrar(clave, valor) {
+    const claveNormalizada = normalizarTexto_(clave);
+    const valorLimpio = limpiarTexto_(valor);
+    if (!claveNormalizada || !valorLimpio) return;
+    mapa[claveNormalizada] = valorLimpio;
+  }
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const hoja = ss.getSheetByName("ROSETA_ACTIVIDADES_CRONOGRAMA");
+    if (!hoja || hoja.getLastRow() < 2) {
+      cacheRosetaActividades_ = mapa;
+      return mapa;
+    }
+
+    const ultimaFila = hoja.getLastRow();
+    const ultimaColumna = Math.min(7, hoja.getLastColumn());
+    const filas = hoja.getRange(2, 1, ultimaFila - 1, ultimaColumna).getDisplayValues();
+
+    filas.forEach(function(fila) {
+      const origen = limpiarTexto_(fila[0]);
+      const limpia = limpiarTexto_(fila[1]);
+      const sugerida = limpiarTexto_(fila[2]);
+      const canonica = limpiarTexto_(fila[4]);
+      const activo = normalizarTexto_(fila[5]).toUpperCase() === "SI";
+      const destino = canonica || sugerida;
+
+      if (!activo || !destino) return;
+
+      registrar(origen, destino);
+      registrar(limpia, destino);
+      registrar(sugerida, destino);
+    });
+  } catch (error) {}
+
+  cacheRosetaActividades_ = mapa;
+  return mapa;
+}
+
+function limpiarTextoActividadCronograma_(actividad) {
+  return limpiarTexto_(actividad || "")
+    .replace(/https?:\/\/\S+/gi, " ")
+    .replace(/\b(?:LUNES|MARTES|MIERCOLES|JUEVES|VIERNES|SABADO|DOMINGO)\b\s*[-:]?/gi, " ")
+    .replace(/\b\d{1,2}[.:]\d{2}\s*(?:A|-)?\s*\d{1,2}[.:]\d{2}\b/gi, " ")
+    .replace(/\bT\.\s*de\b/gi, "Taller de")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function esTextoInvalidoComoActividad_(actividad) {
+  const limpio = limpiarTexto_(actividad || "");
+  const normalizada = normalizarTexto_(limpio).toUpperCase();
+  if (!limpio) return true;
+  if (normalizada.length < 3) return true;
+
+  if (/^(LUNES|MARTES|MIERCOLES|JUEVES|VIERNES|SABADO|DOMINGO)$/.test(normalizada)) {
+    return true;
+  }
+
+  if (/^(LUNES|MARTES|MIERCOLES|JUEVES|VIERNES|SABADO|DOMINGO)\b/.test(normalizada)) {
+    return true;
+  }
+
+  if (/(MAPS\.APP|HTTPS?:\/\/|BAUNESS|NEUQUEN|MOLDES|LACROZE|JURAMENTO|LISANDRO|ASTRADA|FLORESTA)/i.test(limpio)) {
+    return true;
+  }
+
+  return false;
+}
+
+function resolverActividadCanonicaDesdeCatalogo_(actividad) {
+  const limpio = limpiarTextoActividadCronograma_(actividad);
+  if (esTextoInvalidoComoActividad_(limpio)) {
+    return null;
+  }
+
+  const roseta = obtenerRosetaActividades_();
+  const claveRoseta = normalizarTexto_(limpio);
+  if (roseta[claveRoseta]) {
+    return roseta[claveRoseta];
+  }
+
+  const catalogo = obtenerCatalogoActividadesLista_();
+  const normalizada = normalizarTexto_(limpio);
+  const compacta = normalizada.replace(/[^a-z0-9]/g, "");
+  const tokens = normalizada.split(/[^a-z0-9]+/).filter(Boolean);
+
+  for (let i = 0; i < catalogo.length; i++) {
+    if (catalogo[i].normalizada === normalizada || catalogo[i].compacta === compacta) {
+      return catalogo[i].nombre;
     }
   }
 
+  let mejor = null;
+  let mejorPuntaje = 0;
+
+  catalogo.forEach(function(item) {
+    let interseccion = 0;
+    tokens.forEach(function(token) {
+      if (item.tokens.indexOf(token) !== -1) {
+        interseccion++;
+      }
+    });
+
+    let puntaje = interseccion;
+    if (tokens.length && interseccion === tokens.length) puntaje += 5;
+    if (compacta && item.compacta.indexOf(compacta) !== -1) puntaje += 3;
+    if (compacta && compacta.indexOf(item.compacta) !== -1) puntaje += 2;
+
+    if (puntaje > mejorPuntaje) {
+      mejorPuntaje = puntaje;
+      mejor = item;
+    }
+  });
+
+  if (mejor && mejorPuntaje >= 3) {
+    return mejor.nombre;
+  }
+
+  return limpio;
+}
+
+function obtenerMetadatosActividad_(actividad) {
+  const original = limpiarTexto_(actividad || "");
+  const catalogo = obtenerCatalogoActividades_();
+  const canonica = resolverActividadCanonicaDesdeCatalogo_(original);
+  const clave = normalizarTexto_(canonica || "");
+
+  if (!canonica) {
+    return {
+      nombreCanonico: "",
+      categoria: "",
+      excluida: true
+    };
+  }
+
+  if (catalogo[clave]) {
+    return {
+      nombreCanonico: catalogo[clave].nombre,
+      categoria: catalogo[clave].categoria || "",
+      excluida: esActividadExcluidaDeCronograma_(catalogo[clave].nombre, catalogo[clave].categoria || "")
+    };
+  }
+
   return {
-    nombreCanonico: original || normalizarNombreActividadBase_(original),
+    nombreCanonico: canonica,
     categoria: "",
-    excluida: esActividadExcluidaDeCronograma_(original, "")
+    excluida: esActividadExcluidaDeCronograma_(canonica, "")
   };
 }
 
@@ -1880,25 +2437,11 @@ function obtenerClaveProfesorCanonica_(profesor) {
 }
 
 function obtenerAnioCronogramaObjetivo_() {
-  const anioConfigurado = Number(FUENTE_CRONOGRAMA.anioObjetivo || 0);
-  if (anioConfigurado >= 2000 && anioConfigurado <= 2100) {
-    return anioConfigurado;
-  }
-
-  const fuenteTalleres = FUENTES_ESPECIALES_EXTERNAS["TALLERES"];
-  const candidato = fuenteTalleres ? Number(String(fuenteTalleres.sheetName || "").trim()) : 0;
-  if (candidato >= 2000 && candidato <= 2100) {
-    return candidato;
-  }
-  return new Date().getFullYear();
+  return Number(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy"));
 }
 
 function obtenerMesCronogramaObjetivo_() {
-  const mesConfigurado = Number(FUENTE_CRONOGRAMA.mesObjetivo || 0);
-  if (mesConfigurado >= 1 && mesConfigurado <= 12) {
-    return mesConfigurado;
-  }
-  return 3;
+  return Number(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "M"));
 }
 
 function construirFechasProgramadasPorDia_(anio, mes) {
@@ -1941,11 +2484,103 @@ function construirCodigoCruce_(fecha, claveEstacion, claveActividad) {
   ].join(" | ");
 }
 
-function obtenerDatos(){
+function construirCodigoComparacionVisible_(fecha, estacion, actividad) {
+  const serial = convertirFechaTextoASerialHoja_(fecha);
+  if (!serial) return "";
+  return serial + limpiarTexto_(estacion || "") + limpiarTexto_(actividad || "");
+}
+
+function convertirFechaTextoASerialHoja_(fechaTexto) {
+  const fechaNormalizada = normalizarFechaCarga_(fechaTexto);
+  const partes = String(fechaNormalizada).split("/");
+  if (partes.length !== 3) return "";
+
+  const dia = Number(partes[0]);
+  const mes = Number(partes[1]) - 1;
+  const anio = Number(partes[2]);
+  if (!dia || mes < 0 || !anio) return "";
+
+  const baseUtc = Date.UTC(1899, 11, 30);
+  const fechaUtc = Date.UTC(anio, mes, dia);
+  return String(Math.round((fechaUtc - baseUtc) / 86400000));
+}
+
+function convertirSerialHojaAFechaTexto_(serialTexto) {
+  const serial = Number(String(serialTexto || "").trim());
+  if (!serial || isNaN(serial)) return "";
+
+  const baseUtc = Date.UTC(1899, 11, 30);
+  const fechaUtc = new Date(baseUtc + Math.round(serial) * 86400000);
+  return Utilities.formatDate(fechaUtc, Session.getScriptTimeZone(), "dd/MM/yyyy");
+}
+
+function extraerFechaTextoDesdeCodigoComparacion_(codigo) {
+  const limpio = limpiarTexto_(codigo || "");
+  if (!limpio) return "";
+
+  const match = limpio.match(/^(\d{5,})/);
+  if (!match) return "";
+
+  return convertirSerialHojaAFechaTexto_(match[1]);
+}
+
+function iniciarSesionConCorreo(emailIngresado) {
+  const email = String(emailIngresado || "").trim().toLowerCase();
+  console.log("[LOGIN] Intentando ingresar con: " + email);
+
+  if (!email) {
+    return {
+      ok: false,
+      email: "",
+      perfil: "sin_acceso",
+      mensaje: "Ingresa tu correo para continuar."
+    };
+  }
+
+  const perfil = resolverPerfilUsuario_(email);
+  console.log("[LOGIN] Resultado para " + email + ": " + perfil);
+
+  if (perfil === "sin_acceso") {
+    return {
+      ok: false,
+      email: email,
+      perfil: "sin_acceso",
+      mensaje: "El correo " + email + " no figura como ACTIVO en la solapa USUARIOS. Revisa que el estado sea 'SI'."
+    };
+  }
+
+  const contextual = obtenerPermisosVista(perfil);
+  return {
+    ok: true,
+    email: email,
+    perfil: perfil,
+    permisos: contextual.puede,
+    colorPerfil: contextual.color,
+    mensaje: "Acceso autorizado. Perfil: " + perfil + "."
+  };
+}
+
+function obtenerDatos(emailSesion){
+  const acceso = iniciarSesionConCorreo(emailSesion);
+  if (!acceso.ok) {
+    throw new Error(acceso.mensaje || "Comunicarse con el administrador.");
+  }
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const hojas = ss.getSheets();
-  const solapasEspeciales = obtenerNombresSolapasEspeciales_();
-  const contextoUsuario = obtenerContextoUsuarioActual_();
+  const contextual = obtenerPermisosVista(acceso.perfil);
+  const contextoUsuario = {
+    email: acceso.email,
+    perfil: acceso.perfil,
+    autenticado: true,
+    puedeCambiarPerfil: false,
+    mensaje: acceso.mensaje,
+    permisos: contextual.puede,
+    colorPerfil: contextual.color
+  };
+
+  const solapasEspecialesRaw = obtenerNombresSolapasEspeciales_();
+  const solapasEspeciales = solapasEspecialesRaw.filter(nombre => debeVerSolapa(acceso.perfil, nombre));
 
   let estaciones = [];
   let totalRegistros = 0;
@@ -1954,9 +2589,12 @@ function obtenerDatos(){
   const ahora = new Date();
 
   hojas.forEach(hoja => {
-    let nombre = hoja.getName();
+    let nombreOriginal = hoja.getName();
 
-    if (SOLAPAS_EXCLUIDAS_SUPERVISION.indexOf(nombre) !== -1 || solapasEspeciales.indexOf(nombre) !== -1) return;
+    // Solo procesamos solapas que tienen el marcador de estación "*"
+    if (nombreOriginal.indexOf("*") === -1) return;
+
+    let nombre = nombreOriginal.replace("*", "").trim();
 
     let comuna = hoja.getRange("D1").getValue() || "";
     let datos = hoja.getRange("B2:C50").getValues();
@@ -2039,6 +2677,7 @@ function obtenerDatos(){
     estacionesPorActualizar: estaciones.length - estacionesActivas,
     totalRegistros: totalRegistros,
     resumenesEspeciales: {},
+    solapasEspeciales: solapasEspeciales,
     usuario: contextoUsuario
   };
 }
@@ -2072,49 +2711,81 @@ function obtenerEmailUsuarioActual_() {
 }
 
 function resolverPerfilUsuario_(email) {
-  const emailNormalizado = String(email || "").trim().toLowerCase();
-  const perfiles = obtenerPerfilesUsuariosConfigurados_();
+  const emailBusqueda = String(email || "").trim().toLowerCase();
+  if (!emailBusqueda) return "sin_acceso";
 
-  if (!emailNormalizado) {
-    return "sin_acceso";
-  }
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const hoja = ss.getSheetByName("USUARIOS");
+    if (!hoja) return "sin_acceso";
 
-  if (perfiles.admin.indexOf(emailNormalizado) !== -1) {
-    return "admin";
-  }
+    const ultimaFila = hoja.getLastRow();
+    if (ultimaFila < 2) return "sin_acceso";
 
-  if (perfiles.coordinacion.indexOf(emailNormalizado) !== -1) {
-    return "coordinacion";
-  }
+    // Búsqueda directa fila por fila para evitar errores de mapeo
+    const datos = hoja.getRange(2, 1, ultimaFila - 1, 3).getDisplayValues();
+    
+    for (let i = 0; i < datos.length; i++) {
+      const emailHoja = String(datos[i][0] || "").trim().toLowerCase();
+      const perfilHoja = String(datos[i][1] || "").trim().toLowerCase();
+      const activoHoja = String(datos[i][2] || "").trim().toUpperCase();
 
-  if (perfiles.operativo.indexOf(emailNormalizado) !== -1) {
-    return "operativo";
+      if (emailHoja === emailBusqueda) {
+        if (activoHoja === "SI" || activoHoja === "SÍ") {
+          // Normalizar nombres de perfil comunes
+          if (perfilHoja === "administrador") return "admin";
+          if (perfilHoja === "coordinación") return "coordinacion";
+          return perfilHoja;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error en resolverPerfilUsuario_: " + e.message);
   }
 
   return "sin_acceso";
 }
 
+function diagnosticarMiAcceso() {
+  const email = Session.getActiveUser().getEmail();
+  const perfil = resolverPerfilUsuario_(email);
+  const ui = SpreadsheetApp.getUi();
+  
+  let msg = "DIAGNÓSTICO DE ACCESO\n\n";
+  msg += "1. Tu email detectado por Google: " + email + "\n";
+  msg += "2. Perfil resuelto por el sistema: " + (perfil === "sin_acceso" ? "NO ENCONTRADO O INACTIVO" : perfil.toUpperCase()) + "\n\n";
+  
+  if (perfil === "sin_acceso") {
+    msg += "RECOMENDACIÓN:\n";
+    msg += "- Verifica que en la solapa 'USUARIOS' el email coincida exactamente con el punto 1.\n";
+    msg += "- Asegúrate de que la columna 'ACTIVO' tenga el valor 'SI'.\n";
+    msg += "- El perfil debe ser: admin, gerencia, coordinacion o operativo.";
+  } else {
+    msg += "¡Todo correcto! Deberías poder ingresar sin problemas.";
+  }
+  
+  ui.alert(msg);
+}
+
 function obtenerPerfilesUsuariosConfigurados_() {
   const base = clonarPerfilesUsuarios_(PERFILES_USUARIOS);
-  const props = PropertiesService.getScriptProperties();
-  const json = String(props.getProperty("USUARIOS_PERFILES_JSON") || "").trim();
-
-  if (!json) {
-    return base;
+  
+  // UNICA FUENTE DE VERDAD: Solapa USUARIOS
+  const desdeUsuarios = obtenerPerfilesUsuariosDesdeHoja_();
+  if (desdeUsuarios) {
+    return mezclarPerfilesUsuarios_(base, desdeUsuarios);
   }
 
-  try {
-    const configuracion = JSON.parse(json);
-    return mezclarPerfilesUsuarios_(base, configuracion);
-  } catch (error) {
-    Logger.log("USUARIOS_PERFILES_JSON invalido: " + error.message);
-    return base;
-  }
+  // Si no hay usuarios en la solapa, devolvemos la base vacía
+  return base;
 }
+
+
 
 function clonarPerfilesUsuarios_(origen) {
   return {
     admin: normalizarListaEmails_(origen && origen.admin),
+    gerencia: normalizarListaEmails_(origen && origen.gerencia),
     coordinacion: normalizarListaEmails_(origen && origen.coordinacion),
     operativo: normalizarListaEmails_(origen && origen.operativo)
   };
@@ -2127,8 +2798,8 @@ function mezclarPerfilesUsuarios_(base, configuracion) {
     return salida;
   }
 
-  if (Array.isArray(configuracion.admin) || Array.isArray(configuracion.coordinacion) || Array.isArray(configuracion.operativo)) {
-    ["admin", "coordinacion", "operativo"].forEach(function(perfil) {
+  if (Array.isArray(configuracion.admin) || Array.isArray(configuracion.gerencia) || Array.isArray(configuracion.coordinacion) || Array.isArray(configuracion.operativo)) {
+    ["admin", "gerencia", "coordinacion", "operativo"].forEach(function(perfil) {
       if (Array.isArray(configuracion[perfil])) {
         salida[perfil] = normalizarListaEmails_(configuracion[perfil]);
       }
@@ -2141,6 +2812,8 @@ function mezclarPerfilesUsuarios_(base, configuracion) {
     const perfil = limpiarTexto_(configuracion[email]);
     if (perfil === "ADMIN") {
       salida.admin.push(String(email || "").trim().toLowerCase());
+    } else if (perfil === "GERENCIA") {
+      salida.gerencia.push(String(email || "").trim().toLowerCase());
     } else if (perfil === "COORDINACION") {
       salida.coordinacion.push(String(email || "").trim().toLowerCase());
     } else if (perfil === "OPERATIVO") {
@@ -2149,11 +2822,57 @@ function mezclarPerfilesUsuarios_(base, configuracion) {
   });
 
   salida.admin = normalizarListaEmails_(salida.admin);
+  salida.gerencia = normalizarListaEmails_(salida.gerencia);
   salida.coordinacion = normalizarListaEmails_(salida.coordinacion);
   salida.operativo = normalizarListaEmails_(salida.operativo);
 
   return salida;
 }
+
+function obtenerPerfilesUsuariosDesdeHoja_() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const hoja = ss.getSheetByName("USUARIOS");
+    if (!hoja) {
+      console.warn("[AUTH] No se encontro la solapa USUARIOS");
+      return null;
+    }
+    
+    if (hoja.getLastRow() < 2) {
+      console.warn("[AUTH] La solapa USUARIOS esta vacia");
+      return null;
+    }
+
+    const datos = hoja.getRange(2, 1, hoja.getLastRow() - 1, 3).getDisplayValues();
+    const perfiles = clonarPerfilesUsuarios_(PERFILES_USUARIOS);
+    let contador = 0;
+
+    datos.forEach(function(fila) {
+      const email = String(fila[0] || "").trim().toLowerCase();
+      const perfil = String(fila[1] || "").trim().toLowerCase();
+      const activo = String(fila[2] || "").trim().toUpperCase();
+
+      if (email && (activo === "SI" || activo === "SÍ")) {
+        if (perfiles.hasOwnProperty(perfil)) {
+          perfiles[perfil].push(email);
+          contador++;
+        } else if (perfil === "administrador") {
+          perfiles.admin.push(email);
+          contador++;
+        }
+      }
+    });
+
+    console.log("[AUTH] Usuarios cargados desde hoja: " + contador);
+    return perfiles;
+  } catch (error) {
+    console.error("[AUTH] Error en obtenerPerfilesUsuariosDesdeHoja_: " + error.message);
+    return null;
+  }
+}
+
+// FUNCION DEPRECADA - Se mantiene el nombre para evitar errores de referencia pero vacia
+function obtenerPerfilesUsuariosDesdeRol_() { return null; }
 
 function normalizarListaEmails_(lista) {
   const salida = [];
@@ -2176,6 +2895,12 @@ function obtenerNombresSolapasEspeciales_() {
   return SOLAPAS_ESPECIALES.slice();
 }
 
+function esSolapaVisibleEnSupervision_(nombreSolapa, solapasEspeciales) {
+  // Con el nuevo sistema de asteriscos, esta función es redundante pero la mantenemos
+  // simplificada para evitar errores de referencia.
+  return nombreSolapa.indexOf("*") !== -1;
+}
+
 function obtenerResumenesEspeciales_(ss, nombresSolapas) {
   let resumenes = {};
 
@@ -2186,7 +2911,17 @@ function obtenerResumenesEspeciales_(ss, nombresSolapas) {
   return resumenes;
 }
 
-function obtenerResumenSolapaEspecial(nombreSolapa, filtros) {
+function obtenerResumenSolapaEspecial(nombreSolapa, filtros, emailSesion) {
+  const acceso = iniciarSesionConCorreo(emailSesion);
+  if (!acceso.ok) {
+    throw new Error(acceso.mensaje || "Comunicarse con el administrador.");
+  }
+
+  // RBAC: Validar permiso de acceso a la solapa específica
+  if (!debeVerSolapa(acceso.perfil, nombreSolapa)) {
+    throw new Error("No tienes permisos para acceder al módulo: " + nombreSolapa);
+  }
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   return obtenerResumenSolapaEspecialDesdeOrigen_(ss, nombreSolapa, filtros);
 }
@@ -2196,14 +2931,47 @@ function obtenerResumenSolapaEspecialDesdeOrigen_(ss, nombreSolapa, filtros) {
     return obtenerResumenCronogramaSeguimiento_(ss, filtros);
   }
 
+  const hoja = ss.getSheetByName(nombreSolapa);
+  if (nombreSolapa === "TALLERES" && hoja && hoja.getLastRow() >= 2 && hoja.getLastColumn() >= 6) {
+    return obtenerResumenTalleresDesdeHojaLocal_(hoja, nombreSolapa, filtros);
+  }
+
   let fuenteExterna = FUENTES_ESPECIALES_EXTERNAS[nombreSolapa];
 
   if (fuenteExterna) {
     return obtenerResumenSolapaEspecialExterna_(fuenteExterna, nombreSolapa, filtros);
   }
 
-  const hoja = ss.getSheetByName(nombreSolapa);
   return obtenerResumenSolapaEspecial_(hoja, nombreSolapa);
+}
+
+function obtenerResumenTalleresDesdeHojaLocal_(hoja, nombreSolapa, filtros) {
+  const ultimaFila = hoja.getLastRow();
+  const ultimaColumna = hoja.getLastColumn();
+
+  if (ultimaFila < 2 || ultimaColumna < 6) {
+    return {
+      nombre: nombreSolapa,
+      disponible: true,
+      tipoResumen: "especial_detallado",
+      mensaje: "La solapa TALLERES todavia no tiene filas validas con FECHA ACTIVIDAD.",
+      ultimaFechaCarga: "",
+      fechas: [],
+      meses: [],
+      etiquetas: {
+        cuarta: "Estacion",
+        principal: "Profesor",
+        secundaria: "Actividad",
+        terciaria: "Sector de carga"
+      }
+    };
+  }
+
+  const datos = hoja.getRange(1, 1, ultimaFila, Math.min(6, ultimaColumna)).getDisplayValues();
+  let resumen = obtenerResumenActividadExterna_(datos, nombreSolapa);
+  resumen.origenDatos = "talleres_local";
+  resumen = aplicarFiltrosResumenEspecial_(resumen, filtros);
+  return resumirPayloadResumenEspecial_(resumen);
 }
 
 function obtenerResumenSolapaEspecialExterna_(fuente, nombreSolapa, filtros) {
@@ -2285,10 +3053,11 @@ function obtenerResumenCronogramaSeguimiento_(ss, filtros) {
   const programadosFiltrados = programados.filter(function(item) {
     return coincideFiltrosCronogramaProgramado_(item, filtrosNormalizados);
   });
+  const programadosFiltradosUnicos = deduplicarProgramadosSeguimiento_(programadosFiltrados);
   const controlesFiltrados = controles.filter(function(item) {
     return coincideFiltrosCronogramaControl_(item, filtrosNormalizados);
   });
-  const totales = construirTotalesCronogramaSeguimiento_(programadosFiltrados, controlesFiltrados);
+  const totales = construirTotalesCronogramaSeguimiento_(programadosFiltradosUnicos, controlesFiltrados);
 
   return {
     nombre: "CRONOGRAMA",
@@ -2302,9 +3071,9 @@ function obtenerResumenCronogramaSeguimiento_(ss, filtros) {
     filtrosDisponibles: construirFiltrosDisponiblesCronograma_(programados, controles),
     totales: totales,
     resultados: construirResultadosCronogramaSeguimiento_(controlesFiltrados),
-    estaciones: construirAgrupadoCronogramaSeguimiento_(programadosFiltrados, controlesFiltrados, "estacion"),
-    actividades: construirAgrupadoCronogramaSeguimiento_(programadosFiltrados, controlesFiltrados, "actividad"),
-    dias: construirAgrupadoCronogramaSeguimiento_(programadosFiltrados, controlesFiltrados, "diaSemana"),
+    estaciones: construirAgrupadoCronogramaSeguimiento_(programadosFiltradosUnicos, controlesFiltrados, "estacion"),
+    actividades: construirAgrupadoCronogramaSeguimiento_(programadosFiltradosUnicos, controlesFiltrados, "actividad"),
+    dias: construirAgrupadoCronogramaSeguimiento_(programadosFiltradosUnicos, controlesFiltrados, "diaSemana"),
     fechas: construirSerieFechasCronogramaSeguimiento_(controlesFiltrados),
     incidencias: construirIncidenciasCronogramaSeguimiento_(controlesFiltrados)
   };
@@ -2376,7 +3145,7 @@ function leerRegistrosControlSeguimiento_(hoja) {
       excluidaReal: limpiarTexto_(fila[16]) === "SI",
       codigoReal: limpiarTexto_(fila[17]),
       codigoProgramado: limpiarTexto_(fila[18]),
-      profesorDistinto: detalle.indexOf("Profesor distinto") !== -1
+      profesorDistinto: false
     };
   }).filter(function(item) {
     return item.resultadoCruce && !item.excluidaReal;
@@ -2430,7 +3199,7 @@ function construirTotalesCronogramaSeguimiento_(programados, controles) {
     if (item.resultadoCruce === "CARGADO_FUERA_DE_CRONOGRAMA") fueraCronograma++;
     if (item.profesorDistinto) profesorDistinto++;
 
-    const fechaBase = item.fechaReal || item.codigoProgramado.split(" | ")[0] || "";
+    const fechaBase = item.fechaReal || extraerFechaTextoDesdeCodigoComparacion_(item.codigoProgramado);
     const orden = convertirFechaTextoAOrden_(fechaBase);
     if (orden && orden > ultimaFechaOrden) {
       ultimaFechaOrden = orden;
@@ -2440,7 +3209,7 @@ function construirTotalesCronogramaSeguimiento_(programados, controles) {
 
   const totalProgramadas = programados.length;
   const cumplimientoPorcentaje = totalProgramadas
-    ? Math.round(((totalProgramadas - noCargadas) / totalProgramadas) * 1000) / 10
+    ? Math.round((realizadas / totalProgramadas) * 1000) / 10
     : 0;
 
   return {
@@ -2507,7 +3276,7 @@ function construirAgrupadoCronogramaSeguimiento_(programados, controles, campo) 
   return Object.keys(mapa).map(function(nombre) {
     let item = mapa[nombre];
     item.cumplimientoPorcentaje = item.programadas
-      ? Math.round(((item.programadas - item.noCargadas) / item.programadas) * 1000) / 10
+      ? Math.round((item.realizadas / item.programadas) * 1000) / 10
       : 0;
     return item;
   }).sort(function(a, b) {
@@ -2521,7 +3290,7 @@ function construirSerieFechasCronogramaSeguimiento_(controles) {
   const mapa = {};
 
   controles.forEach(function(item) {
-    const fechaBase = item.fechaReal || (item.codigoProgramado ? item.codigoProgramado.split(" | ")[0] : "");
+    const fechaBase = item.fechaReal || extraerFechaTextoDesdeCodigoComparacion_(item.codigoProgramado);
     if (!fechaBase) return;
     if (!mapa[fechaBase]) {
       mapa[fechaBase] = {
@@ -2551,14 +3320,14 @@ function construirIncidenciasCronogramaSeguimiento_(controles) {
   return controles.filter(function(item) {
     return item.resultadoCruce !== "PROGRAMADO_Y_REALIZADO" || item.profesorDistinto;
   }).sort(function(a, b) {
-    const fechaB = b.fechaReal || (b.codigoProgramado ? b.codigoProgramado.split(" | ")[0] : "");
-    const fechaA = a.fechaReal || (a.codigoProgramado ? a.codigoProgramado.split(" | ")[0] : "");
+    const fechaB = b.fechaReal || extraerFechaTextoDesdeCodigoComparacion_(b.codigoProgramado);
+    const fechaA = a.fechaReal || extraerFechaTextoDesdeCodigoComparacion_(a.codigoProgramado);
     const ordenB = convertirFechaTextoAOrden_(fechaB) || 0;
     const ordenA = convertirFechaTextoAOrden_(fechaA) || 0;
     return ordenB - ordenA;
   }).slice(0, 120).map(function(item) {
     return {
-      fecha: item.fechaReal || (item.codigoProgramado ? item.codigoProgramado.split(" | ")[0] : "") || "",
+      fecha: item.fechaReal || extraerFechaTextoDesdeCodigoComparacion_(item.codigoProgramado) || "",
       estacion: item.estacionProgramada || item.estacionReal || "",
       dia: item.diaSemanaProgramado || item.diaSemanaReal || "",
       actividad: item.actividadProgramada || item.actividadReal || "",
@@ -2604,14 +3373,45 @@ function construirFiltrosDisponiblesCronograma_(programados, controles) {
 }
 
 function obtenerNombreEstacionCanonicoSeguimiento_(estacion) {
-  const clave = obtenerClaveEstacionCanonica_(estacion);
-  if (!clave) return limpiarTexto_(estacion || "");
+  return obtenerNombreEstacionVisible_(estacion);
+}
 
-  for (let i = 0; i < ESTACIONES_SALUDABLES_OFICIALES.length; i++) {
-    const nombreOficial = ESTACIONES_SALUDABLES_OFICIALES[i];
-    if (normalizarTexto_(nombreOficial).toUpperCase() === clave) {
-      return nombreOficial;
-    }
+function construirClaveProgramacionUnicaSeguimiento_(item) {
+  if (!item) return "";
+  const fecha = normalizarFechaCarga_(item.fechaProgramada || "");
+  const estacion = obtenerNombreEstacionCanonicoSeguimiento_(item.estacionCanonica || item.estacion || "");
+  const actividad = limpiarTexto_(item.actividad || "");
+  const base = [
+    fecha,
+    estacion,
+    actividad
+  ].join("|");
+  return normalizarTexto_(base).replace(/\s+/g, "");
+}
+
+function deduplicarProgramadosSeguimiento_(programados) {
+  const lista = Array.isArray(programados) ? programados : [];
+  const mapa = {};
+  const resultado = [];
+
+  lista.forEach(function(item) {
+    const clave = construirClaveProgramacionUnicaSeguimiento_(item);
+    if (!clave || mapa[clave]) return;
+    mapa[clave] = true;
+    resultado.push(item);
+  });
+
+  return resultado;
+}
+
+function obtenerNombreEstacionVisible_(estacion) {
+  const limpio = limpiarTexto_(estacion || "");
+  if (!limpio) return "";
+
+  const normalizada = normalizarTexto_(limpio).toUpperCase();
+  const mapa = obtenerMapaEstacionesVisibles_();
+  if (mapa[normalizada]) {
+    return mapa[normalizada];
   }
 
   const equivalencias = combinarEquivalenciasEstaciones_();
@@ -2619,12 +3419,60 @@ function obtenerNombreEstacionCanonicoSeguimiento_(estacion) {
 
   for (let i = 0; i < nombres.length; i++) {
     const nombre = nombres[i];
-    if (normalizarTexto_(nombre).toUpperCase() === clave) {
+    const alias = equivalencias[nombre] || [];
+    const valores = [nombre].concat(alias);
+    const coincide = valores.some(function(item) {
+      return normalizarTexto_(item).toUpperCase() === normalizada;
+    });
+
+    if (coincide) {
       return limpiarTexto_(nombre);
     }
   }
 
-  return limpiarTexto_(estacion || "");
+  return limpio;
+}
+
+function obtenerMapaEstacionesVisibles_() {
+  if (cacheMapaEstacionesVisibles_) {
+    return cacheMapaEstacionesVisibles_;
+  }
+
+  const mapa = {};
+
+  function registrar(canonica, valor) {
+    const limpioCanonico = limpiarTexto_(canonica || "");
+    const limpioValor = limpiarTexto_(valor || "");
+    if (!limpioCanonico || !limpioValor) return;
+
+    const clave = normalizarTexto_(limpioValor).toUpperCase();
+    if (!clave) return;
+
+    mapa[clave] = limpioCanonico;
+
+    const simplificada = simplificarNombreEstacionParaCruce_(limpioValor);
+    if (simplificada) {
+      mapa[simplificada] = limpioCanonico;
+    }
+  }
+
+  ESTACIONES_SALUDABLES_VISIBLES.forEach(function(canonica) {
+    registrar(canonica, canonica);
+
+    const base = limpiarTexto_(canonica)
+      .replace(/^Estaciones?\s+Saludables?\s+/i, "")
+      .replace(/^Estaci(?:o|ó)n\s+Saludable\s+/i, "")
+      .trim();
+
+    registrar(canonica, base);
+
+    (ALIAS_ESTACIONES_SALUDABLES_VISIBLES[canonica] || []).forEach(function(alias) {
+      registrar(canonica, alias);
+    });
+  });
+
+  cacheMapaEstacionesVisibles_ = mapa;
+  return mapa;
 }
 
 function obtenerResumenSolapaEspecial_(hoja, nombreSolapa) {
@@ -3171,6 +4019,7 @@ function aplicarFiltrosResumenEspecial_(resumen, filtros) {
   }
 
   let filtrosNormalizados = normalizarFiltrosResumenEspecial_(filtros);
+  let registrosBase = resumen.registros;
   let hayFiltros = Object.keys(filtrosNormalizados).some(function(clave) {
     return !!filtrosNormalizados[clave];
   });
@@ -3179,7 +4028,7 @@ function aplicarFiltrosResumenEspecial_(resumen, filtros) {
     return resumen;
   }
 
-  let registrosFiltrados = resumen.registros.filter(function(registro) {
+  let registrosFiltrados = registrosBase.filter(function(registro) {
     if (filtrosNormalizados.estacion && limpiarTexto_(registro.estacion) !== filtrosNormalizados.estacion) return false;
     if (filtrosNormalizados.profesor && limpiarTexto_(registro.profesor) !== filtrosNormalizados.profesor) return false;
     if (filtrosNormalizados.actividad && limpiarTexto_(registro.actividad) !== filtrosNormalizados.actividad) return false;
@@ -3187,14 +4036,49 @@ function aplicarFiltrosResumenEspecial_(resumen, filtros) {
     return true;
   });
 
+  let filtrosDisponiblesDinamicos = construirFiltrosDisponiblesDinamicosResumenEspecial_(registrosBase, filtrosNormalizados);
   let resumenFiltrado = construirResumenActividadExternaDesdeRegistros_(
     registrosFiltrados,
     resumen.nombre,
     resumen.ultimaFechaCarga || ""
   );
   resumenFiltrado.filtrosAplicados = filtrosNormalizados;
-  resumenFiltrado.filtrosDisponibles = resumen.filtrosDisponibles || resumenFiltrado.filtrosDisponibles;
+  resumenFiltrado.filtrosDisponibles = filtrosDisponiblesDinamicos;
   return resumenFiltrado;
+}
+
+function construirFiltrosDisponiblesDinamicosResumenEspecial_(registros, filtros) {
+  let lista = Array.isArray(registros) ? registros : [];
+  let filtrosNormalizados = normalizarFiltrosResumenEspecial_(filtros);
+
+  function coincideConOtrosFiltros_(registro, campoIgnorado) {
+    if (campoIgnorado !== "estacion" && filtrosNormalizados.estacion && limpiarTexto_(registro.estacion) !== filtrosNormalizados.estacion) return false;
+    if (campoIgnorado !== "profesor" && filtrosNormalizados.profesor && limpiarTexto_(registro.profesor) !== filtrosNormalizados.profesor) return false;
+    if (campoIgnorado !== "actividad" && filtrosNormalizados.actividad && limpiarTexto_(registro.actividad) !== filtrosNormalizados.actividad) return false;
+    if (campoIgnorado !== "sector" && filtrosNormalizados.sector && limpiarTexto_(registro.sector) !== filtrosNormalizados.sector) return false;
+    return true;
+  }
+
+  function obtenerOpcionesCampo_(campo, campoIgnorado) {
+    let mapa = {};
+    lista.forEach(function(registro) {
+      if (!coincideConOtrosFiltros_(registro, campoIgnorado)) return;
+      let valor = limpiarTexto_(registro && registro[campo]);
+      if (valor) {
+        mapa[valor] = true;
+      }
+    });
+    return Object.keys(mapa).sort(function(a, b) {
+      return a.localeCompare(b, "es", { sensitivity: "base" });
+    });
+  }
+
+  return {
+    estaciones: obtenerOpcionesCampo_("estacion", "estacion"),
+    profesores: obtenerOpcionesCampo_("profesor", "profesor"),
+    actividades: obtenerOpcionesCampo_("actividad", "actividad"),
+    sectores: obtenerOpcionesCampo_("sector", "sector")
+  };
 }
 
 function resumirPayloadResumenEspecial_(resumen) {
@@ -4143,7 +5027,8 @@ function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, compara
   let origenInforme = "ia";
 
   try {
-    texto = solicitarInformeGemini_(prompt);
+    //texto = solicitarInformeGemini_(prompt);
+    texto = solicitarInformeOpenRouter_(prompt);
 
     if (informePareceIncompleto_(texto)) {
       let promptRefuerzo = [
@@ -4156,7 +5041,8 @@ function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, compara
         "El informe debe terminar con la seccion Recomendaciones completa y con cierre en una frase final completa."
       ].join("\n");
 
-      texto = solicitarInformeGemini_(promptRefuerzo);
+      //texto = solicitarInformeGemini_(promptRefuerzo);
+      texto = solicitarInformeOpenRouter_(promptRefuerzo);
     }
 
     if (informePareceIncompleto_(texto)) {
@@ -4531,6 +5417,82 @@ function solicitarInformeGemini_(prompt) {
   }
 
   return texto;
+}
+
+/**
+ * Función para configurar la API KEY de OpenRouter de forma segura.
+ */
+function configurarOpenRouter() {
+  const ui = SpreadsheetApp.getUi();
+  const res = ui.prompt("Configuración de OpenRouter", "Ingresa tu API KEY de OpenRouter:", ui.ButtonSet.OK_CANCEL);
+  
+  if (res.getSelectedButton() == ui.Button.OK) {
+    const key = res.getResponseText().trim();
+    if (key.indexOf("sk-or-") !== 0) {
+      ui.alert("⚠️ Error: La clave ingresada no parece ser una clave de OpenRouter válida.");
+      return;
+    }
+    PropertiesService.getScriptProperties().setProperty("OPENROUTER_API_KEY", key);
+    PropertiesService.getScriptProperties().setProperty("OPENROUTER_MODEL", "anthropic/claude-3-haiku");
+    ui.alert("✅ Configuración exitosa. Ahora el sistema usará Claude 3 Haiku vía OpenRouter.");
+  }
+}
+
+/**
+ * Motor de solicitudes para OpenRouter (Claude/Gemini/GPT).
+ */
+function solicitarInformeOpenRouter_(prompt) {
+  const props = PropertiesService.getScriptProperties();
+  const apiKey = props.getProperty("OPENROUTER_API_KEY");
+  const model = props.getProperty("OPENROUTER_MODEL") || "anthropic/claude-3-haiku";
+
+  if (!apiKey) {
+    throw new Error("⚠️ Falta configurar OPENROUTER_API_KEY. Ve al menú Administración > Configurar OpenRouter.");
+  }
+
+  const url = "https://openrouter.ai/api/v1/chat/completions";
+  const payload = {
+    "model": model,
+    "messages": [
+      {"role": "system", "content": "Eres un analista experto en gestión operativa de estaciones saludables. Tu objetivo es generar informes precisos y profesionales."},
+      {"role": "user", "content": prompt}
+    ],
+    "temperature": 0.3,
+    "max_tokens": 2500
+  };
+
+  const response = UrlFetchApp.fetch(url, {
+    "method": "post",
+    "contentType": "application/json",
+    "headers": {
+      "Authorization": "Bearer " + apiKey,
+      "HTTP-Referer": "https://google.com", // Requerido por OpenRouter
+      "X-Title": "Antigravity ES System"
+    },
+    "muteHttpExceptions": true,
+    "payload": JSON.stringify(payload)
+  });
+
+  const status = response.getResponseCode();
+  const body = response.getContentText();
+  let data = {};
+
+  try {
+    data = JSON.parse(body);
+  } catch (e) {
+    throw new Error("Error: No se pudo interpretar la respuesta de OpenRouter.");
+  }
+
+  if (status !== 200) {
+    const errorMsg = data.error ? (data.error.message || JSON.stringify(data.error)) : body;
+    throw new Error("Error de OpenRouter (" + status + "): " + errorMsg);
+  }
+
+  if (data.choices && data.choices[0] && data.choices[0].message) {
+    return data.choices[0].message.content;
+  }
+
+  throw new Error("OpenRouter no devolvió contenido de texto.");
 }
 
 function obtenerFinishReasonGemini_(data) {
