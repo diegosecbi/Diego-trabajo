@@ -1,5 +1,4 @@
 const SOLAPAS_ESPECIALES = [
-  "CRONOGRAMA",
   "CLIC",
   "EVENTOS",
   "FESTEJOS",
@@ -14,12 +13,6 @@ const SOLAPAS_EXCLUIDAS_SUPERVISION = [
   "DATOS",
   "USUARIOS",
   "Rol",
-  "CRONOGRAMA_NORMALIZADO",
-  "CONTROL_CUMPLIMIENTO",
-  "DIAGNOSTICO_CRONOGRAMA",
-  "AUDITORIA_CODIGOS_CRUCE",
-  "AUDITORIA_CRONOGRAMA_CUMPLIMIENTO",
-  "ROSETA_ACTIVIDADES_CRONOGRAMA",
   "CATALOGO_ACTIVIDADES",
   "actividades_x_estacion",
   "actividades_x_estación",
@@ -113,7 +106,16 @@ const CABECERAS_USUARIOS = [
   "EMAIL",
   "PERFIL",
   "ACTIVO",
-  "OBSERVACIONES"
+  "OBSERVACIONES",
+  "verDashboardCompleto",
+  "verModosSupervision",
+  "verBotonesEspeciales",
+  "verExportarExcel",
+  "verGenerarInformes",
+  "verFiltrosAvanzados",
+  "verPanelAdministracion",
+  "modificarConfiguracion",
+  "verDashboardGraficos"
 ];
 
 const CABECERAS_CRONOGRAMA_NORMALIZADO = [
@@ -747,23 +749,20 @@ function doGet() {
 }
 
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu("Administracion")
+  const ui = SpreadsheetApp.getUi();
+  
+  ui.createMenu("Administracion")
     .addItem("Preparar Hoja De Usuarios", "prepararHojaUsuarios")
     .addItem("🔍 Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
     .addSeparator()
-    .addSubMenu(
-      SpreadsheetApp.getUi()
-        .createMenu("Cronograma")
-        .addItem("Preparar Solapas De Control", "prepararSolapasControlCronograma")
-        .addItem("Sincronizar TALLERES Desde Seguimiento", "sincronizarTalleresDesdeSeguimiento")
-        .addItem("Importar Cronograma Normalizado", "importarCronogramaNormalizado")
-        .addItem("Diagnosticar Importacion De Cronograma", "diagnosticarImportacionCronograma")
-        .addItem("Generar Control De Cumplimiento", "generarControlCumplimiento")
-        .addItem("Auditar Codigos De Cruce", "auditarCodigosCruceCronograma")
-    )
+    .addItem("📊 Generar Dashboard de Gráficos", "generarDashboardGerencial")
     .addSeparator()
     .addItem("⚙️ Configurar OpenRouter (Claude)", "configurarOpenRouter")
+    .addToUi();
+    
+  ui.createMenu("Talleres")
+    .addItem("🔄 Sincronizar Datos Ahora", "sincronizarTalleresDesdeSeguimiento")
+    .addItem("⏰ Activar Sincronizacion Automatica (2x/dia)", "instalarGatillosSincronizacionTalleres")
     .addToUi();
 }
 
@@ -773,35 +772,45 @@ function prepararHojaUsuarios() {
     ss,
     "USUARIOS",
     CABECERAS_USUARIOS,
-    "Administracion de accesos. Completa EMAIL, PERFIL (operativo/coordinacion/admin) y ACTIVO (SI/NO)."
+    "Administracion de accesos. Completa EMAIL, PERFIL y ACTIVO. Las columnas de permisos (SI/NO) son opcionales para sobreescribir el perfil."
   );
 
   if (hoja.getLastRow() <= 1) {
-    hoja.getRange(2, 1, 3, CABECERAS_USUARIOS.length).setValues([
+    hoja.getRange(2, 1, 3, 4).setValues([
       ["admin@dominio.com", "admin", "SI", "Ejemplo"],
       ["coordinacion@dominio.com", "coordinacion", "SI", "Ejemplo"],
       ["operativo@dominio.com", "operativo", "SI", "Ejemplo"]
     ]);
   }
 
-  hoja.getRange("B2:B").setDataValidation(
+  // Validación para Perfil
+  const filasValidacion = Math.max(100, hoja.getLastRow() + 20);
+  const totalFilas = Math.min(filasValidacion, hoja.getMaxRows() - 1);
+
+  hoja.getRange(2, 2, totalFilas, 1).setDataValidation(
     SpreadsheetApp.newDataValidation()
       .requireValueInList(["admin", "gerencia", "coordinacion", "operativo"], true)
       .setAllowInvalid(false)
       .build()
   );
 
-  hoja.getRange("C2:C").setDataValidation(
-    SpreadsheetApp.newDataValidation()
-      .requireValueInList(["SI", "NO"], true)
-      .setAllowInvalid(false)
-      .build()
-  );
+  // Validación para Activo y todos los permisos (SI/NO)
+  const rangoSino = hoja.getRange(2, 3, totalFilas, 1); // Columna ACTIVO
+  const rangoPermisos = hoja.getRange(2, 5, totalFilas, PERMISOS_KEYS.length); // Columnas de permisos
+  
+  const validacionSino = SpreadsheetApp.newDataValidation()
+    .requireValueInList(["SI", "NO"], true)
+    .setAllowInvalid(false)
+    .build();
+
+  rangoSino.setDataValidation(validacionSino);
+  rangoPermisos.setDataValidation(validacionSino);
 
   hoja.autoResizeColumns(1, CABECERAS_USUARIOS.length);
+  SpreadsheetApp.flush();
 
   SpreadsheetApp.getUi().alert(
-    "La hoja USUARIOS esta lista. Completa EMAIL, PERFIL (admin/gerencia/coordinacion/operativo) y ACTIVO para habilitar accesos."
+    "La hoja USUARIOS ha sido actualizada. Ahora puedes asignar permisos individuales (SI/NO) en las columnas de la E a la M para sobreescribir el perfil base."
   );
 }
 
@@ -825,6 +834,24 @@ function prepararSolapasControlCronograma() {
   SpreadsheetApp.getUi().alert(
     "Se prepararon las solapas CRONOGRAMA_NORMALIZADO y CONTROL_CUMPLIMIENTO."
   );
+}
+
+function instalarGatillosSincronizacionTalleres() {
+  const funcionSincronizacion = "sincronizarTalleresDesdeSeguimiento";
+  
+  const triggers = ScriptApp.getProjectTriggers();
+  for (let i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === funcionSincronizacion) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  ScriptApp.newTrigger(funcionSincronizacion)
+    .timeBased()
+    .everyHours(12)
+    .create();
+    
+  SpreadsheetApp.getUi().alert("✅ ¡Listo! La sincronizacion de Talleres se ejecutara automaticamente cada 12 horas.");
 }
 
 function sincronizarTalleresDesdeSeguimiento() {
@@ -901,10 +928,8 @@ function sincronizarTalleresDesdeSeguimiento() {
     hojaDestino.getRange(2, 1, ultimaFilaDestino - 1, CABECERAS_TALLERES.length).clearContent();
   }
 
-  const lote = 500;
-  for (let i = 0; i < filas.length; i += lote) {
-    const bloque = filas.slice(i, i + lote);
-    hojaDestino.getRange(2 + i, 1, bloque.length, CABECERAS_TALLERES.length).setValues(bloque);
+  if (filas.length > 0) {
+    hojaDestino.getRange(2, 1, filas.length, CABECERAS_TALLERES.length).setValues(filas);
   }
 
   if (filas.length) {
@@ -1005,9 +1030,7 @@ function asegurarSolapaEstructural_(ss, nombreSolapa, cabeceras, descripcion) {
   }
 
   const rangoCabecera = hoja.getRange(1, 1, 1, cabeceras.length);
-  const cabeceraActual = hoja.getLastColumn() >= cabeceras.length
-    ? rangoCabecera.getDisplayValues()[0]
-    : [];
+  const cabeceraActual = rangoCabecera.getDisplayValues()[0];
 
   let necesitaCabecera = hoja.getLastRow() === 0;
   if (!necesitaCabecera) {
@@ -2537,7 +2560,8 @@ function iniciarSesionConCorreo(emailIngresado) {
     };
   }
 
-  const perfil = resolverPerfilUsuario_(email);
+  const datosUsuario = resolverPerfilUsuario_(email);
+  const perfil = datosUsuario.perfil;
   console.log("[LOGIN] Resultado para " + email + ": " + perfil);
 
   if (perfil === "sin_acceso") {
@@ -2549,14 +2573,28 @@ function iniciarSesionConCorreo(emailIngresado) {
     };
   }
 
-  const contextual = obtenerPermisosVista(perfil);
+  const permisosBase = obtenerPermisosVista(perfil).puede;
+  
+  // Mezclar permisos base con overrides de la hoja
+  const permisosFinales = {};
+  PERMISOS_KEYS.forEach(key => {
+    // Si en la hoja dice SI o NO, manda eso. Si está vacío, manda lo del perfil base.
+    if (datosUsuario.overrides && (datosUsuario.overrides[key] === true || datosUsuario.overrides[key] === false)) {
+      permisosFinales[key] = datosUsuario.overrides[key];
+    } else {
+      permisosFinales[key] = permisosBase[key] || false;
+    }
+  });
+
+  const colorPerfil = obtenerPermisosVista(perfil).color;
+
   return {
     ok: true,
     email: email,
     perfil: perfil,
-    permisos: contextual.puede,
-    colorPerfil: contextual.color,
-    mensaje: "Acceso autorizado. Perfil: " + perfil + "."
+    permisos: permisosFinales,
+    colorPerfil: colorPerfil,
+    mensaje: "Acceso autorizado. Perfil: " + perfil + (Object.keys(datosUsuario.overrides).length > 0 ? " (con permisos personalizados)" : "") + "."
   };
 }
 
@@ -2575,7 +2613,7 @@ function obtenerDatos(emailSesion){
     autenticado: true,
     puedeCambiarPerfil: false,
     mensaje: acceso.mensaje,
-    permisos: contextual.puede,
+    permisos: acceso.permisos, // Corregido: Usa los permisos mezclados (Base + Overrides)
     colorPerfil: contextual.color
   };
 
@@ -2684,7 +2722,8 @@ function obtenerDatos(emailSesion){
 
 function obtenerContextoUsuarioActual_() {
   const email = obtenerEmailUsuarioActual_();
-  const perfil = resolverPerfilUsuario_(email);
+  const datosUsuario = resolverPerfilUsuario_(email);
+  const perfil = datosUsuario.perfil;
   let mensaje = "No se pudo identificar la cuenta del usuario. Verifica el despliegue del web app y el inicio de sesion.";
 
   if (email && perfil !== "sin_acceso") {
@@ -2712,18 +2751,18 @@ function obtenerEmailUsuarioActual_() {
 
 function resolverPerfilUsuario_(email) {
   const emailBusqueda = String(email || "").trim().toLowerCase();
-  if (!emailBusqueda) return "sin_acceso";
+  if (!emailBusqueda) return { perfil: "sin_acceso", overrides: {} };
 
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const hoja = ss.getSheetByName("USUARIOS");
-    if (!hoja) return "sin_acceso";
+    if (!hoja) return { perfil: "sin_acceso", overrides: {} };
 
     const ultimaFila = hoja.getLastRow();
-    if (ultimaFila < 2) return "sin_acceso";
+    if (ultimaFila < 2) return { perfil: "sin_acceso", overrides: {} };
 
-    // Búsqueda directa fila por fila para evitar errores de mapeo
-    const datos = hoja.getRange(2, 1, ultimaFila - 1, 3).getDisplayValues();
+    const ultCol = hoja.getLastColumn();
+    const datos = hoja.getRange(2, 1, ultimaFila - 1, ultCol).getDisplayValues();
     
     for (let i = 0; i < datos.length; i++) {
       const emailHoja = String(datos[i][0] || "").trim().toLowerCase();
@@ -2732,10 +2771,26 @@ function resolverPerfilUsuario_(email) {
 
       if (emailHoja === emailBusqueda) {
         if (activoHoja === "SI" || activoHoja === "SÍ") {
-          // Normalizar nombres de perfil comunes
-          if (perfilHoja === "administrador") return "admin";
-          if (perfilHoja === "coordinación") return "coordinacion";
-          return perfilHoja;
+          let perfilReal = perfilHoja;
+          if (perfilHoja === "administrador") perfilReal = "admin";
+          if (perfilHoja === "coordinación") perfilReal = "coordinacion";
+
+          // Capturar Overrides de permisos
+          const overrides = {};
+          // Las columnas de permisos empiezan en la E (índice 4)
+          PERMISOS_KEYS.forEach((key, index) => {
+            const colIndex = 4 + index;
+            if (colIndex < datos[i].length) {
+              const valor = String(datos[i][colIndex] || "").trim().toUpperCase();
+              if (valor === "SI") overrides[key] = true;
+              if (valor === "NO") overrides[key] = false;
+            }
+          });
+
+          return {
+            perfil: perfilReal,
+            overrides: overrides
+          };
         }
       }
     }
@@ -2743,12 +2798,13 @@ function resolverPerfilUsuario_(email) {
     console.error("Error en resolverPerfilUsuario_: " + e.message);
   }
 
-  return "sin_acceso";
+  return { perfil: "sin_acceso", overrides: {} };
 }
 
 function diagnosticarMiAcceso() {
   const email = Session.getActiveUser().getEmail();
-  const perfil = resolverPerfilUsuario_(email);
+  const datosUsuario = resolverPerfilUsuario_(email);
+  const perfil = datosUsuario.perfil;
   const ui = SpreadsheetApp.getUi();
   
   let msg = "DIAGNÓSTICO DE ACCESO\n\n";
@@ -5009,8 +5065,8 @@ function generarPdfInformeEspecial_(nombreSolapa, contexto, texto, origenInforme
   };
 }
 
-function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros) {
-  let resumen = obtenerResumenSolapaEspecial(nombreSolapa);
+function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros, emailSesion) {
+  let resumen = obtenerResumenSolapaEspecial(nombreSolapa, null, emailSesion);
   resumen = aplicarFiltrosResumenEspecial_(resumen, filtros);
 
   if (!resumen || !resumen.disponible) {
@@ -5069,13 +5125,13 @@ function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, compara
   };
 }
 
-function enviarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros, emailDestino, asuntoPersonalizado, mensajePersonalizado) {
+function enviarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros, emailDestino, asuntoPersonalizado, mensajePersonalizado, emailSesion) {
   let destinatario = String(emailDestino || "").trim();
   if (!destinatario) {
     throw new Error("Debes indicar un correo electronico de destino.");
   }
 
-  let resultado = generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros);
+  let resultado = generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros, emailSesion);
   let bytes = Utilities.base64Decode(resultado.base64 || "");
   let adjunto = Utilities.newBlob(bytes, resultado.mimeType || "application/pdf", resultado.archivo || "informe.pdf");
   let asunto = String(asuntoPersonalizado || "").trim() || ("[Estaciones Saludables] " + (resultado.archivo || "Informe PDF"));
@@ -5577,4 +5633,174 @@ function construirNombreArchivoInformeIA_(nombreSolapa, contexto, origenInforme)
     .toLowerCase()
     .replace(/[^\w\-]+/g, "_")
     .replace(/_+/g, "_") + ".pdf";
+}
+
+/**
+ * Genera una solapa de GRAFICOS con tablas dinámicas y gráficos basados en TALLERES.
+ */
+function generarDashboardGerencial() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let hojaGraficos = ss.getSheetByName("GRAFICOS");
+  
+  if (hojaGraficos) {
+    ss.deleteSheet(hojaGraficos);
+  }
+  hojaGraficos = ss.insertSheet("GRAFICOS");
+  
+  const hojaTalleres = ss.getSheetByName("TALLERES");
+  if (!hojaTalleres || hojaTalleres.getLastRow() < 2) {
+    SpreadsheetApp.getUi().alert("❌ Error: La solapa TALLERES está vacía o no existe. No se pueden generar gráficos.");
+    return;
+  }
+  
+  const datos = hojaTalleres.getDataRange().getValues();
+  const headers = datos[0];
+  const filas = datos.slice(1);
+  
+  // 1. Procesar Datos para Tablas de Resumen
+  const resumenEstaciones = {};
+  const resumenActividades = {};
+  const resumenMensual = {};
+  
+  const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+  const idxEstacion = headers.indexOf("ESTACION");
+  const idxActividad = headers.indexOf("ACTIVIDAD");
+  
+  filas.forEach(fila => {
+    const estacion = fila[idxEstacion] || "Sin Datos";
+    const actividad = fila[idxActividad] || "Sin Datos";
+    const fechaRaw = fila[idxFecha];
+    
+    // Conteo Estaciones
+    resumenEstaciones[estacion] = (resumenEstaciones[estacion] || 0) + 1;
+    
+    // Conteo Actividades
+    resumenActividades[actividad] = (resumenActividades[actividad] || 0) + 1;
+    
+    // Conteo Mensual
+    if (fechaRaw instanceof Date) {
+      const mesAnio = Utilities.formatDate(fechaRaw, ss.getSpreadsheetTimeZone(), "yyyy-MM");
+      resumenMensual[mesAnio] = (resumenMensual[mesAnio] || 0) + 1;
+    }
+  });
+  
+  // 2. Volcar Tablas en GRAFICOS (Zona oculta o lateral)
+  // Tabla Estaciones (A:B)
+  const dataEst = [["ESTACION", "PARTICIPANTES"]].concat(Object.entries(resumenEstaciones).sort((a,b) => b[1] - a[1]));
+  hojaGraficos.getRange(1, 1, dataEst.length, 2).setValues(dataEst);
+  
+  // Tabla Actividades (D:E)
+  const dataAct = [["ACTIVIDAD", "PARTICIPANTES"]].concat(Object.entries(resumenActividades).sort((a,b) => b[1] - a[1]));
+  hojaGraficos.getRange(1, 4, dataAct.length, 2).setValues(dataAct);
+  
+  // Tabla Mensual (G:H)
+  const dataMes = [["MES", "PARTICIPANTES"]].concat(Object.entries(resumenMensual).sort((a,b) => a[0].localeCompare(b[0])));
+  hojaGraficos.getRange(1, 7, dataMes.length, 2).setValues(dataMes);
+  
+  // 3. Crear Gráficos
+  
+  // Gráfico 1: Barras - Estaciones (A tope)
+  const chartEst = hojaGraficos.newChart()
+    .setChartType(Charts.ChartType.BAR)
+    .addRange(hojaGraficos.getRange(1, 1, Math.min(dataEst.length, 15), 2))
+    .setPosition(2, 10, 0, 0)
+    .setOption('title', 'Top 15 Estaciones con Mayor Participación')
+    .setOption('width', 600)
+    .setOption('height', 400)
+    .setOption('colors', ['#153244'])
+    .build();
+    
+  // Gráfico 2: Torta - Actividades
+  const chartAct = hojaGraficos.newChart()
+    .setChartType(Charts.ChartType.PIE)
+    .addRange(hojaGraficos.getRange(1, 4, Math.min(dataAct.length, 10), 2))
+    .setPosition(2, 20, 0, 0)
+    .setOption('title', 'Distribución por Tipo de Actividad (Top 10)')
+    .setOption('width', 500)
+    .setOption('height', 400)
+    .setOption('is3D', true)
+    .build();
+
+  // Gráfico 3: Líneas/Áreas - Evolución Mensual
+  const chartMes = hojaGraficos.newChart()
+    .setChartType(Charts.ChartType.AREA)
+    .addRange(hojaGraficos.getRange(1, 7, dataMes.length, 2))
+    .setPosition(23, 10, 0, 0)
+    .setOption('title', 'Evolución Mensual de Asistencia')
+    .setOption('width', 1110)
+    .setOption('height', 350)
+    .setOption('colors', ['#ffcb00'])
+    .setOption('legend', {position: 'bottom'})
+    .build();
+
+  hojaGraficos.insertChart(chartEst);
+  hojaGraficos.insertChart(chartAct);
+  hojaGraficos.insertChart(chartMes);
+  
+  // Formateo final
+  hojaGraficos.getRange("A1:H1").setFontWeight("bold").setBackground("#f3f3f3");
+  hojaGraficos.autoResizeColumns(1, 8);
+  
+  // Ocultar las columnas de datos crudos si prefieres que se vea solo el gráfico
+  // hojaGraficos.hideColumns(1, 8); 
+
+  ss.setActiveSheet(hojaGraficos);
+  SpreadsheetApp.getUi().alert("✅ Dashboard de Gráficos generado con éxito en la solapa GRAFICOS.");
+}
+
+/**
+ * Procesa los datos de TALLERES para el frontend.
+ * Evita enviar miles de filas, solo envía los totales agregados.
+ */
+function obtenerDatosGraficos() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hojaTalleres = ss.getSheetByName("TALLERES");
+  if (!hojaTalleres || hojaTalleres.getLastRow() < 2) return { ok: false, msg: "Sin datos" };
+
+  const datos = hojaTalleres.getDataRange().getValues();
+  const headers = datos[0];
+  const filas = datos.slice(1);
+
+  const idxDni = headers.indexOf("DNI");
+  const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+  const idxEstacion = headers.indexOf("ESTACION");
+  const idxActividad = headers.indexOf("ACTIVIDAD");
+
+  const est = {};
+  const act = {};
+  const mesCounts = {};
+  const mesUnicos = {};
+
+  filas.forEach(fila => {
+    const d = String(fila[idxDni] || "").trim();
+    const e = fila[idxEstacion] || "Sin Datos";
+    const a = fila[idxActividad] || "Sin Datos";
+    const f = fila[idxFecha];
+
+    est[e] = (est[e] || 0) + 1;
+    act[a] = (act[a] || 0) + 1;
+    
+    if (f instanceof Date) {
+      const m = Utilities.formatDate(f, ss.getSpreadsheetTimeZone(), "yyyy-MM");
+      mesCounts[m] = (mesCounts[m] || 0) + 1;
+      
+      if (!mesUnicos[m]) mesUnicos[m] = {};
+      if (d) mesUnicos[m][d] = true;
+    }
+  });
+
+  const mensual = Object.keys(mesCounts).sort().map(m => {
+    return [
+      m, 
+      mesCounts[m], 
+      mesUnicos[m] ? Object.keys(mesUnicos[m]).length : 0
+    ];
+  });
+
+  return {
+    ok: true,
+    estaciones: Object.entries(est).sort((a,b) => b[1] - a[1]).slice(0, 15),
+    actividades: Object.entries(act).sort((a,b) => b[1] - a[1]).slice(0, 10),
+    mensual: mensual
+  };
 }

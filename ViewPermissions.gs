@@ -2,6 +2,18 @@
 // Definido: 2026-04-23
 // Propósito: Centralizar permisos de visualización sin tocar la lógica funcional
 
+const PERMISOS_KEYS = [
+  "verDashboardCompleto",
+  "verModosSupervision",
+  "verBotonesEspeciales",
+  "verExportarExcel",
+  "verGenerarInformes",
+  "verFiltrosAvanzados",
+  "verPanelAdministracion",
+  "modificarConfiguracion",
+  "verDashboardGraficos"
+];
+
 const VIEW_PERMISSIONS = {
   "admin": {
     nombre: "Administrador",
@@ -14,7 +26,8 @@ const VIEW_PERMISSIONS = {
       verGenerarInformes: true,
       verFiltrosAvanzados: true,
       verPanelAdministracion: true,
-      modificarConfiguracion: true
+      modificarConfiguracion: true,
+      verDashboardGraficos: true
     },
     restricciones: [],
     solapasVisibles: "todas",
@@ -32,18 +45,22 @@ const VIEW_PERMISSIONS = {
       verGenerarInformes: true,
       verFiltrosAvanzados: true,
       verPanelAdministracion: false,
-      modificarConfiguracion: false
+      modificarConfiguracion: false,
+      verDashboardGraficos: true
     },
     restricciones: [
       "panelSupervision",
       "tablaSupervision"
     ],
     solapasVisibles: [
-      "CRONOGRAMA",
       "CLIC",
+      "ETZ",
       "EVENTOS",
       "FESTEJOS",
-      "TALLERES"
+      "COCINA",
+      "VISITAS ESCOLARES",
+      "TALLERES",
+      "EXPLORANDO CABA"
     ],
     color: "#0066cc"
   },
@@ -69,10 +86,13 @@ const VIEW_PERMISSIONS = {
     ],
     solapasVisibles: [
       "CLIC",
+      "ETZ",
       "EVENTOS",
       "FESTEJOS",
+      "COCINA",
+      "VISITAS ESCOLARES",
       "TALLERES",
-      "CRONOGRAMA"
+      "EXPLORANDO CABA"
     ],
     color: "#ff9800"
   },
