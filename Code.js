@@ -763,6 +763,9 @@ function onOpen() {
   ui.createMenu("Talleres")
     .addItem("🔄 Sincronizar Datos Ahora", "sincronizarTalleresDesdeSeguimiento")
     .addItem("⏰ Activar Sincronizacion Automatica (2x/dia)", "instalarGatillosSincronizacionTalleres")
+    .addSeparator()
+    .addItem("📅 Completar Columna SADOFE/SEMANA Ahora", "actualizarColumnaSadofe")
+    .addItem("⏰ Activar Llenado Auto SADOFE (2x/dia)", "instalarGatilloSadofe")
     .addToUi();
 }
 
@@ -852,6 +855,28 @@ function instalarGatillosSincronizacionTalleres() {
     .create();
     
   SpreadsheetApp.getUi().alert("✅ ¡Listo! La sincronizacion de Talleres se ejecutara automaticamente cada 12 horas.");
+}
+
+function instalarGatilloSadofe() {
+  const nombreFuncion = "ejecutarActualizacionSadofeProgramada";
+  
+  const triggers = ScriptApp.getProjectTriggers();
+  for (let i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === nombreFuncion) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  ScriptApp.newTrigger(nombreFuncion)
+    .timeBased()
+    .everyHours(12)
+    .create();
+    
+  SpreadsheetApp.getUi().alert("✅ ¡Listo! La columna SADOFE se rellenará automáticamente cada 12 horas.");
+}
+
+function ejecutarActualizacionSadofeProgramada() {
+  actualizarColumnaSadofe(true);
 }
 
 function sincronizarTalleresDesdeSeguimiento() {
@@ -5125,6 +5150,121 @@ function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, compara
   };
 }
 
+function enviarInformeDashboardIA(datos, imagenes, emailDestino, asunto, mensaje, emailSesion) {
+  let destinatario = String(emailDestino || "").trim();
+  if (!destinatario) throw new Error("Debes indicar un correo electronico de destino.");
+
+  // 1. Preparar Prompt para IA
+  let prompt = [
+    "Actua como un analista institucional del programa Estaciones Saludables del GCBA.",
+    "Analiza los siguientes datos agregados del Tablero Gerencial:",
+    "",
+    "DATOS GENERALES:",
+    "- Estaciones Lideres: " + datos.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " participaciones)").join(", "),
+    "- Actividades con mayor volumen: " + datos.actividades.slice(0, 8).map(a => a[0] + " (" + a[1] + " participaciones)").join(", "),
+    "- Evolucion Mensual (Participaciones vs Unicas): " + datos.mensual.slice(-8).map(m => m[0] + ": " + m[1] + " cargas / " + m[2] + " personas").join(" | "),
+    "",
+    "CONSIGNA:",
+    "Genera un informe analitico ejecutivo (maximo 500 palabras).",
+    "Estructura obligatoria:",
+    "1. Resumen de Situacion: interpreta el volumen total y la tendencia de los ultimos meses.",
+    "2. Analisis de Composicion: destaca que estaciones y actividades traccionan el programa.",
+    "3. Lectura de Gestion: que sugieren estos numeros para la toma de decisiones (ej: reforzar horarios, diversificar oferta).",
+    "4. Recomendaciones: 3 puntos clave de accion.",
+    "Estilo profesional, institucional y basado estrictamente en la evidencia provista."
+  ].join("\n");
+
+  let analisis = "";
+  try {
+    analisis = solicitarInformeOpenRouter_(prompt);
+  } catch (e) {
+    analisis = "INFORME ANALITICO (MODO RESPALDO)\n\n" + 
+               "El analisis detallado por IA no pudo completarse. Basado en los datos directos:\n" +
+               "- La estacion con mayor volumen es " + (datos.estaciones[0] ? datos.estaciones[0][0] : "N/D") + ".\n" +
+               "- La actividad predominante es " + (datos.actividades[0] ? datos.actividades[0][0] : "N/D") + ".\n" +
+               "- Se observa una evolucion mensual con picos en " + (datos.mensual.length ? datos.mensual[datos.mensual.length-1][0] : "el ultimo mes") + ".\n" +
+               "Se recomienda revisar la consistencia de carga y la distribucion territorial.";
+  }
+
+  // 2. Generar Documento y PDF
+  let nombreArchivo = "Informe_Estadistico_Tablero_" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd_HHmm");
+  let doc = DocumentApp.create(nombreArchivo);
+  let body = doc.getBody();
+  
+  body.clear();
+  agregarFranjaDocumento_(body, "INFORME EJECUTIVO DE ESTADISTICAS", "#153244", "#ffffff", 14);
+  
+  body.appendParagraph("Generado: " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm")).setFontSize(9);
+  body.appendParagraph("Analisis asistido por Inteligencia Artificial basado en el Tablero Gerencial.").setItalic(true).setFontSize(9);
+  
+  body.appendParagraph("\nANALISIS Y DIAGNOSTICO").setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  agregarTextoInformeADocumento_(body, analisis);
+
+  // Agregar Graficos
+  if (imagenes && (imagenes.est || imagenes.act || imagenes.mes)) {
+    body.appendPageBreak();
+    body.appendParagraph("ANEXO: VISUALIZACIONES COMPLEMENTARIAS").setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    
+    if (imagenes.est) {
+      body.appendParagraph("\nRanking de Estaciones Saludables").setBold(true);
+      try {
+        let partes = imagenes.est.split(',');
+        let mime = partes[0].match(/:(.*?);/)[1];
+        let b = Utilities.base64Decode(partes[1]);
+        let img = body.appendImage(Utilities.newBlob(b, mime));
+        let w = img.getWidth();
+        let h = img.getHeight();
+        if (w > 460) {
+            img.setWidth(460);
+            img.setHeight(h * (460/w));
+        }
+      } catch(e){}
+    }
+
+    if (imagenes.act) {
+      body.appendParagraph("\nDistribucion por Actividad").setBold(true);
+      try {
+        let partes = imagenes.act.split(',');
+        let mime = partes[0].match(/:(.*?);/)[1];
+        let b = Utilities.base64Decode(partes[1]);
+        let img = body.appendImage(Utilities.newBlob(b, mime));
+        img.setWidth(300);
+        img.setHeight(300);
+      } catch(e){}
+    }
+
+    if (imagenes.mes) {
+      body.appendParagraph("\nEvolucion de Participaciones y Personas").setBold(true);
+      try {
+        let partes = imagenes.mes.split(',');
+        let mime = partes[0].match(/:(.*?);/)[1];
+        let b = Utilities.base64Decode(partes[1]);
+        let img = body.appendImage(Utilities.newBlob(b, mime));
+        let w = img.getWidth();
+        let h = img.getHeight();
+        if (w > 460) {
+            img.setWidth(460);
+            img.setHeight(h * (460/w));
+        }
+      } catch(e){}
+    }
+  }
+
+  doc.saveAndClose();
+  let pdf = DriveApp.getFileById(doc.getId()).getAs("application/pdf");
+  DriveApp.getFileById(doc.getId()).setTrashed(true); // Borrar temporal
+
+  // 3. Enviar Email
+  MailApp.sendEmail({
+    to: destinatario,
+    subject: asunto || ("[Estaciones Saludables] Informe de Estadisticas"),
+    body: (mensaje || "Se adjunta el informe analitico solicitado desde el Tablero Gerencial.") + "\n\nEste es un mensaje generado automaticamente desde el sistema.",
+    attachments: [pdf]
+  });
+
+  return { ok: true, destino: destinatario };
+}
+
 function enviarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros, emailDestino, asuntoPersonalizado, mensajePersonalizado, emailSesion) {
   let destinatario = String(emailDestino || "").trim();
   if (!destinatario) {
@@ -5752,7 +5892,7 @@ function generarDashboardGerencial() {
  * Procesa los datos de TALLERES para el frontend.
  * Evita enviar miles de filas, solo envía los totales agregados.
  */
-function obtenerDatosGraficos() {
+function obtenerDatosGraficos(filtroEstacion, filtroDias) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const hojaTalleres = ss.getSheetByName("TALLERES");
   if (!hojaTalleres || hojaTalleres.getLastRow() < 2) return { ok: false, msg: "Sin datos" };
@@ -5765,23 +5905,54 @@ function obtenerDatosGraficos() {
   const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
   const idxEstacion = headers.indexOf("ESTACION");
   const idxActividad = headers.indexOf("ACTIVIDAD");
+  
+  // Buscar columna para Tipo de Día o usar la última
+  let idxTipoDia = -1;
+  for (let i = 0; i < headers.length; i++) {
+    const h = String(headers[i]).toUpperCase();
+    if (h.includes("TIPO") && h.includes("DIA")) idxTipoDia = i;
+    else if (h.includes("FERIADO") || h.includes("FINDE")) idxTipoDia = i;
+  }
+  if (idxTipoDia === -1) {
+    idxTipoDia = headers.length - 1; // usar la ultima si no hay coincidencia
+  }
 
   const est = {};
   const act = {};
   const mesCounts = {};
   const mesUnicos = {};
+  const listaEstaciones = {};
 
   filas.forEach(fila => {
-    const d = String(fila[idxDni] || "").trim();
     const e = fila[idxEstacion] || "Sin Datos";
-    const a = fila[idxActividad] || "Sin Datos";
+    listaEstaciones[e] = true;
+    
+    if (filtroEstacion && e !== filtroEstacion) return;
+
     const f = fila[idxFecha];
+    
+    let isFinde = false;
+    const tipoColVal = String(fila[idxTipoDia] || "").toUpperCase();
+    
+    // Validar por la columna de feriados o por el día de la semana
+    if (tipoColVal.includes("FINDE") || tipoColVal.includes("FERIADO") || tipoColVal.includes("SAB") || tipoColVal.includes("DOM") || tipoColVal.includes("SADOFE")) {
+      isFinde = true;
+    } else if (f instanceof Date) {
+      const day = f.getDay();
+      isFinde = (day === 0 || day === 6);
+    }
+    
+    if (filtroDias === "semana" && isFinde) return;
+    if (filtroDias === "finde" && !isFinde) return;
+
+    const d = String(fila[idxDni] || "").trim();
+    const a = fila[idxActividad] || "Sin Datos";
 
     est[e] = (est[e] || 0) + 1;
     act[a] = (act[a] || 0) + 1;
     
     if (f instanceof Date) {
-      const m = Utilities.formatDate(f, ss.getSpreadsheetTimeZone(), "yyyy-MM");
+      const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, '0');
       mesCounts[m] = (mesCounts[m] || 0) + 1;
       
       if (!mesUnicos[m]) mesUnicos[m] = {};
@@ -5801,6 +5972,86 @@ function obtenerDatosGraficos() {
     ok: true,
     estaciones: Object.entries(est).sort((a,b) => b[1] - a[1]).slice(0, 15),
     actividades: Object.entries(act).sort((a,b) => b[1] - a[1]).slice(0, 10),
-    mensual: mensual
+    mensual: mensual,
+    listaEstaciones: Object.keys(listaEstaciones)
   };
+}
+
+/**
+ * Rellena automáticamente la columna "TIPO DIA" (H) en TALLERES.
+ * Si ya tiene la palabra "SADOFE", la respeta (útil para feriados cargados a mano).
+ * Si está vacía o dice "SEMANA", evalúa si es fin de semana o no y la sobrescribe.
+ */
+function actualizarColumnaSadofe(silencioso = false) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hoja = ss.getSheetByName("TALLERES");
+  if (!hoja) {
+    if (!silencioso) SpreadsheetApp.getUi().alert("❌ No se encontró la solapa TALLERES");
+    return;
+  }
+  
+  const datos = hoja.getDataRange().getValues();
+  if (datos.length < 2) {
+    if (!silencioso) SpreadsheetApp.getUi().alert("⚠️ La solapa TALLERES está vacía.");
+    return;
+  }
+  
+  const headers = datos[0];
+  const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+  
+  if (idxFecha === -1) {
+    if (!silencioso) SpreadsheetApp.getUi().alert("❌ No se encontró la columna 'FECHA ACTIVIDAD'");
+    return;
+  }
+  
+  // Buscar columna TIPO DIA, o usar la H (índice 7)
+  let idxTipoDia = -1;
+  for (let i = 0; i < headers.length; i++) {
+    const h = String(headers[i]).toUpperCase();
+    if (h.includes("TIPO") || h.includes("SADOFE") || h.includes("FERIADO")) {
+      idxTipoDia = i;
+      break;
+    }
+  }
+  
+  // Forzar el índice 7 si el usuario pidió la columna H y no había un header previo claro
+  if (idxTipoDia === -1) {
+    idxTipoDia = 7; // Columna H
+    hoja.getRange(1, idxTipoDia + 1).setValue("TIPO DIA");
+  }
+  
+  const rangoActualizar = hoja.getRange(2, idxTipoDia + 1, datos.length - 1, 1);
+  const valoresNuevos = [];
+  
+  let cambiados = 0;
+
+  for (let i = 1; i < datos.length; i++) {
+    const f = datos[i][idxFecha];
+    const valorActual = String(datos[i][idxTipoDia] || "").toUpperCase().trim();
+    
+    // Si ya dice explícitamente SADOFE o FERIADO, lo respetamos por si fue cargado a mano
+    if (valorActual === "SADOFE" || valorActual.includes("FERIADO")) {
+      valoresNuevos.push([valorActual]);
+      continue;
+    }
+
+    if (f instanceof Date) {
+      const day = f.getDay();
+      const esFinde = (day === 0 || day === 6);
+      const valorNuevo = esFinde ? "SADOFE" : "SEMANA";
+      
+      if (valorActual !== valorNuevo) cambiados++;
+      valoresNuevos.push([valorNuevo]);
+    } else {
+      valoresNuevos.push([datos[i][idxTipoDia]]); // dejar como estaba si la fecha es inválida
+    }
+  }
+  
+  if (valoresNuevos.length > 0) {
+    rangoActualizar.setValues(valoresNuevos);
+  }
+  
+  if (!silencioso) {
+    SpreadsheetApp.getUi().alert(`✅ Columna actualizada correctamente en ${cambiados} filas.\n\nTodos los fines de semana dicen 'SADOFE' y los días hábiles dicen 'SEMANA'.\n\nSi hay un feriado en día de semana, puedes escribir manualmente 'SADOFE' en esa celda y este script lo respetará.`);
+  }
 }
