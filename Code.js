@@ -5143,10 +5143,7 @@ function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, compara
     alcance: contexto.titulo,
     archivo: pdf.archivo,
     mimeType: pdf.mimeType,
-    base64: pdf.base64,
-    origenInforme: origenInforme,
-    motivoRespaldo: contexto.errorIA || (origenInforme !== "ia" ? "Gemini devolvio una respuesta incompleta y se genero un informe de dato duro." : ""),
-    contenido: texto
+    base64: pdf.base64
   };
 }
 
@@ -5154,107 +5151,13 @@ function enviarInformeDashboardIA(datos, imagenes, emailDestino, asunto, mensaje
   let destinatario = String(emailDestino || "").trim();
   if (!destinatario) throw new Error("Debes indicar un correo electronico de destino.");
 
-  // 1. Preparar Prompt para IA
-  let prompt = [
-    "Actua como un analista institucional del programa Estaciones Saludables del GCBA.",
-    "Analiza los siguientes datos agregados del Tablero Gerencial:",
-    "",
-    "DATOS GENERALES:",
-    "- Estaciones Lideres: " + datos.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " participaciones)").join(", "),
-    "- Actividades con mayor volumen: " + datos.actividades.slice(0, 8).map(a => a[0] + " (" + a[1] + " participaciones)").join(", "),
-    "- Evolucion Mensual (Participaciones vs Unicas): " + datos.mensual.slice(-8).map(m => m[0] + ": " + m[1] + " cargas / " + m[2] + " personas").join(" | "),
-    "",
-    "CONSIGNA:",
-    "Genera un informe analitico ejecutivo (maximo 500 palabras).",
-    "Estructura obligatoria:",
-    "1. Resumen de Situacion: interpreta el volumen total y la tendencia de los ultimos meses.",
-    "2. Analisis de Composicion: destaca que estaciones y actividades traccionan el programa.",
-    "3. Lectura de Gestion: que sugieren estos numeros para la toma de decisiones (ej: reforzar horarios, diversificar oferta).",
-    "4. Recomendaciones: 3 puntos clave de accion.",
-    "Estilo profesional, institucional y basado estrictamente en la evidencia provista."
-  ].join("\n");
-
-  let analisis = "";
-  try {
-    analisis = solicitarInformeOpenRouter_(prompt);
-  } catch (e) {
-    analisis = "INFORME ANALITICO (MODO RESPALDO)\n\n" + 
-               "El analisis detallado por IA no pudo completarse. Basado en los datos directos:\n" +
-               "- La estacion con mayor volumen es " + (datos.estaciones[0] ? datos.estaciones[0][0] : "N/D") + ".\n" +
-               "- La actividad predominante es " + (datos.actividades[0] ? datos.actividades[0][0] : "N/D") + ".\n" +
-               "- Se observa una evolucion mensual con picos en " + (datos.mensual.length ? datos.mensual[datos.mensual.length-1][0] : "el ultimo mes") + ".\n" +
-               "Se recomienda revisar la consistencia de carga y la distribucion territorial.";
-  }
-
-  // 2. Generar Documento y PDF
-  let nombreArchivo = "Informe_Estadistico_Tablero_" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd_HHmm");
-  let doc = DocumentApp.create(nombreArchivo);
-  let body = doc.getBody();
-  
-  body.clear();
-  agregarFranjaDocumento_(body, "INFORME EJECUTIVO DE ESTADISTICAS", "#153244", "#ffffff", 14);
-  
-  body.appendParagraph("Generado: " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm")).setFontSize(9);
-  body.appendParagraph("Analisis asistido por Inteligencia Artificial basado en el Tablero Gerencial.").setItalic(true).setFontSize(9);
-  
-  body.appendParagraph("\nANALISIS Y DIAGNOSTICO").setHeading(DocumentApp.ParagraphHeading.HEADING1);
-  agregarTextoInformeADocumento_(body, analisis);
-
-  // Agregar Graficos
-  if (imagenes && (imagenes.est || imagenes.act || imagenes.mes)) {
-    body.appendPageBreak();
-    body.appendParagraph("ANEXO: VISUALIZACIONES COMPLEMENTARIAS").setHeading(DocumentApp.ParagraphHeading.HEADING1);
-    
-    if (imagenes.est) {
-      body.appendParagraph("\nRanking de Estaciones Saludables").setBold(true);
-      try {
-        let partes = imagenes.est.split(',');
-        let mime = partes[0].match(/:(.*?);/)[1];
-        let b = Utilities.base64Decode(partes[1]);
-        let img = body.appendImage(Utilities.newBlob(b, mime));
-        let w = img.getWidth();
-        let h = img.getHeight();
-        if (w > 460) {
-            img.setWidth(460);
-            img.setHeight(h * (460/w));
-        }
-      } catch(e){}
-    }
-
-    if (imagenes.act) {
-      body.appendParagraph("\nDistribucion por Actividad").setBold(true);
-      try {
-        let partes = imagenes.act.split(',');
-        let mime = partes[0].match(/:(.*?);/)[1];
-        let b = Utilities.base64Decode(partes[1]);
-        let img = body.appendImage(Utilities.newBlob(b, mime));
-        img.setWidth(300);
-        img.setHeight(300);
-      } catch(e){}
-    }
-
-    if (imagenes.mes) {
-      body.appendParagraph("\nEvolucion de Participaciones y Personas").setBold(true);
-      try {
-        let partes = imagenes.mes.split(',');
-        let mime = partes[0].match(/:(.*?);/)[1];
-        let b = Utilities.base64Decode(partes[1]);
-        let img = body.appendImage(Utilities.newBlob(b, mime));
-        let w = img.getWidth();
-        let h = img.getHeight();
-        if (w > 460) {
-            img.setWidth(460);
-            img.setHeight(h * (460/w));
-        }
-      } catch(e){}
-    }
-  }
-
+  let doc = crearDocumentoInformeDashboard_(datos, imagenes);
+  let nombre = doc.getName();
   doc.saveAndClose();
+  
   let pdf = DriveApp.getFileById(doc.getId()).getAs("application/pdf");
-  DriveApp.getFileById(doc.getId()).setTrashed(true); // Borrar temporal
+  DriveApp.getFileById(doc.getId()).setTrashed(true); 
 
-  // 3. Enviar Email
   MailApp.sendEmail({
     to: destinatario,
     subject: asunto || ("[Estaciones Saludables] Informe de Estadisticas"),
@@ -5263,6 +5166,104 @@ function enviarInformeDashboardIA(datos, imagenes, emailDestino, asunto, mensaje
   });
 
   return { ok: true, destino: destinatario };
+}
+
+function generarInformeDashboardParaDescarga(datos, imagenes) {
+  let doc = crearDocumentoInformeDashboard_(datos, imagenes);
+  let nombre = doc.getName() + ".pdf";
+  doc.saveAndClose();
+  
+  let blob = DriveApp.getFileById(doc.getId()).getAs("application/pdf");
+  let base64 = Utilities.base64Encode(blob.getBytes());
+  DriveApp.getFileById(doc.getId()).setTrashed(true); 
+
+  return { base64: base64, nombre: nombre };
+}
+
+function crearDocumentoInformeDashboard_(datos, imagenes) {
+  // 1. Preparar Datos Consolidados para el Prompt
+  const claves = Object.keys(datos.resultados).sort();
+  let resumenTexto = "";
+  
+  claves.forEach(c => {
+    const r = datos.resultados[c];
+    resumenTexto += `\nPERÍODO: ${c}\n`;
+    resumenTexto += `- Estaciones Líderes: ${r.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " part.)").join(", ")}\n`;
+    resumenTexto += `- Actividades Predominantes: ${r.actividades.slice(0, 8).map(a => a[0] + " (" + a[1] + " part.)").join(", ")}\n`;
+    const totalP = r.mensual.reduce((a, b) => a + b[1], 0);
+    const totalU = r.mensual.reduce((a, b) => a + b[2], 0);
+    resumenTexto += `- Métricas Consolidadas: ${totalP} participaciones totales / ${totalU} usuarios únicos\n`;
+  });
+
+  let prompt = [
+    "Actúa como un Consultor Estratégico Senior especializado en Salud Pública y Gestión Operativa del programa Estaciones Saludables (GCBA).",
+    "Tu misión es realizar un análisis forense y prospectivo basado en los datos del Tablero Gerencial.",
+    "",
+    "CONTEXTO DE LOS DATOS:",
+    "- Modo de Visualización: " + (datos.modo === "comparacion" ? "Comparativa entre Períodos" : "Análisis Acumulado"),
+    "- Datos Estadísticos:",
+    resumenTexto,
+    "",
+    "CONSIGNA DE ANÁLISIS (CRÍTICO):",
+    "Genera un informe ejecutivo de alto nivel (máximo 600 palabras) que cumpla con los siguientes requisitos:",
+    "1. Análisis de Variaciones: Si hay comparación, explica detalladamente los motivos lógicos de las variaciones (ej: estacionalidad, éxito de ciertas actividades, impacto territorial). Si no hay comparación, evalúa la solidez del volumen actual.",
+    "2. Correlación Estación-Actividad: Analiza si la oferta de actividades en las estaciones líderes es la adecuada para traccionar más público.",
+    "3. Hallazgos y 'Pain Points': Identifica dónde se están perdiendo oportunidades de crecimiento.",
+    "4. Hoja de Ruta Estratégica: Provee sugerencias REALES y ACCIONABLES para incrementar los números de participación y usuarios únicos (ej: redistribución de profesores, horarios críticos, diversificación de servicios).",
+    "",
+    "ESTRUCTURA DEL INFORME:",
+    "A. Diagnóstico Situacional y Tendencias.",
+    "B. Evaluación de Impacto Operativo (por estación y actividad).",
+    "C. Análisis Causal de las Estadísticas (explicar el 'porqué' de los números).",
+    "D. Plan de Acción Recomendado (3-5 puntos clave).",
+    "",
+    "Tono institucional, analítico, directo y con rigor estadístico. Evita generalidades; usa los datos provistos para justificar cada afirmación."
+  ].join("\n");
+
+  let analisis = "";
+  try {
+    analisis = solicitarInformeOpenRouter_(prompt);
+  } catch (e) {
+    analisis = "INFORME ANALITICO (MODO RESPALDO)\n\n" + 
+               "El analisis detallado por IA no pudo completarse. Se recomienda revisar la consistencia de carga y la distribucion territorial en el tablero visual.";
+  }
+
+  // 2. Generar Documento
+  let nombreArchivo = "Informe_Analitico_Estaciones_" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd_HHmm");
+  let doc = DocumentApp.create(nombreArchivo);
+  let body = doc.getBody();
+  
+  body.clear();
+  agregarFranjaDocumento_(body, "INFORME ANALÍTICO DE ESTADÍSTICAS", "#153244", "#ffffff", 14);
+  
+  body.appendParagraph("Generado: " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm")).setFontSize(9);
+  body.appendParagraph("Filtro: " + (datos.modo === "comparacion" ? "Comparativo Mensual" : "Acumulado del Período")).setItalic(true).setFontSize(9);
+  
+  body.appendParagraph("\nANÁLISIS Y DIAGNÓSTICO ESTRATÉGICO").setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  agregarTextoInformeADocumento_(body, analisis);
+
+  // Agregar Graficos
+  if (imagenes && Object.keys(imagenes).length > 0) {
+    body.appendPageBreak();
+    body.appendParagraph("ANEXO: VISUALIZACIONES DEL TABLERO").setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    
+    Object.keys(imagenes).forEach(key => {
+        try {
+          let partes = imagenes[key].split(',');
+          let mime = partes[0].match(/:(.*?);/)[1];
+          let b = Utilities.base64Decode(partes[1]);
+          let img = body.appendImage(Utilities.newBlob(b, mime));
+          
+          let w = img.getWidth();
+          let h = img.getHeight();
+          if (w > 480) {
+              img.setWidth(480);
+              img.setHeight(h * (480/w));
+          }
+        } catch(e){}
+    });
+  }
+  return doc;
 }
 
 function enviarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, comparacion, filtros, emailDestino, asuntoPersonalizado, mensajePersonalizado, emailSesion) {
@@ -5892,52 +5893,60 @@ function generarDashboardGerencial() {
  * Procesa los datos de TALLERES para el frontend.
  * Evita enviar miles de filas, solo envía los totales agregados.
  */
-function obtenerDatosGraficos(filtroEstacion, filtroDias) {
+function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const hojaTalleres = ss.getSheetByName("TALLERES");
   if (!hojaTalleres || hojaTalleres.getLastRow() < 2) return { ok: false, msg: "Sin datos" };
 
   const datos = hojaTalleres.getDataRange().getValues();
-  const headers = datos[0];
-  const filas = datos.slice(1);
-
+  const headers = datos[0].map(h => String(h).toUpperCase().trim());
+  
   const idxDni = headers.indexOf("DNI");
   const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
-  const idxEstacion = headers.indexOf("ESTACION");
-  const idxActividad = headers.indexOf("ACTIVIDAD");
   
-  // Buscar columna para Tipo de Día o usar la última
+  let idxEstacion = headers.indexOf("ESTACION");
+  if (idxEstacion === -1) idxEstacion = headers.findIndex(h => h.includes("ESTACION"));
+  
+  let idxActividad = headers.indexOf("ACTIVIDAD");
+  if (idxActividad === -1) idxActividad = headers.findIndex(h => h.includes("ACTIVIDAD"));
+  
+  let idxProfesor = headers.indexOf("PROFESOR");
+  if (idxProfesor === -1) idxProfesor = headers.findIndex(h => h.includes("PROFESOR"));
+  
   let idxTipoDia = -1;
   for (let i = 0; i < headers.length; i++) {
-    const h = String(headers[i]).toUpperCase();
+    const h = headers[i];
     if (h.includes("TIPO") && h.includes("DIA")) idxTipoDia = i;
-    else if (h.includes("FERIADO") || h.includes("FINDE")) idxTipoDia = i;
+    else if (h.includes("FERIADO") || h.includes("FINDE") || h.includes("SADOFE")) idxTipoDia = i;
   }
-  if (idxTipoDia === -1) {
-    idxTipoDia = headers.length - 1; // usar la ultima si no hay coincidencia
-  }
+  if (idxTipoDia === -1) idxTipoDia = headers.length - 1;
 
-  const est = {};
-  const act = {};
-  const mesCounts = {};
-  const mesUnicos = {};
-  const listaEstaciones = {};
+  const filas = datos.slice(1);
+
+  const mesesDisponibles = {};
+  const dataAgrupada = {}; 
 
   filas.forEach(fila => {
-    const e = fila[idxEstacion] || "Sin Datos";
-    listaEstaciones[e] = true;
+    const f = fila[idxFecha];
+    if (!(f instanceof Date)) return;
+    
+    const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, '0');
+    mesesDisponibles[m] = true;
+    
+    if (filtroMeses && filtroMeses.length > 0 && !filtroMeses.includes(m)) return;
+
+    const e = String(fila[idxEstacion] || "Sin Datos");
+    const d = String(fila[idxDni] || "").trim();
+    const a = fila[idxActividad] || "Sin Datos";
+    const p = fila[idxProfesor] || "Sin Datos";
     
     if (filtroEstacion && e !== filtroEstacion) return;
 
-    const f = fila[idxFecha];
-    
     let isFinde = false;
     const tipoColVal = String(fila[idxTipoDia] || "").toUpperCase();
-    
-    // Validar por la columna de feriados o por el día de la semana
     if (tipoColVal.includes("FINDE") || tipoColVal.includes("FERIADO") || tipoColVal.includes("SAB") || tipoColVal.includes("DOM") || tipoColVal.includes("SADOFE")) {
       isFinde = true;
-    } else if (f instanceof Date) {
+    } else {
       const day = f.getDay();
       isFinde = (day === 0 || day === 6);
     }
@@ -5945,35 +5954,86 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias) {
     if (filtroDias === "semana" && isFinde) return;
     if (filtroDias === "finde" && !isFinde) return;
 
-    const d = String(fila[idxDni] || "").trim();
-    const a = fila[idxActividad] || "Sin Datos";
-
-    est[e] = (est[e] || 0) + 1;
-    act[a] = (act[a] || 0) + 1;
+    const clave = (modo === "comparacion") ? m : "acumulado";
+    if (!dataAgrupada[clave]) {
+      dataAgrupada[clave] = { est: {}, act: {}, prof: {}, mesCounts: {}, mesUnicos: {}, dias: {} };
+    }
     
-    if (f instanceof Date) {
-      const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, '0');
-      mesCounts[m] = (mesCounts[m] || 0) + 1;
-      
-      if (!mesUnicos[m]) mesUnicos[m] = {};
-      if (d) mesUnicos[m][d] = true;
+    const target = dataAgrupada[clave];
+    if (e.includes("*")) {
+      if (!target.est[e]) target.est[e] = { participaciones: 0, unicos: {} };
+      target.est[e].participaciones++;
+      if (d) target.est[e].unicos[d] = true;
+    }
+    
+    target.act[a] = (target.act[a] || 0) + 1;
+    
+    if (!target.prof[p]) target.prof[p] = { participaciones: 0, unicos: {} };
+    target.prof[p].participaciones++;
+    if (d) target.prof[p].unicos[d] = true;
+    
+    target.mesCounts[m] = (target.mesCounts[m] || 0) + 1;
+    if (!target.mesUnicos[m]) target.mesUnicos[m] = {};
+    if (d) target.mesUnicos[m][d] = true;
+
+    // Desglose por día del mes (1-31)
+    const dia = f.getDate();
+    if (!target.dias[dia]) target.dias[dia] = { participaciones: 0, unicos: {} };
+    target.dias[dia].participaciones++;
+    if (d) target.dias[dia].unicos[d] = true;
+  });
+
+  // Re-procesar estaciones si el filtro de asterisco dejó todo vacío
+  Object.keys(dataAgrupada).forEach(clave => {
+    const t = dataAgrupada[clave];
+    if (Object.keys(t.est).length === 0) {
+      filas.forEach(fila => {
+        const e = String(fila[idxEstacion] || "");
+        if (e.toUpperCase().includes("SALUDABLE")) {
+          const f = fila[idxFecha];
+          if (!(f instanceof Date)) return;
+          const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, '0');
+          if (filtroMeses && filtroMeses.length > 0 && !filtroMeses.includes(m)) return;
+          const c = (modo === "comparacion") ? m : "acumulado";
+          if (c !== clave) return;
+
+          const d = String(fila[idxDni] || "").trim();
+          if (!t.est[e]) t.est[e] = { participaciones: 0, unicos: {} };
+          t.est[e].participaciones++;
+          if (d) t.est[e].unicos[d] = true;
+        }
+      });
     }
   });
 
-  const mensual = Object.keys(mesCounts).sort().map(m => {
-    return [
-      m, 
-      mesCounts[m], 
-      mesUnicos[m] ? Object.keys(mesUnicos[m]).length : 0
-    ];
+  const resultados = {};
+  Object.keys(dataAgrupada).forEach(clave => {
+    const t = dataAgrupada[clave];
+    resultados[clave] = {
+      estaciones: Object.entries(t.est)
+        .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length])
+        .sort((a,b) => b[1] - a[1]),
+      actividades: Object.entries(t.act).sort((a,b) => b[1] - a[1]).slice(0, 10),
+      profesores: Object.entries(t.prof)
+        .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length])
+        .sort((a, b) => b[1] - a[1]).slice(0, 10),
+      mensual: Object.keys(t.mesCounts).sort().map(m => [m, t.mesCounts[m], Object.keys(t.mesUnicos[m]).length]),
+      dias: Object.keys(t.dias).sort((a, b) => a - b).map(d => [d, t.dias[d].participaciones, Object.keys(t.dias[d].unicos).length])
+    };
+  });
+
+  const listaEstaciones = {};
+  filas.forEach(f => {
+    const e = f[idxEstacion];
+    if (e) listaEstaciones[e] = true;
   });
 
   return {
     ok: true,
-    estaciones: Object.entries(est).sort((a,b) => b[1] - a[1]).slice(0, 15),
-    actividades: Object.entries(act).sort((a,b) => b[1] - a[1]).slice(0, 10),
-    mensual: mensual,
-    listaEstaciones: Object.keys(listaEstaciones)
+    modo: modo || "periodo",
+    resultados: resultados,
+    mesesDisponibles: Object.keys(mesesDisponibles).sort(),
+    listaEstaciones: Object.keys(listaEstaciones).sort()
   };
 }
 

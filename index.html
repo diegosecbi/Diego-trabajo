@@ -1044,7 +1044,7 @@ grid-template-columns:1fr;
 </div>
 </div>
 
-<div id="modalEnvioInforme" class="modalOverlay" onclick="cerrarModalEnvioInforme(event)">
+<div id="modalEnvioInforme" class="modalOverlay" style="z-index: 5000;" onclick="cerrarModalEnvioInforme(event)">
 <div class="modalVentana" style="width:min(560px,94vw);" onclick="event.stopPropagation()">
 <div class="modalHeader">
 <div>
@@ -1067,9 +1067,10 @@ grid-template-columns:1fr;
 <textarea id="mensajeEnvioInforme" class="campoTexto" rows="5" placeholder="Mensaje adicional para el destinatario"></textarea>
 </div>
 <div class="estadoVacio" id="estadoEnvioInforme" style="display:none;margin-top:16px;"></div>
-<div class="accionesPopup">
-<button class="botonSecundario" onclick="cerrarModalEnvioInforme()">Cancelar</button>
-<button id="btnConfirmarEnvioInforme" class="botonInformeIA" onclick="confirmarEnvioInforme()">Enviar PDF</button>
+<div class="accionesPopup" style="flex-wrap: wrap; gap: 10px;">
+    <button class="botonSecundario" onclick="cerrarModalEnvioInforme()">Cancelar</button>
+    <button id="btnDescargarInforme" class="botonSecundario" onclick="confirmarDescargaInforme()" style="border: 2px solid #0066cc; color: #0066cc;">🪄 Solo Descargar</button>
+    <button id="btnConfirmarEnvioInforme" class="botonInformeIA" onclick="confirmarEnvioInforme()">📧 Enviar por Mail</button>
 </div>
 </div>
 </div>
@@ -1091,20 +1092,36 @@ grid-template-columns:1fr;
 <div class="modalBody">
   <!-- Filtros -->
   <div style="display:flex; gap:15px; align-items: center; flex-wrap: wrap; background: white; padding: 20px; border-radius: 16px; box-shadow: var(--sombra-suave);">
-      <div style="flex: 1; min-width: 250px;">
+      <div style="flex: 1; min-width: 200px;">
           <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Estación Seleccionada</label>
           <select id="filtroEstacionGrafico" class="campoTexto" onchange="aplicarFiltrosGraficos()">
               <option value="">Todas las Estaciones Saludables</option>
           </select>
       </div>
-      <div style="flex: 1; min-width: 250px;">
+      <div style="flex: 1; min-width: 150px;">
+          <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Modo</label>
+          <select id="filtroModoGrafico" class="campoTexto" onchange="cambiarModoGrafico()">
+              <option value="periodo">Período (Acumulado)</option>
+              <option value="comparacion">Comparación (Mes a Mes)</option>
+          </select>
+      </div>
+      <div style="flex: 2; min-width: 250px;">
+          <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Seleccionar Meses</label>
+          <div id="multiselectMeses" style="max-height: 80px; overflow-y: auto; border: 1px solid #c9d7df; border-radius: 10px; padding: 8px; background: #f9fcfe; display: flex; flex-wrap: wrap; gap: 8px;">
+              <!-- Se llena dinámicamente -->
+          </div>
+      </div>
+      <div style="flex: 0; min-width: 140px;">
           <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Tipo de Día</label>
           <button id="btnFiltroDiasGrafico" class="botonSecundario" onclick="toggleFiltroDiasGrafico()" style="width: 100%; border-radius: 12px; height: 48px;">Días: Todos</button>
+      </div>
+      <div style="flex: 0; min-width: 120px; display: flex; align-items: flex-end;">
+          <button class="botonActualizar" onclick="aplicarFiltrosGraficos()" style="height: 48px; width: 100%; font-size: 12px;">🔄 Actualizar</button>
       </div>
   </div>
 
   <!-- Métricas Rápidas -->
-  <div id="metricasGraficasFlash" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+  <div id="metricasGraficasFlash" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
       <div class="resumenCard" style="border-top-color: var(--color-celeste-es);">
           <div class="resumenLabel">Participaciones</div>
           <div class="resumenValor" id="flashParticipaciones">0</div>
@@ -1119,28 +1136,38 @@ grid-template-columns:1fr;
       </div>
   </div>
 
-  <!-- Gráficos Superiores -->
-  <div class="panelGraficosContainer">
-      <div class="panelDetalle">
-          <div class="resumenLabel" style="margin-bottom: 15px;">Top Estaciones por Volumen</div>
-          <div class="canvasWrapper">
-            <canvas id="chartEstaciones"></canvas>
-          </div>
-      </div>
-      <div class="panelDetalle">
-          <div class="resumenLabel" style="margin-bottom: 15px;">Distribución de Actividades (%)</div>
-          <div class="canvasWrapper">
-            <canvas id="chartActividades"></canvas>
-          </div>
-      </div>
-  </div>
+  <div id="contenedorGraficosDinamicos" style="margin-top: 25px;">
+    <!-- Gráficos Superiores -->
+    <div class="panelGraficosContainer">
+        <div class="panelDetalle">
+            <div class="resumenLabel" style="margin-bottom: 15px; font-weight: 800;">Ranking de Estaciones Saludables (*)</div>
+            <div class="canvasWrapper" style="height: 500px;">
+              <canvas id="chartEstaciones"></canvas>
+            </div>
+        </div>
+        <div class="panelDetalle">
+            <div class="resumenLabel" style="margin-bottom: 15px; font-weight: 800;">Top 10 Profesores (Participaciones vs Únicos)</div>
+            <div class="canvasWrapper" style="height: 500px;">
+              <canvas id="chartProfesores"></canvas>
+            </div>
+        </div>
+    </div>
 
-  <!-- Gráfico Inferior -->
-  <div class="panelDetalle">
-      <div class="resumenLabel" style="margin-bottom: 15px;">Evolución Histórica Mensual</div>
-      <div class="canvasWrapper" style="min-height: 250px;">
-        <canvas id="chartMensual"></canvas>
-      </div>
+    <!-- Gráficos Inferiores -->
+    <div class="panelGraficosContainer" style="margin-top: 20px;">
+        <div class="panelDetalle">
+            <div class="resumenLabel" style="margin-bottom: 15px; font-weight: 800;">Distribución de Actividades (%)</div>
+            <div class="canvasWrapper">
+              <canvas id="chartActividades"></canvas>
+            </div>
+        </div>
+        <div class="panelDetalle">
+            <div class="resumenLabel" style="margin-bottom: 15px; font-weight: 800;">Evolución Histórica Mensual</div>
+            <div class="canvasWrapper">
+              <canvas id="chartMensual"></canvas>
+            </div>
+        </div>
+    </div>
   </div>
 </div>
 </div>
@@ -2718,6 +2745,57 @@ document.getElementById("modalEnvioInforme").classList.remove("visible")
 let timerInformeInterval = null;
 let segundosInforme = 0;
 
+function confirmarDescargaInforme() {
+    if (envioInformeCargando) return;
+    if (origenInformeActual === "dashboard" && !datosGraficosActuales) return;
+
+    let boton = document.getElementById("btnDescargarInforme");
+    let estado = document.getElementById("estadoEnvioInforme");
+    
+    envioInformeCargando = true;
+    if (estado) {
+        estado.style.display = "block";
+        estado.style.color = "#153244";
+        estado.textContent = "Generando PDF y análisis de IA para descarga...";
+    }
+    boton.disabled = true;
+
+    let imagenes = {};
+    try {
+        Object.keys(chartsInstancias).forEach(key => {
+            if (chartsInstancias[key] && typeof chartsInstancias[key].toDataURL === 'function') {
+                imagenes[key] = chartsInstancias[key].toDataURL('image/jpeg', 0.7);
+            }
+        });
+    } catch (e) { console.error(e); }
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            envioInformeCargando = false;
+            boton.disabled = false;
+            if (estado) estado.textContent = "✅ Preparando descarga...";
+            
+            // Trigger download
+            const link = document.createElement('a');
+            link.href = "data:application/pdf;base64," + res.base64;
+            link.download = res.nombre || "Informe_IA.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            setTimeout(cerrarModalEnvioInforme, 2000);
+        })
+        .withFailureHandler(function(error) {
+            envioInformeCargando = false;
+            boton.disabled = false;
+            if (estado) {
+                estado.style.color = "#d32f2f";
+                estado.textContent = "Error: " + error.message;
+            }
+        })
+        .generarInformeDashboardParaDescarga(datosGraficosActuales, imagenes);
+}
+
 function confirmarEnvioInforme() {
     if (envioInformeCargando) return;
     if (origenInformeActual === "especial" && !resumenEspecialActual) return;
@@ -2780,12 +2858,14 @@ function confirmarEnvioInforme() {
     if (origenInformeActual === "dashboard") {
         let imagenes = {};
         try {
-            // Usamos jpeg con calidad 0.7 para reducir el peso del payload y evitar timeouts
-            if (chartsInstancias.est) imagenes.est = chartsInstancias.est.toDataURL('image/jpeg', 0.7);
-            if (chartsInstancias.act) imagenes.act = chartsInstancias.act.toDataURL('image/jpeg', 0.7);
-            if (chartsInstancias.mes) imagenes.mes = chartsInstancias.mes.toDataURL('image/jpeg', 0.7);
-            
-            console.log("Imágenes capturadas y optimizadas para envío.");
+            // Capturar todos los gráficos activos en chartsInstancias
+            Object.keys(chartsInstancias).forEach(key => {
+                if (chartsInstancias[key] && typeof chartsInstancias[key].toDataURL === 'function') {
+                    // Usamos jpeg con calidad 0.7 para reducir el peso del payload
+                    imagenes[key] = chartsInstancias[key].toDataURL('image/jpeg', 0.7);
+                }
+            });
+            console.log("Imágenes capturadas dinámicamente:", Object.keys(imagenes));
         } catch (e) {
             console.error("Error capturando imagenes:", e);
         }
@@ -3135,7 +3215,6 @@ function abrirDashboardGraficos() {
     // Llenar select si no se llenó todavía
     const sel = document.getElementById("filtroEstacionGrafico");
     if(sel && sel.options.length <= 1) {
-        // En la primera carga, reseteamos filtros para traer todo
         sel.value = "";
         filtroDiasGrafico = "todos";
         const btnFiltro = document.getElementById("btnFiltroDiasGrafico");
@@ -3160,30 +3239,56 @@ function toggleFiltroDiasGrafico() {
     aplicarFiltrosGraficos();
 }
 
+function obtenerMesesSeleccionados() {
+    const checks = document.querySelectorAll('.check-mes:checked');
+    return Array.from(checks).map(c => c.value);
+}
+
+function cambiarModoGrafico() {
+    aplicarFiltrosGraficos();
+}
+
 function aplicarFiltrosGraficos() {
     const est = document.getElementById("filtroEstacionGrafico").value;
+    const modo = document.getElementById("filtroModoGrafico").value;
+    const meses = obtenerMesesSeleccionados();
     
     const btn = document.getElementById("btnDashboardGraficos");
     if(btn) btn.innerText = "⏳ Calculando...";
 
-    Object.values(chartsInstancias).forEach(chart => chart.destroy());
+    // Limpiar instancias previas
+    Object.values(chartsInstancias).forEach(chart => {
+        if(Array.isArray(chart)) chart.forEach(c => c.destroy());
+        else chart.destroy();
+    });
+    chartsInstancias = {};
 
     google.script.run
         .withSuccessHandler(function(res) {
-            datosGraficosActuales = res; // Guardar para informe IA
+            datosGraficosActuales = res;
             if(btn) btn.innerText = "📊 Ver Gráficos";
             if (!res.ok) {
-                alert("No se pudieron obtener los datos para los gráficos: " + (res.msg || "Sin datos"));
+                alert("No se pudieron obtener los datos: " + (res.msg || "Sin datos"));
                 return;
             }
             
+            // Poblar meses si no están
+            const contMeses = document.getElementById("multiselectMeses");
+            if(contMeses && contMeses.children.length === 0 && res.mesesDisponibles) {
+                contMeses.innerHTML = res.mesesDisponibles.map(m => `
+                    <label style="display:flex; align-items:center; gap:5px; font-size:12px; background:white; padding:4px 8px; border-radius:6px; border:1px solid #ddd; cursor:pointer;">
+                        <input type="checkbox" class="check-mes" value="${m}" onchange="aplicarFiltrosGraficos()"> ${m}
+                    </label>
+                `).join("");
+            }
+
             // Poblar select de estaciones si está vacío (sólo en la primera carga general)
             const sel = document.getElementById("filtroEstacionGrafico");
             if(sel && sel.options.length <= 1 && res.listaEstaciones) {
                 const val = sel.value;
                 sel.innerHTML = '<option value="">Todas las Estaciones Saludables</option>';
                 res.listaEstaciones
-                    .filter(e => e.toLowerCase().includes("saludable"))
+                    .filter(e => e.toLowerCase().includes("saludable") || e.includes("*"))
                     .sort()
                     .forEach(e => {
                         const op = document.createElement("option");
@@ -3193,14 +3298,14 @@ function aplicarFiltrosGraficos() {
                     });
                 sel.value = val;
             }
-            
+
             renderizarCharts(res);
         })
         .withFailureHandler(function(err) {
             if(btn) btn.innerText = "📊 Ver Gráficos";
             alert("Error al cargar gráficos: " + err.message);
         })
-        .obtenerDatosGraficos(est, filtroDiasGrafico);
+        .obtenerDatosGraficos(est, filtroDiasGrafico, meses, modo);
 }
 
 function cerrarModalGraficos(event) {
@@ -3208,79 +3313,300 @@ function cerrarModalGraficos(event) {
     document.getElementById("modalGraficos").classList.remove("visible");
 }
 
-// Registrar plugin globalmente si está disponible
-if (typeof ChartDataLabels !== 'undefined') {
-  Chart.register(ChartDataLabels);
-}
+const COLORES_PERIODOS = [
+    { main: '#153244', light: 'rgba(21, 50, 68, 0.1)', alt: '#800020', altLight: 'rgba(128, 0, 32, 0.1)' }, // Azul / Bordó
+    { main: '#4caf50', light: 'rgba(76, 175, 80, 0.1)', alt: '#ff9800', altLight: 'rgba(255, 152, 0, 0.1)' }, // Verde / Naranja
+    { main: '#2196f3', light: 'rgba(33, 150, 243, 0.1)', alt: '#f44336', altLight: 'rgba(244, 67, 54, 0.1)' }  // Celeste / Rojo
+];
+
+const FONT_SETTINGS = { size: 12, family: "'Inter', sans-serif" };
+const FONT_SETTINGS_TICKS = { size: 11, family: "'Inter', sans-serif" };
 
 function renderizarCharts(data) {
-    // 0. Actualizar Métricas Rápidas (Flash)
-    try {
-        const participaciones = data.mensual.reduce((a, b) => a + (b[1] || 0), 0);
-        const unicas = data.mensual.reduce((a, b) => a + (b[2] || 0), 0);
-        const dias = data.mensual.length || 1;
+    const container = document.getElementById("contenedorGraficosDinamicos");
+    container.innerHTML = ""; 
+
+    const claves = Object.keys(data.resultados).sort();
+    if (claves.length === 0) return;
+
+    if (data.modo === "comparacion" && claves.length > 1) {
+        renderizarVistaComparativa(container, data, claves);
+    } else {
+        renderizarVistaIndividual(container, data, claves);
+    }
+
+    // Actualizar métricas flash
+    let totalP = 0, totalU = 0, countM = 0;
+    claves.forEach(c => {
+        totalP += data.resultados[c].mensual.reduce((a, b) => a + (b[1] || 0), 0);
+        totalU += data.resultados[c].mensual.reduce((a, b) => a + (b[2] || 0), 0);
+        countM += data.resultados[c].mensual.length || 1;
+    });
+    document.getElementById("flashParticipaciones").textContent = totalP.toLocaleString();
+    document.getElementById("flashUnicas").textContent = totalU.toLocaleString();
+    document.getElementById("flashPromedio").textContent = Math.round(totalP / (countM || 1)).toLocaleString();
+}
+
+function renderizarVistaIndividual(container, data, claves) {
+    claves.forEach((clave, index) => {
+        const d = data.resultados[clave];
+        const titulo = `RESUMEN ACUMULADO (Período Seleccionado)`;
         
-        document.getElementById("flashParticipaciones").textContent = participaciones.toLocaleString();
-        document.getElementById("flashUnicas").textContent = unicas.toLocaleString();
-        document.getElementById("flashPromedio").textContent = Math.round(participaciones / dias).toLocaleString();
-    } catch(e) { console.error("Error en métricas flash:", e); }
+        const section = document.createElement("div");
+        section.className = "panelGraficosContainer";
+        section.style.marginTop = "30px";
+        
+        section.innerHTML = `
+            <div style="grid-column: span 2; background: #153244; color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
+                ${titulo}
+            </div>
+            <div class="card" style="grid-column: span 2;">
+                <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📈 Evolución Temporal (Participaciones vs Personas Únicas)</div>
+                <div class="canvasWrapper" style="height: 300px;"><canvas id="chartMensual_${clave}"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📊 Ranking de Estaciones Saludables (*)</div>
+                <div class="canvasWrapper" style="height: 500px;"><canvas id="chartEstaciones_${clave}"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📊 Top 10 Profesores (Participaciones vs Únicos)</div>
+                <div class="canvasWrapper" style="height: 500px;"><canvas id="chartProfesores_${clave}"></canvas></div>
+            </div>
+            <div class="card" style="grid-column: span 2;">
+                <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">🍕 Distribución de Actividades (%)</div>
+                <div class="canvasWrapper" style="height: 400px;"><canvas id="chartActividades_${clave}"></canvas></div>
+            </div>
+        `;
+        container.appendChild(section);
+        
+        crearGraficoEvolucion(clave, d.mensual);
+        crearGraficoEstaciones(clave, d.estaciones);
+        crearGraficoProfesores(clave, d.profesores);
+        crearGraficoActividades(clave, d.actividades);
+    });
+}
 
-    const estacionesFiltradas = data.estaciones.filter(i => i[0].toLowerCase().includes("saludable"));
+function renderizarVistaComparativa(container, data, claves) {
+    const section = document.createElement("div");
+    section.className = "panelGraficosContainer";
+    section.innerHTML = `
+        <div style="grid-column: span 2; background: #0066cc; color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; font-size: 14px; display:flex; justify-content:space-between; align-items:center;">
+            <span>🔄 MODO COMPARACIÓN ACTIVADO</span>
+            <span style="font-size:12px; background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px;">${claves.join(" vs ")}</span>
+        </div>
+        <div class="card" style="grid-column: span 2;">
+            <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📈 Comparativa Diaria: Evolución del Mes (Día 1-31)</div>
+            <div class="canvasWrapper" style="height: 400px;"><canvas id="chartComparativoMensual"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📊 Comparativa: Ranking de Estaciones (*)</div>
+            <div class="canvasWrapper" style="height: 600px;"><canvas id="chartComparativoEstaciones"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📊 Comparativa: Top 10 Profesores</div>
+            <div class="canvasWrapper" style="height: 600px;"><canvas id="chartComparativoProfesores"></canvas></div>
+        </div>
+        <div class="card" style="grid-column: span 2;">
+            <div class="tituloSeccion" style="font-size: 16px; margin-bottom: 15px;">📉 Comparativa de Actividades (Top 10)</div>
+            <div class="canvasWrapper" style="height: 400px;"><canvas id="chartComparativoActividades"></canvas></div>
+        </div>
+    `;
+    container.appendChild(section);
 
-    // 1. Chart Estaciones
-    const ctxEst = document.getElementById('chartEstaciones').getContext('2d');
-    chartsInstancias.est = new Chart(ctxEst, {
-        type: 'bar',
-        data: {
-            labels: estacionesFiltradas.map(i => i[0]),
-            datasets: [{
-                label: 'Participaciones',
-                data: estacionesFiltradas.map(i => i[1]),
-                backgroundColor: '#153244',
-                borderRadius: 8
-            }]
-        },
-        options: { 
-            animation: false, 
-            indexAxis: 'y', 
+    // 1. Gráfico Líneas Combinado
+    const ctxMes = document.getElementById('chartComparativoMensual').getContext('2d');
+    const datasetsMes = [];
+    claves.forEach((c, i) => {
+        const col = COLORES_PERIODOS[i % COLORES_PERIODOS.length];
+        const d = data.resultados[c].dias; // Formato [dia, part, unicos]
+        datasetsMes.push({
+            label: `Asistencias (${c})`,
+            data: d.map(item => ({ x: item[0], y: item[1] })),
+            borderColor: col.main,
+            backgroundColor: col.light,
+            fill: false,
+            tension: 0.4
+        });
+        datasetsMes.push({
+            label: `Únicos (${c})`,
+            data: d.map(item => ({ x: item[0], y: item[2] })),
+            borderColor: col.alt,
+            backgroundColor: col.altLight,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4
+        });
+    });
+
+    chartsInstancias.comparativoMes = new Chart(ctxMes, {
+        type: 'line',
+        data: { datasets: datasetsMes },
+        options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { 
-                title: { display: false },
-                legend: { display: false },
-                datalabels: { display: false }
+            scales: { 
+                x: { type: 'linear', min: 1, max: 31, ticks: { font: FONT_SETTINGS_TICKS }, title: { display: true, text: 'Día del Mes', font: FONT_SETTINGS } },
+                y: { ticks: { font: FONT_SETTINGS_TICKS } }
             },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { display: false } }
-            }
+            plugins: { legend: { position: 'top', labels: { boxWidth: 15, font: FONT_SETTINGS } }, datalabels: { display: false } }
         }
     });
 
-    // 2. Chart Actividades (Pie con % fijos)
-    const ctxAct = document.getElementById('chartActividades').getContext('2d');
-    chartsInstancias.act = new Chart(ctxAct, {
+    // 2. Gráfico Estaciones Agrupado
+    const ctxEst = document.getElementById('chartComparativoEstaciones').getContext('2d');
+    const todasEstaciones = [...new Set(claves.flatMap(c => data.resultados[c].estaciones.map(e => e[0])))].slice(0, 20);
+    const datasetsEst = [];
+    claves.forEach((c, i) => {
+        const col = COLORES_PERIODOS[i % COLORES_PERIODOS.length];
+        datasetsEst.push({
+            label: `${c} (Part.)`,
+            data: todasEstaciones.map(nom => {
+                const found = data.resultados[c].estaciones.find(e => e[0] === nom);
+                return found ? found[1] : 0;
+            }),
+            backgroundColor: col.main
+        });
+    });
+
+    chartsInstancias.comparativoEst = new Chart(ctxEst, {
+        type: 'bar',
+        data: { labels: todasEstaciones.map(n => String(n).replace("*","").trim()), datasets: datasetsEst },
+        options: { 
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+            scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
+            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+        }
+    });
+
+    // 3. Gráfico Profesores Agrupado
+    const ctxProf = document.getElementById('chartComparativoProfesores').getContext('2d');
+    const todosProfes = [...new Set(claves.flatMap(c => data.resultados[c].profesores.map(p => p[0])))].slice(0, 10);
+    const datasetsProf = [];
+    claves.forEach((c, i) => {
+        const col = COLORES_PERIODOS[i % COLORES_PERIODOS.length];
+        datasetsProf.push({
+            label: `${c}`,
+            data: todosProfes.map(nom => {
+                const found = data.resultados[c].profesores.find(p => p[0] === nom);
+                return found ? found[1] : 0;
+            }),
+            backgroundColor: col.main
+        });
+    });
+
+    chartsInstancias.comparativoProf = new Chart(ctxProf, {
+        type: 'bar',
+        data: { labels: todosProfes, datasets: datasetsProf },
+        options: { 
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+            scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
+            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+        }
+    });
+
+    // 4. Gráfico Actividades Agrupado
+    const ctxAct = document.getElementById('chartComparativoActividades').getContext('2d');
+    const todasAct = [...new Set(claves.flatMap(c => data.resultados[c].actividades.map(a => a[0])))].slice(0, 8);
+    const datasetsAct = [];
+    claves.forEach((c, i) => {
+        const col = COLORES_PERIODOS[i % COLORES_PERIODOS.length];
+        datasetsAct.push({
+            label: `${c}`,
+            data: todasAct.map(nom => {
+                const found = data.resultados[c].actividades.find(a => a[0] === nom);
+                return found ? found[1] : 0;
+            }),
+            backgroundColor: col.main
+        });
+    });
+
+    chartsInstancias.comparativoAct = new Chart(ctxAct, {
+        type: 'bar',
+        data: { labels: todasAct, datasets: datasetsAct },
+        options: { 
+            responsive: true, maintainAspectRatio: false, 
+            scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
+            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+        }
+    });
+}
+
+function crearGraficoEvolucion(clave, mensual) {
+    const ctx = document.getElementById(`chartMensual_${clave}`).getContext('2d');
+    chartsInstancias[`mes_${clave}`] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: mensual.map(i => i[0]),
+            datasets: [
+                { label: 'Asistencias', data: mensual.map(i => i[1]), borderColor: '#153244', backgroundColor: 'rgba(21, 50, 68, 0.1)', fill: true, tension: 0.4 },
+                { label: 'Personas Únicas', data: mensual.map(i => i[2]), borderColor: '#FFD600', backgroundColor: 'rgba(255, 214, 0, 0.1)', fill: true, tension: 0.4 }
+            ]
+        },
+        options: { 
+            animation: false, responsive: true, maintainAspectRatio: false, 
+            scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
+            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+        }
+    });
+}
+
+function crearGraficoEstaciones(clave, estaciones) {
+    const ctx = document.getElementById(`chartEstaciones_${clave}`).getContext('2d');
+    chartsInstancias[`est_${clave}`] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: estaciones.map(i => String(i[0] || "").replace("*", "").trim()),
+            datasets: [
+                { label: 'Participaciones', data: estaciones.map(i => i[1]), backgroundColor: '#800020', borderRadius: 6 },
+                { label: 'Personas Únicas', data: estaciones.map(i => i[2]), backgroundColor: '#0066cc', borderRadius: 6 }
+            ]
+        },
+        options: { 
+            animation: false, indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+            scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 15, font: FONT_SETTINGS } }, datalabels: { display: false } } 
+        }
+    });
+}
+
+function crearGraficoProfesores(clave, profesores) {
+    const ctx = document.getElementById(`chartProfesores_${clave}`).getContext('2d');
+    chartsInstancias[`prof_${clave}`] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: profesores.map(i => i[0]),
+            datasets: [
+                { label: 'Participaciones', data: profesores.map(i => i[1]), backgroundColor: '#800020', borderRadius: 6 },
+                { label: 'Personas Únicas', data: profesores.map(i => i[2]), backgroundColor: '#0066cc', borderRadius: 6 }
+            ]
+        },
+        options: { 
+            animation: false, indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+            scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
+            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+        }
+    });
+}
+
+function crearGraficoActividades(clave, actividades) {
+    const ctx = document.getElementById(`chartActividades_${clave}`).getContext('2d');
+    chartsInstancias[`act_${clave}`] = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: data.actividades.map(i => i[0]),
+            labels: actividades.map(i => i[0]),
             datasets: [{
-                data: data.actividades.map(i => i[1]),
+                data: actividades.map(i => i[1]),
                 backgroundColor: ['#153244', '#FFD600', '#8DE2D6', '#4caf50', '#f44336', '#2196f3', '#9c27b0', '#ff9800', '#795548', '#607d8b']
             }]
         },
         options: { 
-            animation: false, 
-            responsive: true,
-            maintainAspectRatio: false,
+            animation: false, responsive: true, maintainAspectRatio: false,
             plugins: { 
-                legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } },
+                legend: { position: 'right', labels: { boxWidth: 15, font: FONT_SETTINGS } },
                 datalabels: {
-                    display: true,
-                    color: '#000', // Negro para máximo contraste sobre colores claros
-                    font: { weight: '900', size: 12 },
-                    backgroundColor: 'rgba(255,255,255,0.7)', // Fondo semi-transparente
-                    borderRadius: 4,
-                    padding: 4,
+                    display: true, anchor: 'end', align: 'start', offset: 12, color: '#000',
+                    font: { weight: 'bold', size: 12, family: "'Inter', sans-serif" },
+                    backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 3,
                     formatter: (value, ctx) => {
                         let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
                         return (value * 100 / sum).toFixed(1) + "%";
@@ -3289,57 +3615,11 @@ function renderizarCharts(data) {
             } 
         }
     });
+}
 
-    // 3. Chart Mensual (Líneas con Interacción)
-    const ctxMes = document.getElementById('chartMensual').getContext('2d');
-    chartsInstancias.mes = new Chart(ctxMes, {
-        type: 'line',
-        data: {
-            labels: data.mensual.map(i => i[0]),
-            datasets: [
-                {
-                    label: 'Asistencias',
-                    data: data.mensual.map(i => i[1]),
-                    borderColor: '#153244',
-                    backgroundColor: 'rgba(21, 50, 68, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                },
-                {
-                    label: 'Personas Únicas',
-                    data: data.mensual.map(i => i[2]),
-                    borderColor: '#FFD600',
-                    backgroundColor: 'rgba(255, 214, 0, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }
-            ]
-        },
-        options: { 
-            animation: false,
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { 
-                legend: { position: 'top' },
-                datalabels: { display: false },
-                tooltip: {
-                    padding: 12,
-                    backgroundColor: 'rgba(21, 50, 68, 0.9)',
-                    titleFont: { size: 14, weight: 'bold' },
-                    bodyFont: { size: 13 }
-                }
-            },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
+// Registro de datalabels si existe
+if (typeof ChartDataLabels !== 'undefined') {
+  Chart.register(ChartDataLabels);
 }
 
 // Inyectar en el mapeo de referencias para que el admin sepa qué clave es
