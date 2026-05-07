@@ -1,4 +1,4 @@
-﻿# Project Context
+# Project Context
 
 ## Objetivo
 Aplicacion web en Google Apps Script para monitorear cargas de Estaciones Saludables, resumir modulos especiales y cruzar lo programado en CRONOGRAMA contra lo efectivamente cargado en TALLERES.
@@ -184,43 +184,24 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 - `ROSETA_ACTIVIDADES_CRONOGRAMA` es la capa operativa para absorber suciedad del cronograma.
 - `actividades_x_estacion`, `profesores_estacion` y `profesores_en_feriados` deben usarse para mejorar criterio, no para endurecer validaciones.
 
-## Estado actual (actualizado 2026-04-23)
-- Existe login manual por correo usando la solapa `Rol`.
-- **NUEVO**: Sistema RBAC (Role-Based Access Control) implementado.
-- El cronograma ya tiene pipeline de normalizacion, roseta y control de cumplimiento.
-- La comparacion de actividades esta mas robusta, pero sigue requiriendo mantenimiento de roseta para casos ambiguos.
-- El proyecto tiene bastante logica funcional y conviene seguir modificandolo por capas y con cambios acotados.
+## Actualizaciones Recientes (2026-05-07)
 
-## Sistema RBAC (Role-Based Views) - Nuevo desde 2026-04-23
+### 📊 Reestructuración del Tablero Gerencial (Modo Comparación)
+- **Visualización Unificada**: Se eliminó la duplicidad de tarjetas en modo comparación a favor de una vista consolidada.
+- **Gráficos Superpuestos**: El gráfico de evolución temporal ahora utiliza un eje X de 1 a 31 días, permitiendo superponer líneas de múltiples meses para una comparativa directa de tendencias diarias.
+- **Gráficos Agrupados**: Los rankings de estaciones, profesores y actividades ahora utilizan barras agrupadas laterales, facilitando la visualización de diferencias de rendimiento entre períodos.
+- **Estética Premium**: Se implementaron paletas de colores armónicas y diferenciadas para cada período comparado (ej. Azul/Bordó, Verde/Naranja).
 
-### Estructura de perfiles
-- **admin**: Acceso completo a todas las funciones (sin cambios respecto a antes).
-- **gerencia**: Acceso a reportes, solapas especiales, generación de informes.
-- **coordinacion**: Monitoreo operativo, acceso a estaciones y actividades, sin panel admin.
-- **operativo**: Visualización en tiempo real, sin exportación ni informes.
+### 🪄 Evolución del Motor de Informes con IA
+- **Perfil Estratégico**: La IA ahora actúa como un **Consultor Senior en Gestión de Salud Pública**, proporcionando análisis más profundos que el simple resumen.
+- **Análisis de Variaciones**: El sistema instruye a la IA para buscar explicaciones lógicas a las variaciones estadísticas (estacionalidad, impacto territorial, etc.).
+- **Hoja de Ruta de Mejoras**: Se incluyó una sección de recomendaciones reales y accionables para optimizar la operación e incrementar la participación.
+- **Descarga Directa**: Se añadió la funcionalidad para generar y descargar el informe PDF directamente en el navegador (base64), además del envío por correo.
 
-### Archivos relevantes
-- `ViewPermissions.gs`: Configuración centralizada de permisos por rol.
-- `Code.js`: Función `iniciarSesionConCorreo()` ahora permite múltiples perfiles.
-- `index.html`: Frontend adaptará UI según rol (implementación en progreso).
+### 🎨 Mejoras de UX y Accesibilidad
+- **Tipografía**: Se aumentó el tamaño de fuente en leyendas (12px), ejes (11px) y etiquetas de datos para garantizar una lectura cómoda sin esfuerzo visual.
+- **Z-Index y Capas**: Se ajustó la jerarquía visual de los modales para asegurar que las ventanas de informes siempre aparezcan al frente de todos los elementos.
 
-### Punto de recuperación
-- Se creó `BACKUP_MANIFEST.md` con instrucciones de reversión.
-- Backups: `Code.js.bak`, `index.html.bak`, `CONTEXT.md.bak`.
-
-## Riesgos al tocar esta base
-- `Code.js` es grande y concentra muchas responsabilidades.
-- Hay textos con problemas de codificacion heredados.
-- El frontend depende de nombres exactos de funciones y payloads del backend.
-- Cambios bruscos en roseta, catalogos o exclusiones pueden alterar el control de cumplimiento.
-- Las nuevas solapas de referencia no deben transformarse en reglas duras sin validarlo primero.
-- **Importante**: No modificar el login de admin; mantener `iniciarSesionConCorreo()` compatible.
-
-## Criterio para proximos cambios
-- No modificar lo que ya funciona si no es necesario.
-- Priorizar referencias blandas antes que reglas bloqueantes.
-- Mantener separadas tres capas:
-  1. catalogo canónico
-  2. roseta de equivalencias
-  3. control de cumplimiento
-- Documentar en este archivo cada nueva solapa, fuente o regla de negocio que se incorpore.
+### ⚙️ Optimización del Backend (`Code.js`)
+- **Granularidad Diaria**: Refactorización de la lógica de agregación para proveer datos desglosados por día del mes (1-31) necesarios para los nuevos gráficos superpuestos.
+- **Consolidación de Datos**: Mejora en la preparación de payloads para que la IA tenga contexto completo de los filtros activos en el dashboard.
