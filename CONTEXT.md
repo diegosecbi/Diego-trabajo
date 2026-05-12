@@ -1,7 +1,7 @@
 # Project Context
 
 ## Objetivo
-Aplicacion web en Google Apps Script para monitorear cargas de Estaciones Saludables, resumir modulos especiales y cruzar lo programado en CRONOGRAMA contra lo efectivamente cargado en TALLERES.
+Aplicación web **A.L.F. (Asistente de Lectura Funcional)** en Google Apps Script para monitorear cargas de Estaciones Saludables, resumir módulos especiales, analizar estadísticas históricas de personas únicas y cruzar lo programado en CRONOGRAMA contra lo efectivamente cargado en TALLERES.
 
 ## Archivos principales
 - `Code.js`
@@ -163,10 +163,8 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
   Dibuja accesos a modulos especiales.
 - `solicitarResumenEspecial(nombre)`
   Pide un resumen de solapa especial y abre modal.
-- `abrirModalClic(...)`
-  Render especializado para modulos con filtros y comparaciones.
-- `abrirModalCronograma(...)`
-  Render del tablero de cronograma y cumplimiento.
+- `abrirModalPersonasUnicas()`
+  Análisis avanzado de identidades únicas, nuevas incorporaciones y métricas de fidelización (2025-2026).
 - `exportarExcel()`
   Exporta el tablero principal.
 
@@ -179,29 +177,20 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 ## Lógica de negocio central
 - El tablero principal clasifica estaciones por recencia de carga.
 - El control de cronograma compara lo programado con lo realizado usando `fecha + estacion + actividad`.
-- El profesor es contexto adicional, no bloqueo de cumplimiento.
 - `CATALOGO_ACTIVIDADES` es la base canónica principal para actividades.
 - `ROSETA_ACTIVIDADES_CRONOGRAMA` es la capa operativa para absorber suciedad del cronograma.
-- `actividades_x_estacion`, `profesores_estacion` y `profesores_en_feriados` deben usarse para mejorar criterio, no para endurecer validaciones.
 
-## Actualizaciones Recientes (2026-05-07)
+## Actualizaciones Recientes (2026-05-12)
 
-### 📊 Reestructuración del Tablero Gerencial (Modo Comparación)
-- **Visualización Unificada**: Se eliminó la duplicidad de tarjetas en modo comparación a favor de una vista consolidada.
-- **Gráficos Superpuestos**: El gráfico de evolución temporal ahora utiliza un eje X de 1 a 31 días, permitiendo superponer líneas de múltiples meses para una comparativa directa de tendencias diarias.
-- **Gráficos Agrupados**: Los rankings de estaciones, profesores y actividades ahora utilizan barras agrupadas laterales, facilitando la visualización de diferencias de rendimiento entre períodos.
-- **Estética Premium**: Se implementaron paletas de colores armónicas y diferenciadas para cada período comparado (ej. Azul/Bordó, Verde/Naranja).
+### 👤 Módulo Avanzado de Personas Únicas
+- **Filtros Multi-dimensionales**: Filtrado por Estación (alias robusto), Tipo de Día (Lunes a Viernes vs SADOFE) y Meses específicos.
+- **Selector de Años**: Filtro explícito para 2025 y 2026 con lectura optimizada de datos locales e históricos.
+- **UX Optimizada**: Rediseño de selección de meses en columnas por año, nombres en español y contador regresivo de 60s para procesos pesados.
+- **Identidad Visual**: Codificación por colores (Turquesa para 2025, Azul para 2026) y métricas de fidelización (usuarios que regresan).
 
-### 🪄 Evolución del Motor de Informes con IA
-- **Perfil Estratégico**: La IA ahora actúa como un **Consultor Senior en Gestión de Salud Pública**, proporcionando análisis más profundos que el simple resumen.
-- **Análisis de Variaciones**: El sistema instruye a la IA para buscar explicaciones lógicas a las variaciones estadísticas (estacionalidad, impacto territorial, etc.).
-- **Hoja de Ruta de Mejoras**: Se incluyó una sección de recomendaciones reales y accionables para optimizar la operación e incrementar la participación.
-- **Descarga Directa**: Se añadió la funcionalidad para generar y descargar el informe PDF directamente en el navegador (base64), además del envío por correo.
+> [!WARNING]
+> **Estado de Modo Comparación**: Se ha reportado que el modo "Comparación de Períodos" dentro de Personas Únicas presenta demoras excesivas o fallos en el cálculo debido al volumen de datos (52k+ registros). Se recomienda usar el modo Global con filtros de año por el momento.
 
-### 🎨 Mejoras de UX y Accesibilidad
-- **Tipografía**: Se aumentó el tamaño de fuente en leyendas (12px), ejes (11px) y etiquetas de datos para garantizar una lectura cómoda sin esfuerzo visual.
-- **Z-Index y Capas**: Se ajustó la jerarquía visual de los modales para asegurar que las ventanas de informes siempre aparezcan al frente de todos los elementos.
-
-### ⚙️ Optimización del Backend (`Code.js`)
-- **Granularidad Diaria**: Refactorización de la lógica de agregación para proveer datos desglosados por día del mes (1-31) necesarios para los nuevos gráficos superpuestos.
-- **Consolidación de Datos**: Mejora en la preparación de payloads para que la IA tenga contexto completo de los filtros activos en el dashboard.
+### 📊 Otras Mejoras
+- **Branding A.L.F.**: Interfaz rediseñada con el nombre "Asistente de Lectura Funcional".
+- **RBAC**: Implementación de Control de Acceso Basado en Roles (Fase 2) con filtrado dinámico de UI según el perfil del usuario.

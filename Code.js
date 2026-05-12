@@ -15,7 +15,7 @@ const SOLAPAS_EXCLUIDAS_SUPERVISION = [
   "Rol",
   "CATALOGO_ACTIVIDADES",
   "actividades_x_estacion",
-  "actividades_x_estación",
+  "actividades_x_estaciÃ³n",
   "profesores_estacion",
   "profesores_en_feriados",
   "CLIC",
@@ -30,6 +30,7 @@ const SOLAPAS_EXCLUIDAS_SUPERVISION = [
 const FUENTES_ESPECIALES_EXTERNAS = {
   "TALLERES": {
     spreadsheetId: "1QMzJPBMWo0qCaSTD5cw78BX_sleg-5h2u914cDGvo4g",
+    sheetNames: ["2025", "2026"],
     sheetName: "2026",
     tipoResumen: "actividad_externa"
   }
@@ -271,65 +272,65 @@ const EQUIVALENCIAS_ESTACIONES = {
 };
 
 const ESTACIONES_SALUDABLES_OFICIALES = [
-  "Estación Saludable Aristóbulo del Valle",
-  "Estación Saludable Lago de Palermo",
-  "Estación Saludable Manzana 66",
-  "Estación Saludable Móvil 1",
-  "Estación Saludable Móvil 2",
-  "Estación Saludable Parque Avellaneda",
-  "Estación Saludable Parque Centenario",
-  "Estación Saludable Parque Chacabuco",
-  "Estación Saludable Parque Los Andes",
-  "Estación Saludable Parque Patricios",
-  "Estación Saludable Parque Rivadavia",
-  "Estación Saludable Parque Saavedra",
-  "Estación Saludable Plaza Almagro",
-  "Estación Saludable Plaza Dr. Bernardo A. Houssay",
-  "Estación Saludable Plaza Flores",
-  "Estación Saludable Plaza Martin Fierro",
-  "Estación Saludable Parque de la Ciudad",
-  "Estación Saludable Plaza Rubén Darío",
-  "Estación Saludable Sudamérica",
-  "Estación Saludable Rosedal",
+  "EstaciÃ³n Saludable AristÃ³bulo del Valle",
+  "EstaciÃ³n Saludable Lago de Palermo",
+  "EstaciÃ³n Saludable Manzana 66",
+  "EstaciÃ³n Saludable MÃ³vil 1",
+  "EstaciÃ³n Saludable MÃ³vil 2",
+  "EstaciÃ³n Saludable Parque Avellaneda",
+  "EstaciÃ³n Saludable Parque Centenario",
+  "EstaciÃ³n Saludable Parque Chacabuco",
+  "EstaciÃ³n Saludable Parque Los Andes",
+  "EstaciÃ³n Saludable Parque Patricios",
+  "EstaciÃ³n Saludable Parque Rivadavia",
+  "EstaciÃ³n Saludable Parque Saavedra",
+  "EstaciÃ³n Saludable Plaza Almagro",
+  "EstaciÃ³n Saludable Plaza Dr. Bernardo A. Houssay",
+  "EstaciÃ³n Saludable Plaza Flores",
+  "EstaciÃ³n Saludable Plaza Martin Fierro",
+  "EstaciÃ³n Saludable Parque de la Ciudad",
+  "EstaciÃ³n Saludable Plaza RubÃ©n DarÃ­o",
+  "EstaciÃ³n Saludable SudamÃ©rica",
+  "EstaciÃ³n Saludable Rosedal",
   "Estaciones Saludables Clic"
 ];
 
 const ALIAS_ESTACIONES_SALUDABLES = {
-  "Estación Saludable Aristóbulo del Valle": ["Aristóbulo del Valle", "Aristobulo del Valle"],
-  "Estación Saludable Lago de Palermo": ["Lago de Palermo", "Lagos de Palermo", "Palermo"],
-  "Estación Saludable Manzana 66": ["Manzana 66", "Plaza Manzana 66"],
-  "Estación Saludable Móvil 1": ["Móvil 1", "Movil 1"],
-  "Estación Saludable Móvil 2": ["Móvil 2", "Movil 2"],
-  "Estación Saludable Parque Avellaneda": ["Parque Avellaneda"],
-  "Estación Saludable Parque Centenario": ["Parque Centenario", "Centenario"],
-  "Estación Saludable Parque Chacabuco": ["Parque Chacabuco", "Chacabuco"],
-  "Estación Saludable Parque Los Andes": ["Parque Los Andes", "Los Andes"],
-  "Estación Saludable Parque Patricios": ["Parque Patricios", "Patricios"],
-  "Estación Saludable Parque Rivadavia": ["Parque Rivadavia", "Rivadavia"],
-  "Estación Saludable Parque Saavedra": ["Parque Saavedra", "Saavedra"],
-  "Estación Saludable Plaza Almagro": ["Plaza Almagro", "Almagro"],
-  "Estación Saludable Plaza Dr. Bernardo A. Houssay": ["Plaza Houssay", "Houssay", "Plaza Dr Bernardo A Houssay"],
-  "Estación Saludable Plaza Flores": ["Plaza Flores", "Flores"],
-  "Estación Saludable Plaza Martin Fierro": ["Plaza Martin Fierro", "Plaza Martín Fierro", "Martin Fierro", "Martín Fierro"],
-  "Estación Saludable Parque de la Ciudad": ["Parque de la Ciudad"],
-  "Estación Saludable Plaza Rubén Darío": ["Plaza Rubén Darío", "Plaza Ruben Dario", "Rubén Darío", "Ruben Dario"],
-  "Estación Saludable Sudamérica": ["Sudamérica", "Sudamerica"],
-  "Estación Saludable Rosedal": ["Rosedal"],
+  "EstaciÃ³n Saludable AristÃ³bulo del Valle": ["AristÃ³bulo del Valle", "Aristobulo del Valle"],
+  "EstaciÃ³n Saludable Lago de Palermo": ["Lago de Palermo", "Lagos de Palermo", "Palermo"],
+  "EstaciÃ³n Saludable Manzana 66": ["Manzana 66", "Plaza Manzana 66"],
+  "EstaciÃ³n Saludable MÃ³vil 1": ["MÃ³vil 1", "Movil 1"],
+  "EstaciÃ³n Saludable MÃ³vil 2": ["MÃ³vil 2", "Movil 2"],
+  "EstaciÃ³n Saludable Parque Avellaneda": ["Parque Avellaneda"],
+  "EstaciÃ³n Saludable Parque Centenario": ["Parque Centenario", "Centenario"],
+  "EstaciÃ³n Saludable Parque Chacabuco": ["Parque Chacabuco", "Chacabuco"],
+  "EstaciÃ³n Saludable Parque Los Andes": ["Parque Los Andes", "Los Andes"],
+  "EstaciÃ³n Saludable Parque Patricios": ["Parque Patricios", "Patricios"],
+  "EstaciÃ³n Saludable Parque Rivadavia": ["Parque Rivadavia", "Rivadavia"],
+  "EstaciÃ³n Saludable Parque Saavedra": ["Parque Saavedra", "Saavedra"],
+  "EstaciÃ³n Saludable Plaza Almagro": ["Plaza Almagro", "Almagro"],
+  "EstaciÃ³n Saludable Plaza Dr. Bernardo A. Houssay": ["Plaza Houssay", "Houssay", "Plaza Dr Bernardo A Houssay"],
+  "EstaciÃ³n Saludable Plaza Flores": ["Plaza Flores", "Flores"],
+  "EstaciÃ³n Saludable Plaza Martin Fierro": ["Plaza Martin Fierro", "Plaza MartÃ­n Fierro", "Martin Fierro", "MartÃ­n Fierro"],
+  "EstaciÃ³n Saludable Parque de la Ciudad": ["Parque de la Ciudad"],
+  "EstaciÃ³n Saludable Plaza RubÃ©n DarÃ­o": ["Plaza RubÃ©n DarÃ­o", "Plaza Ruben Dario", "RubÃ©n DarÃ­o", "Ruben Dario"],
+  "EstaciÃ³n Saludable SudamÃ©rica": ["SudamÃ©rica", "Sudamerica"],
+  "EstaciÃ³n Saludable Rosedal": ["Rosedal"],
   "Estaciones Saludables Clic": ["Estaciones Saludables Clic", "Clic", "CLIC"]
 };
 
-const ACTIVIDADES_CATALOGO_TEXTO = `ABS ( Trabajo de músculos abdominales)
-ABS ( Trabajo de músculos abdominales) 2
+const ACTIVIDADES_CATALOGO_TEXTO = `ABS ( Trabajo de mÃºsculos abdominales)
+ABS ( Trabajo de mÃºsculos abdominales) 2
 Abuelos contra el Bullying
-Aconcionamiento físico integral
-Aconcionamiento físico integral 2
+Aconcionamiento fÃ­sico integral
+Aconcionamiento fÃ­sico integral 2
 Actividad al paso
 Actividad Fisica integral
 Actividad Fisica integral 2
 Actividades en otras instituciones
-Actividades Recreativas (Ajedrez Didáctico, Burako,etc)
+Actividades Recreativas (Ajedrez DidÃ¡ctico, Burako,etc)
 Actividad Recreativa Deportiva
-Actividades Recreativas (Ajedrez Didáctico, Burako,etc) 2
+Actividades Recreativas (Ajedrez DidÃ¡ctico, Burako,etc) 2
 Aerobica
 Aerobica 2
 Aerobox ES Clic
@@ -347,7 +348,7 @@ Asesoria lactancia
 Asesoria nutricion Clic
 Bachata
 Bachata 2
-Baile con GAP (Trabajo de glúteos, abdomen y piernas)
+Baile con GAP (Trabajo de glÃºteos, abdomen y piernas)
 Bienestar organizacional
 Bordado
 Bordado 2
@@ -371,16 +372,16 @@ Clase de Cocina Clic
 Clases de Cocina
 Coaching Presencial
 Correctivo postural Clic
-Cumpleaños
-Devolución de Libros
-Devolución de Libros 2
+CumpleaÃ±os
+DevoluciÃ³n de Libros
+DevoluciÃ³n de Libros 2
 Dibujo y Pintura
 Dibujo y Pintura 2
 Egresaditos
 En tus zapatos
 Encuentro con vecinos
-Entrenamiento físico
-Entrenamiento físico 2
+Entrenamiento fÃ­sico
+Entrenamiento fÃ­sico 2
 Entrenamiento Funcional
 Entrenamiento Funcional 2
 Escritura creativa VAC
@@ -393,13 +394,13 @@ Eventos
 Festivales
 Folklore
 Folklore 2
-GAP (Trabajo de glúteos, abdomen y piernas)
+GAP (Trabajo de glÃºteos, abdomen y piernas)
 Gimnasia
 Gimnasia 2
 Grupos de Chat Clic
 Hit y Funcional ES Clic
-Inclusión Digital y Redes Sociales
-Inclusión Digital y Redes Sociales 2
+InclusiÃ³n Digital y Redes Sociales
+InclusiÃ³n Digital y Redes Sociales 2
 Localizada
 Localizada 2
 Mix Training ES Clic
@@ -407,8 +408,8 @@ Localizada Clic
 Localizada y Estiramiento
 Manualidades en familia
 Mercadito
-Mindfulness/Meditación
-Mindfulness/Meditación 2
+Mindfulness/MeditaciÃ³n
+Mindfulness/MeditaciÃ³n 2
 Minichef VI
 MSETB (Mas servicios en tu Barrio)
 Newcom (Voley adaptado)
@@ -418,10 +419,10 @@ Pilates
 Pilates 2
 Prestamo de Libros
 Prestamo de Libros 2
-Prevención de Osteopenia y Ostioporosis
-Prevención de Osteopenia y Ostioporosis 2
-Reeducación Postural
-Reeducación Postural 2
+PrevenciÃ³n de Osteopenia y Ostioporosis
+PrevenciÃ³n de Osteopenia y Ostioporosis 2
+ReeducaciÃ³n Postural
+ReeducaciÃ³n Postural 2
 Ritmos
 Ritmos 2
 Salsa
@@ -439,10 +440,10 @@ Taller Cognitivo II
 Taller Cognitivo II 2
 Taller con Pelotas
 Taller con Pelotas 2
-Taller de alimentación saludable
+Taller de alimentaciÃ³n saludable
 Taller de burbujas
 Taller de Circo
-Taller de Comunicación No Verbal Clic
+Taller de ComunicaciÃ³n No Verbal Clic
 Taller de Escritura
 Taller de Escritura 2
 huerta
@@ -456,7 +457,7 @@ Taller de Memoria
 Taller de percusion
 Taller de Truco
 Taller de Truco 2
-Taller de vinculación
+Taller de vinculaciÃ³n
 Taller Literario
 Taller Literario 2
 Talleres de Cocina
@@ -465,17 +466,17 @@ Talleres de Cocina VAC
 Talleres y charlas Clic
 Tango
 Tango 2
-Tardes Mágicas VI
+Tardes MÃ¡gicas VI
 Vacaciones de invierno
 Visitas Escolares
-Visitas Escolares - Actividad física
+Visitas Escolares - Actividad fÃ­sica
 Visitas Escolares - Experimental y armado de juegos
 Visitas Escolares - Naturaleza y medio ambiente
-Visitas Escolares - Vínculos y hábitos positivos
+Visitas Escolares - VÃ­nculos y hÃ¡bitos positivos
 Yoga
 Yoga 2
-Yoga dinámico
-Yoga dinámico 2
+Yoga dinÃ¡mico
+Yoga dinÃ¡mico 2
 Yoga ES Clic
 Yoga Restaurativo
 Yoga suave
@@ -691,12 +692,12 @@ CANDELA RUIZ DEZA
 CUESTA GABRIEL MARIANO SEBASTIAN
 CARLOS GUSTAVO TORALES
 RODRIGO GABRIEL GONZALEZ
-NICOLÁS VARA
+NICOLÃS VARA
 MARIANO VOUILLAT
 MARIEL CHUTCHURRU
 CECILIA SUAREZ
 ELENA BEATRIZ DEVOTO SZUMOWICZ
-EQUIPO ESTACIÓN
+EQUIPO ESTACIÃ“N
 LEGUIZA FLORENCIA AILEN
 MATIAS EZEQUIEL CHEDUFAU
 ROSALIA MARTIN
@@ -723,7 +724,7 @@ GALIZIA ROXANA GRACIELA
 LUCIA GRANATELLI
 MARTIN ALEJANDRO ARMAND UGON
 RUBEN DARIO VALLOZZI
-NICOLÁS NAHUEL GARCÍA
+NICOLÃS NAHUEL GARCÃA
 ESTEFANIA VAQUER TEMPLETE
 CLAUDIA ALEJANDRA GUAGLIARELO
 AGOSTINA DALBO
@@ -753,19 +754,19 @@ function onOpen() {
   
   ui.createMenu("Administracion")
     .addItem("Preparar Hoja De Usuarios", "prepararHojaUsuarios")
-    .addItem("🔍 Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
+    .addItem("ðŸ” Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
     .addSeparator()
-    .addItem("📊 Generar Dashboard de Gráficos", "generarDashboardGerencial")
+    .addItem("ðŸ“Š Generar Dashboard de GrÃ¡ficos", "generarDashboardGerencial")
     .addSeparator()
-    .addItem("⚙️ Configurar OpenRouter (Claude)", "configurarOpenRouter")
+    .addItem("âš™ï¸ Configurar OpenRouter (Claude)", "configurarOpenRouter")
     .addToUi();
     
   ui.createMenu("Talleres")
-    .addItem("🔄 Sincronizar Datos Ahora", "sincronizarTalleresDesdeSeguimiento")
-    .addItem("⏰ Activar Sincronizacion Automatica (2x/dia)", "instalarGatillosSincronizacionTalleres")
+    .addItem("ðŸ”„ Sincronizar Datos Ahora", "sincronizarTalleresDesdeSeguimiento")
+    .addItem("â° Activar Sincronizacion Automatica (2x/dia)", "instalarGatillosSincronizacionTalleres")
     .addSeparator()
-    .addItem("📅 Completar Columna SADOFE/SEMANA Ahora", "actualizarColumnaSadofe")
-    .addItem("⏰ Activar Llenado Auto SADOFE (2x/dia)", "instalarGatilloSadofe")
+    .addItem("ðŸ“… Completar Columna SADOFE/SEMANA Ahora", "actualizarColumnaSadofe")
+    .addItem("â° Activar Llenado Auto SADOFE (2x/dia)", "instalarGatilloSadofe")
     .addToUi();
 }
 
@@ -786,7 +787,7 @@ function prepararHojaUsuarios() {
     ]);
   }
 
-  // Validación para Perfil
+  // ValidaciÃ³n para Perfil
   const filasValidacion = Math.max(100, hoja.getLastRow() + 20);
   const totalFilas = Math.min(filasValidacion, hoja.getMaxRows() - 1);
 
@@ -797,7 +798,7 @@ function prepararHojaUsuarios() {
       .build()
   );
 
-  // Validación para Activo y todos los permisos (SI/NO)
+  // ValidaciÃ³n para Activo y todos los permisos (SI/NO)
   const rangoSino = hoja.getRange(2, 3, totalFilas, 1); // Columna ACTIVO
   const rangoPermisos = hoja.getRange(2, 5, totalFilas, PERMISOS_KEYS.length); // Columnas de permisos
   
@@ -854,7 +855,7 @@ function instalarGatillosSincronizacionTalleres() {
     .everyHours(12)
     .create();
     
-  SpreadsheetApp.getUi().alert("✅ ¡Listo! La sincronizacion de Talleres se ejecutara automaticamente cada 12 horas.");
+  SpreadsheetApp.getUi().alert("âœ… Â¡Listo! La sincronizacion de Talleres se ejecutara automaticamente cada 12 horas.");
 }
 
 function instalarGatilloSadofe() {
@@ -872,7 +873,7 @@ function instalarGatilloSadofe() {
     .everyHours(12)
     .create();
     
-  SpreadsheetApp.getUi().alert("✅ ¡Listo! La columna SADOFE se rellenará automáticamente cada 12 horas.");
+  SpreadsheetApp.getUi().alert("âœ… Â¡Listo! La columna SADOFE se rellenarÃ¡ automÃ¡ticamente cada 12 horas.");
 }
 
 function ejecutarActualizacionSadofeProgramada() {
@@ -1949,12 +1950,12 @@ function parsearDetalleCronograma_(texto) {
     actividad = limpiarTexto_(limpio.replace(tipoMatch[0], ""));
   }
 
-  let equipoMatch = actividad.match(/(.+?)\s+(Equipo\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+)$/);
+  let equipoMatch = actividad.match(/(.+?)\s+(Equipo\s+[A-Za-zÃÃ‰ÃÃ“ÃšÃœÃ‘Ã¡Ã©Ã­Ã³ÃºÃ¼Ã± ]+)$/);
   if (equipoMatch) {
     actividad = limpiarTexto_(equipoMatch[1]);
     profesor = limpiarTexto_(equipoMatch[2]);
   } else {
-    let profesorMatch = actividad.match(/(.+?)\s+([A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ'".-]+(?:\s+[A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ'".-]+){1,3})$/);
+    let profesorMatch = actividad.match(/(.+?)\s+([A-ZÃÃ‰ÃÃ“ÃšÃœÃ‘][A-Za-zÃÃ‰ÃÃ“ÃšÃœÃ‘Ã¡Ã©Ã­Ã³ÃºÃ¼Ã±'".-]+(?:\s+[A-ZÃÃ‰ÃÃ“ÃšÃœÃ‘][A-Za-zÃÃ‰ÃÃ“ÃšÃœÃ‘Ã¡Ã©Ã­Ã³ÃºÃ¼Ã±'".-]+){1,3})$/);
     if (profesorMatch) {
       actividad = limpiarTexto_(profesorMatch[1]);
       profesor = limpiarTexto_(profesorMatch[2]);
@@ -2068,7 +2069,7 @@ function combinarEquivalenciasEstaciones_() {
 
     const base = limpiarTexto_(canonica)
       .replace(/^Estaciones?\s+Saludables?\s+/i, "")
-      .replace(/^Estación\s+Saludable\s+/i, "")
+      .replace(/^EstaciÃ³n\s+Saludable\s+/i, "")
       .trim();
 
     agregar(canonica, base);
@@ -2598,7 +2599,8 @@ function iniciarSesionConCorreo(emailIngresado) {
     };
   }
 
-  const permisosBase = obtenerPermisosVista(perfil).puede;
+  const configVista = obtenerPermisosVista(perfil);
+  const permisosBase = configVista.puede;
   
   // Mezclar permisos base con overrides de la hoja
   const permisosFinales = {};
@@ -2611,13 +2613,17 @@ function iniciarSesionConCorreo(emailIngresado) {
     }
   });
 
-  const colorPerfil = obtenerPermisosVista(perfil).color;
+  const colorPerfil = configVista.color;
+  const restricciones = configVista.restricciones || [];
+  const solapasVisibles = configVista.solapasVisibles || [];
 
   return {
     ok: true,
     email: email,
     perfil: perfil,
     permisos: permisosFinales,
+    restricciones: restricciones,
+    solapasVisibles: solapasVisibles,
     colorPerfil: colorPerfil,
     mensaje: "Acceso autorizado. Perfil: " + perfil + (Object.keys(datosUsuario.overrides).length > 0 ? " (con permisos personalizados)" : "") + "."
   };
@@ -2638,7 +2644,9 @@ function obtenerDatos(emailSesion){
     autenticado: true,
     puedeCambiarPerfil: false,
     mensaje: acceso.mensaje,
-    permisos: acceso.permisos, // Corregido: Usa los permisos mezclados (Base + Overrides)
+    permisos: acceso.permisos,
+    restricciones: acceso.restricciones,
+    solapasVisibles: acceso.solapasVisibles,
     colorPerfil: contextual.color
   };
 
@@ -2654,7 +2662,7 @@ function obtenerDatos(emailSesion){
   hojas.forEach(hoja => {
     let nombreOriginal = hoja.getName();
 
-    // Solo procesamos solapas que tienen el marcador de estación "*"
+    // Solo procesamos solapas que tienen el marcador de estaciÃ³n "*"
     if (nombreOriginal.indexOf("*") === -1) return;
 
     let nombre = nombreOriginal.replace("*", "").trim();
@@ -2795,14 +2803,14 @@ function resolverPerfilUsuario_(email) {
       const activoHoja = String(datos[i][2] || "").trim().toUpperCase();
 
       if (emailHoja === emailBusqueda) {
-        if (activoHoja === "SI" || activoHoja === "SÍ") {
+        if (activoHoja === "SI" || activoHoja === "SÃ") {
           let perfilReal = perfilHoja;
           if (perfilHoja === "administrador") perfilReal = "admin";
-          if (perfilHoja === "coordinación") perfilReal = "coordinacion";
+          if (perfilHoja === "coordinaciÃ³n") perfilReal = "coordinacion";
 
           // Capturar Overrides de permisos
           const overrides = {};
-          // Las columnas de permisos empiezan en la E (índice 4)
+          // Las columnas de permisos empiezan en la E (Ã­ndice 4)
           PERMISOS_KEYS.forEach((key, index) => {
             const colIndex = 4 + index;
             if (colIndex < datos[i].length) {
@@ -2832,17 +2840,17 @@ function diagnosticarMiAcceso() {
   const perfil = datosUsuario.perfil;
   const ui = SpreadsheetApp.getUi();
   
-  let msg = "DIAGNÓSTICO DE ACCESO\n\n";
+  let msg = "DIAGNÃ“STICO DE ACCESO\n\n";
   msg += "1. Tu email detectado por Google: " + email + "\n";
   msg += "2. Perfil resuelto por el sistema: " + (perfil === "sin_acceso" ? "NO ENCONTRADO O INACTIVO" : perfil.toUpperCase()) + "\n\n";
   
   if (perfil === "sin_acceso") {
-    msg += "RECOMENDACIÓN:\n";
+    msg += "RECOMENDACIÃ“N:\n";
     msg += "- Verifica que en la solapa 'USUARIOS' el email coincida exactamente con el punto 1.\n";
-    msg += "- Asegúrate de que la columna 'ACTIVO' tenga el valor 'SI'.\n";
+    msg += "- AsegÃºrate de que la columna 'ACTIVO' tenga el valor 'SI'.\n";
     msg += "- El perfil debe ser: admin, gerencia, coordinacion o operativo.";
   } else {
-    msg += "¡Todo correcto! Deberías poder ingresar sin problemas.";
+    msg += "Â¡Todo correcto! DeberÃ­as poder ingresar sin problemas.";
   }
   
   ui.alert(msg);
@@ -2857,7 +2865,7 @@ function obtenerPerfilesUsuariosConfigurados_() {
     return mezclarPerfilesUsuarios_(base, desdeUsuarios);
   }
 
-  // Si no hay usuarios en la solapa, devolvemos la base vacía
+  // Si no hay usuarios en la solapa, devolvemos la base vacÃ­a
   return base;
 }
 
@@ -2933,7 +2941,7 @@ function obtenerPerfilesUsuariosDesdeHoja_() {
       const perfil = String(fila[1] || "").trim().toLowerCase();
       const activo = String(fila[2] || "").trim().toUpperCase();
 
-      if (email && (activo === "SI" || activo === "SÍ")) {
+      if (email && (activo === "SI" || activo === "SÃ")) {
         if (perfiles.hasOwnProperty(perfil)) {
           perfiles[perfil].push(email);
           contador++;
@@ -2977,7 +2985,7 @@ function obtenerNombresSolapasEspeciales_() {
 }
 
 function esSolapaVisibleEnSupervision_(nombreSolapa, solapasEspeciales) {
-  // Con el nuevo sistema de asteriscos, esta función es redundante pero la mantenemos
+  // Con el nuevo sistema de asteriscos, esta funciÃ³n es redundante pero la mantenemos
   // simplificada para evitar errores de referencia.
   return nombreSolapa.indexOf("*") !== -1;
 }
@@ -2998,9 +3006,9 @@ function obtenerResumenSolapaEspecial(nombreSolapa, filtros, emailSesion) {
     throw new Error(acceso.mensaje || "Comunicarse con el administrador.");
   }
 
-  // RBAC: Validar permiso de acceso a la solapa específica
+  // RBAC: Validar permiso de acceso a la solapa especÃ­fica
   if (!debeVerSolapa(acceso.perfil, nombreSolapa)) {
-    throw new Error("No tienes permisos para acceder al módulo: " + nombreSolapa);
+    throw new Error("No tienes permisos para acceder al mÃ³dulo: " + nombreSolapa);
   }
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -3024,6 +3032,274 @@ function obtenerResumenSolapaEspecialDesdeOrigen_(ss, nombreSolapa, filtros) {
   }
 
   return obtenerResumenSolapaEspecial_(hoja, nombreSolapa);
+}
+
+function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  console.log("[STATS] Iniciando obtención de Personas Únicas con filtros:", JSON.stringify(filtros));
+  
+  // 1. Recolectar todos los registros Cronológicamente
+  let todosLosRegistros = [];
+  
+  const leerHoja = function(hoja, anioHoja) {
+    if (!hoja || hoja.getLastRow() < 2) return;
+    const datos = hoja.getDataRange().getValues();
+    const headers = datos[0].map(h => String(h || "").toUpperCase().trim());
+    
+    // Búsqueda flexible de cabeceras
+    let idxDni = headers.indexOf("DNI");
+    if (idxDni === -1) idxDni = headers.findIndex(h => h.includes("DNI"));
+    if (idxDni === -1) idxDni = 0; // Fallback
+    
+    let idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+    if (idxFecha === -1) idxFecha = headers.indexOf("FECHA");
+    if (idxFecha === -1) idxFecha = headers.findIndex(h => h.includes("FECHA"));
+    if (idxFecha === -1) idxFecha = 1; // Fallback
+    
+    let idxEstacion = headers.indexOf("ESTACION");
+    if (idxEstacion === -1) idxEstacion = headers.findIndex(h => h.includes("ESTACION"));
+    if (idxEstacion === -1) idxEstacion = 2; // Fallback
+
+    let idxTipoDia = -1;
+    for (let i = 0; i < headers.length; i++) {
+      const h = headers[i];
+      if (h.includes("TIPO") && h.includes("DIA")) idxTipoDia = i;
+      else if (h.includes("FERIADO") || h.includes("FINDE") || h.includes("SADOFE")) idxTipoDia = i;
+    }
+
+    for(let i=1; i<datos.length; i++) {
+      let fila = datos[i];
+      let fechaRaw = fila[idxFecha];
+      if (!fechaRaw) continue;
+
+      let fechaObj = null;
+      if (fechaRaw instanceof Date) {
+        fechaObj = fechaRaw;
+      } else {
+        let parts = String(fechaRaw).split("/");
+        if(parts.length >= 3) {
+          let year = parts[2].split(" ")[0];
+          if (year.length === 2) year = "20" + year;
+          fechaObj = new Date(year, parseInt(parts[1])-1, parseInt(parts[0]));
+        }
+      }
+      if (!fechaObj || isNaN(fechaObj.getTime())) continue;
+
+      // Filtrar por año ya en la lectura para optimizar
+      const anioReal = String(fechaObj.getFullYear());
+      if (anioReal !== "2025" && anioReal !== "2026") continue;
+
+      let dniLimpio = String(fila[idxDni] || "").replace(/[^\d]/g, "");
+      if (!dniLimpio || dniLimpio.length < 6) continue;
+
+      todosLosRegistros.push({
+        dni: dniLimpio,
+        fecha: fechaObj,
+        estacion: String(fila[idxEstacion] || "Sin Datos").trim(),
+        tipoDiaVal: idxTipoDia !== -1 ? String(fila[idxTipoDia] || "").toUpperCase().trim() : "",
+        anioHoja: anioReal
+      });
+    }
+  };
+
+  // Cargar datos del 2025
+  const hojaHistorico2025 = ss.getSheetByName("2025_HISTORICO");
+  if (hojaHistorico2025) {
+     console.log("[STATS] Leyendo 2025 local (2025_HISTORICO)");
+     leerHoja(hojaHistorico2025, "2025");
+  } else {
+     const fuente = FUENTES_ESPECIALES_EXTERNAS["TALLERES"];
+     if (fuente) {
+       try {
+         console.log("[STATS] Leyendo 2025 desde fuente externa");
+         let libroExterno = SpreadsheetApp.openById(fuente.spreadsheetId);
+         leerHoja(libroExterno.getSheetByName("2025"), "2025");
+       } catch(e) {
+         console.error("Error leyendo fuente externa 2025: " + e.message);
+       }
+     }
+  }
+
+  // Cargar datos del 2026 (TALLERES)
+  const hojaTalleres = ss.getSheetByName("TALLERES");
+  if (hojaTalleres) {
+     console.log("[STATS] Leyendo 2026 local (TALLERES)");
+     leerHoja(hojaTalleres, "2026");
+  }
+
+  console.log("[STATS] Total registros cargados (2025+2026):", todosLosRegistros.length);
+
+  // 2. Ordenar por Fecha para detectar primer contacto (Nuevas)
+  todosLosRegistros.sort((a, b) => a.fecha - b.fecha);
+
+  // 3. Marcar "esNueva" (Globalmente en el histórico cargado)
+  let historialDni = {};
+  todosLosRegistros.forEach(reg => {
+    if (!historialDni[reg.dni]) {
+      reg.esNueva = true;
+      historialDni[reg.dni] = true;
+    } else {
+      reg.esNueva = false;
+    }
+  });
+
+  // 4. Aplicar Filtros y Agrupar
+  const fEstacion = filtros && filtros.estacion ? filtros.estacion : "Todas";
+  const fTipoDia = filtros && filtros.tipoDia ? filtros.tipoDia : "Todos";
+  const fAnios = filtros && filtros.anios && filtros.anios.length > 0 ? filtros.anios : ["2025", "2026"]; // Por defecto ambos
+  const fMeses = filtros && filtros.meses && filtros.meses.length > 0 ? filtros.meses : null;
+  const fMesesP1 = filtros && filtros.mesesP1 && filtros.mesesP1.length > 0 ? filtros.mesesP1 : null;
+  const fMesesP2 = filtros && filtros.mesesP2 && filtros.mesesP2.length > 0 ? filtros.mesesP2 : null;
+  const modo = (filtros && filtros.modo) || "general";
+
+  // Pre-calcular canónico de la estación elegida para comparación robusta
+  const canonicoFiltro = obtenerNombreEstacionCanonico_(fEstacion);
+
+  let res = {
+    modo: modo,
+    totalUnicasHistorico: Object.keys(historialDni).length,
+    totalUnicasSeleccion: 0,
+    resumenAnual: {},
+    mesesDisponiblesSet: {}
+  };
+
+  let unicasFiltradasSet = {};
+
+  if (modo === "comparacion") {
+    res.periodo1 = { unicasSet: {}, prestaciones: 0, nuevas: 0 };
+    res.periodo2 = { unicasSet: {}, prestaciones: 0, nuevas: 0 };
+  }
+
+  todosLosRegistros.forEach(reg => {
+    const anioReg = String(reg.anioHoja);
+    const mesReg = String(reg.fecha.getMonth() + 1).padStart(2, '0');
+    const mesAnio = anioReg + "-" + mesReg;
+    
+    res.mesesDisponiblesSet[mesAnio] = true;
+
+    // Filtro Año
+    if (!fAnios.includes(anioReg)) return;
+
+    // Filtro Estacion (Usando alias)
+    if (fEstacion !== "Todas") {
+      const canonicoReg = obtenerNombreEstacionCanonico_(reg.estacion);
+      if (canonicoReg !== canonicoFiltro) return;
+    }
+
+    // Filtro Tipo Dia
+    if (fTipoDia !== "Todos") {
+      let esSadofe = (reg.tipoDiaVal === "SADOFE" || reg.tipoDiaVal.includes("FERIADO") || reg.tipoDiaVal.includes("FINDE"));
+      if (!esSadofe) {
+         const day = reg.fecha.getDay();
+         esSadofe = (day === 0 || day === 6);
+      }
+      if (fTipoDia === "SADOFE" && !esSadofe) return;
+      if (fTipoDia === "SEMANA" && esSadofe) return;
+    }
+
+    if (modo === "comparacion") {
+      if (fMesesP1 && fMesesP1.includes(mesAnio)) {
+        res.periodo1.prestaciones++;
+        res.periodo1.unicasSet[reg.dni] = true;
+        if (reg.esNueva) res.periodo1.nuevas++;
+      }
+      if (fMesesP2 && fMesesP2.includes(mesAnio)) {
+        res.periodo2.prestaciones++;
+        res.periodo2.unicasSet[reg.dni] = true;
+        if (reg.esNueva) res.periodo2.nuevas++;
+      }
+    } else {
+      // Filtro Meses (Solo en modo general)
+      if (fMeses && !fMeses.includes(mesAnio)) return;
+      
+      // Si llegó hasta aquí, pasó todos los filtros
+      unicasFiltradasSet[reg.dni] = true;
+
+      if (!res.resumenAnual[anioReg]) res.resumenAnual[anioReg] = { unicasSet: {}, prestaciones: 0, nuevas: 0 };
+      
+      res.resumenAnual[anioReg].prestaciones++;
+      res.resumenAnual[anioReg].unicasSet[reg.dni] = true;
+      if (reg.esNueva) res.resumenAnual[anioReg].nuevas++;
+    }
+  });
+
+  // Finalizar respuesta
+  res.mesesDisponibles = Object.keys(res.mesesDisponiblesSet).sort().reverse();
+  delete res.mesesDisponiblesSet;
+  
+  if (modo === "comparacion") {
+    res.periodo1.unicas = Object.keys(res.periodo1.unicasSet).length;
+    res.periodo2.unicas = Object.keys(res.periodo2.unicasSet).length;
+    res.totalUnicasSeleccion = res.periodo1.unicas + res.periodo2.unicas;
+    delete res.periodo1.unicasSet;
+    delete res.periodo2.unicasSet;
+  } else {
+    res.totalUnicasSeleccion = Object.keys(unicasFiltradasSet).length;
+    let finalAnual = [];
+    Object.keys(res.resumenAnual).forEach(anio => {
+      finalAnual.push({
+        anio: anio,
+        unicas: Object.keys(res.resumenAnual[anio].unicasSet).length,
+        prestaciones: res.resumenAnual[anio].prestaciones,
+        nuevas: res.resumenAnual[anio].nuevas
+      });
+    });
+    res.resumenAnual = finalAnual.sort((a, b) => b.anio.localeCompare(a.anio));
+  }
+
+  console.log("[STATS] Finalizado. Unicas en selección:", res.totalUnicasSeleccion);
+  return res;
+}
+
+// Helper robusto para normalizar nombres de estaciones (Case-insensitive)
+function obtenerNombreEstacionCanonico_(nombre) {
+  if (!nombre) return "sin_datos";
+  const texto = String(nombre).replace("*", "").trim().toLowerCase();
+  
+  // Buscar en el mapa de alias
+  for (const canonico in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
+    const canonicoLower = canonico.toLowerCase();
+    
+    // 1. Coincidencia exacta con el nombre largo
+    if (texto === canonicoLower) return canonicoLower;
+    
+    // 2. Coincidencia con alguno de los alias
+    const alias = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[canonico] || [];
+    const aliasLower = alias.map(a => String(a).toLowerCase());
+    if (aliasLower.indexOf(texto) !== -1) return canonicoLower;
+    
+    // 3. Coincidencia parcial (por si viene con "Estación Saludable..." o similar)
+    if (texto.includes(canonicoLower) || canonicoLower.includes(texto)) return canonicoLower;
+  }
+  
+  return texto; // Si no lo encuentra, devuelve el texto limpio en minúsculas
+}
+
+/**
+ * Función para importar físicamente los datos del 2025 al sheet maestro.
+ * Ejecutar una sola vez para agilizar el sistema de Personas Únicas.
+ */
+function importarHistorico2025() {
+  const fuente = FUENTES_ESPECIALES_EXTERNAS["TALLERES"];
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  let hojaDestino = ss.getSheetByName("2025_HISTORICO");
+  if (!hojaDestino) {
+    hojaDestino = ss.insertSheet("2025_HISTORICO");
+  }
+  
+  const libroExterno = SpreadsheetApp.openById(fuente.spreadsheetId);
+  const hojaOrigen = libroExterno.getSheetByName("2025");
+  
+  if (!hojaOrigen) {
+    throw new Error("No se encontró la solapa '2025' en el archivo externo.");
+  }
+  
+  const datos = hojaOrigen.getDataRange().getValues();
+  hojaDestino.clear();
+  hojaDestino.getRange(1, 1, datos.length, datos[0].length).setValues(datos);
+  
+  return "Importación exitosa. Ahora el sistema de Personas Únicas leerá los datos del 2025 localmente.";
 }
 
 function obtenerResumenTalleresDesdeHojaLocal_(hoja, nombreSolapa, filtros) {
@@ -3057,14 +3333,33 @@ function obtenerResumenTalleresDesdeHojaLocal_(hoja, nombreSolapa, filtros) {
 
 function obtenerResumenSolapaEspecialExterna_(fuente, nombreSolapa, filtros) {
   let libroExterno = SpreadsheetApp.openById(fuente.spreadsheetId);
-  let hoja = libroExterno.getSheetByName(fuente.sheetName);
+  let hojasAConsultar = fuente.sheetNames || [fuente.sheetName];
+  let datosConsolidados = [];
+  
+  hojasAConsultar.forEach(function(nombreHoja, idx) {
+    let hoja = libroExterno.getSheetByName(nombreHoja);
+    if (!hoja) return;
+    
+    let ultimaFila = hoja.getLastRow();
+    let ultimaColumna = hoja.getLastColumn();
+    if (ultimaFila < 2 || ultimaColumna === 0) return;
+    
+    let cantidadColumnas = Math.min(6, ultimaColumna);
+    let datosHoja = hoja.getRange(1, 1, ultimaFila, cantidadColumnas).getValues();
+    
+    if (idx === 0 || datosConsolidados.length === 0) {
+      datosConsolidados = datosConsolidados.concat(datosHoja);
+    } else {
+      datosConsolidados = datosConsolidados.concat(datosHoja.slice(1));
+    }
+  });
 
-  if (!hoja) {
+  if (datosConsolidados.length < 2) {
     return {
       nombre: nombreSolapa,
       disponible: false,
       tipoResumen: "especial_detallado",
-      mensaje: "No se encontro la solapa " + fuente.sheetName + " en el archivo externo.",
+      mensaje: "No se encontraron datos en las solapas externas.",
       ultimaFechaCarga: "",
       fechas: [],
       meses: [],
@@ -3075,28 +3370,7 @@ function obtenerResumenSolapaEspecialExterna_(fuente, nombreSolapa, filtros) {
     };
   }
 
-  let ultimaFila = hoja.getLastRow();
-  let ultimaColumna = hoja.getLastColumn();
-
-  if (ultimaFila < 2 || ultimaColumna === 0) {
-    return {
-      nombre: nombreSolapa,
-      disponible: true,
-      tipoResumen: "especial_detallado",
-      mensaje: "La fuente externa todavia no tiene datos.",
-      ultimaFechaCarga: "",
-      fechas: [],
-      meses: [],
-      etiquetas: {
-        principal: "Profesor",
-        secundaria: "Actividad"
-      }
-    };
-  }
-
-  let cantidadColumnas = Math.min(6, ultimaColumna);
-  let datos = hoja.getRange(1, 1, ultimaFila, cantidadColumnas).getValues();
-  let resumen = obtenerResumenActividadExterna_(datos, nombreSolapa);
+  let resumen = obtenerResumenActividadExterna_(datosConsolidados, nombreSolapa);
   resumen = aplicarFiltrosResumenEspecial_(resumen, filtros);
   return resumirPayloadResumenEspecial_(resumen);
 }
@@ -3542,7 +3816,7 @@ function obtenerMapaEstacionesVisibles_() {
 
     const base = limpiarTexto_(canonica)
       .replace(/^Estaciones?\s+Saludables?\s+/i, "")
-      .replace(/^Estaci(?:o|ó)n\s+Saludable\s+/i, "")
+      .replace(/^Estaci(?:o|Ã³)n\s+Saludable\s+/i, "")
       .trim();
 
     registrar(canonica, base);
@@ -5187,37 +5461,37 @@ function crearDocumentoInformeDashboard_(datos, imagenes) {
   
   claves.forEach(c => {
     const r = datos.resultados[c];
-    resumenTexto += `\nPERÍODO: ${c}\n`;
-    resumenTexto += `- Estaciones Líderes: ${r.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " part.)").join(", ")}\n`;
+    resumenTexto += `\nPERÃODO: ${c}\n`;
+    resumenTexto += `- Estaciones LÃ­deres: ${r.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " part.)").join(", ")}\n`;
     resumenTexto += `- Actividades Predominantes: ${r.actividades.slice(0, 8).map(a => a[0] + " (" + a[1] + " part.)").join(", ")}\n`;
     const totalP = r.mensual.reduce((a, b) => a + b[1], 0);
     const totalU = r.mensual.reduce((a, b) => a + b[2], 0);
-    resumenTexto += `- Métricas Consolidadas: ${totalP} participaciones totales / ${totalU} usuarios únicos\n`;
+    resumenTexto += `- MÃ©tricas Consolidadas: ${totalP} participaciones totales / ${totalU} usuarios Ãºnicos\n`;
   });
 
   let prompt = [
-    "Actúa como un Consultor Estratégico Senior especializado en Salud Pública y Gestión Operativa del programa Estaciones Saludables (GCBA).",
-    "Tu misión es realizar un análisis forense y prospectivo basado en los datos del Tablero Gerencial.",
+    "ActÃºa como un Consultor EstratÃ©gico Senior especializado en Salud PÃºblica y GestiÃ³n Operativa del programa Estaciones Saludables (GCBA).",
+    "Tu misiÃ³n es realizar un anÃ¡lisis forense y prospectivo basado en los datos del Tablero Gerencial.",
     "",
     "CONTEXTO DE LOS DATOS:",
-    "- Modo de Visualización: " + (datos.modo === "comparacion" ? "Comparativa entre Períodos" : "Análisis Acumulado"),
-    "- Datos Estadísticos:",
+    "- Modo de VisualizaciÃ³n: " + (datos.modo === "comparacion" ? "Comparativa entre PerÃ­odos" : "AnÃ¡lisis Acumulado"),
+    "- Datos EstadÃ­sticos:",
     resumenTexto,
     "",
-    "CONSIGNA DE ANÁLISIS (CRÍTICO):",
-    "Genera un informe ejecutivo de alto nivel (máximo 600 palabras) que cumpla con los siguientes requisitos:",
-    "1. Análisis de Variaciones: Si hay comparación, explica detalladamente los motivos lógicos de las variaciones (ej: estacionalidad, éxito de ciertas actividades, impacto territorial). Si no hay comparación, evalúa la solidez del volumen actual.",
-    "2. Correlación Estación-Actividad: Analiza si la oferta de actividades en las estaciones líderes es la adecuada para traccionar más público.",
-    "3. Hallazgos y 'Pain Points': Identifica dónde se están perdiendo oportunidades de crecimiento.",
-    "4. Hoja de Ruta Estratégica: Provee sugerencias REALES y ACCIONABLES para incrementar los números de participación y usuarios únicos (ej: redistribución de profesores, horarios críticos, diversificación de servicios).",
+    "CONSIGNA DE ANÃLISIS (CRÃTICO):",
+    "Genera un informe ejecutivo de alto nivel (mÃ¡ximo 600 palabras) que cumpla con los siguientes requisitos:",
+    "1. AnÃ¡lisis de Variaciones: Si hay comparaciÃ³n, explica detalladamente los motivos lÃ³gicos de las variaciones (ej: estacionalidad, Ã©xito de ciertas actividades, impacto territorial). Si no hay comparaciÃ³n, evalÃºa la solidez del volumen actual.",
+    "2. CorrelaciÃ³n EstaciÃ³n-Actividad: Analiza si la oferta de actividades en las estaciones lÃ­deres es la adecuada para traccionar mÃ¡s pÃºblico.",
+    "3. Hallazgos y 'Pain Points': Identifica dÃ³nde se estÃ¡n perdiendo oportunidades de crecimiento.",
+    "4. Hoja de Ruta EstratÃ©gica: Provee sugerencias REALES y ACCIONABLES para incrementar los nÃºmeros de participaciÃ³n y usuarios Ãºnicos (ej: redistribuciÃ³n de profesores, horarios crÃ­ticos, diversificaciÃ³n de servicios).",
     "",
     "ESTRUCTURA DEL INFORME:",
-    "A. Diagnóstico Situacional y Tendencias.",
-    "B. Evaluación de Impacto Operativo (por estación y actividad).",
-    "C. Análisis Causal de las Estadísticas (explicar el 'porqué' de los números).",
-    "D. Plan de Acción Recomendado (3-5 puntos clave).",
+    "A. DiagnÃ³stico Situacional y Tendencias.",
+    "B. EvaluaciÃ³n de Impacto Operativo (por estaciÃ³n y actividad).",
+    "C. AnÃ¡lisis Causal de las EstadÃ­sticas (explicar el 'porquÃ©' de los nÃºmeros).",
+    "D. Plan de AcciÃ³n Recomendado (3-5 puntos clave).",
     "",
-    "Tono institucional, analítico, directo y con rigor estadístico. Evita generalidades; usa los datos provistos para justificar cada afirmación."
+    "Tono institucional, analÃ­tico, directo y con rigor estadÃ­stico. Evita generalidades; usa los datos provistos para justificar cada afirmaciÃ³n."
   ].join("\n");
 
   let analisis = "";
@@ -5234,12 +5508,12 @@ function crearDocumentoInformeDashboard_(datos, imagenes) {
   let body = doc.getBody();
   
   body.clear();
-  agregarFranjaDocumento_(body, "INFORME ANALÍTICO DE ESTADÍSTICAS", "#153244", "#ffffff", 14);
+  agregarFranjaDocumento_(body, "INFORME ANALÃTICO DE ESTADÃSTICAS", "#153244", "#ffffff", 14);
   
   body.appendParagraph("Generado: " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm")).setFontSize(9);
-  body.appendParagraph("Filtro: " + (datos.modo === "comparacion" ? "Comparativo Mensual" : "Acumulado del Período")).setItalic(true).setFontSize(9);
+  body.appendParagraph("Filtro: " + (datos.modo === "comparacion" ? "Comparativo Mensual" : "Acumulado del PerÃ­odo")).setItalic(true).setFontSize(9);
   
-  body.appendParagraph("\nANÁLISIS Y DIAGNÓSTICO ESTRATÉGICO").setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  body.appendParagraph("\nANÃLISIS Y DIAGNÃ“STICO ESTRATÃ‰GICO").setHeading(DocumentApp.ParagraphHeading.HEADING1);
   agregarTextoInformeADocumento_(body, analisis);
 
   // Agregar Graficos
@@ -5509,7 +5783,7 @@ function construirPromptInformeIA_(nombreSolapa, resumen, contexto) {
         "- Debes incluir una seccion titulada Comparacion con " + contexto.comparacion.datosPrompt.periodoComparado + ".",
         "- Debes comparar explicitamente personas unicas y participaciones, mencionando si suben, bajan o se mantienen.",
         "- Debes mencionar la diferencia absoluta y, si existe, la diferencia porcentual aproximada.",
-        "- Debes señalar al menos 2 cambios relevantes en la composicion del periodo si pueden verse en los tops de " + contexto.etiquetas.principalPlural + " o " + contexto.etiquetas.secundariaPlural + ".",
+        "- Debes seÃ±alar al menos 2 cambios relevantes en la composicion del periodo si pueden verse en los tops de " + contexto.etiquetas.principalPlural + " o " + contexto.etiquetas.secundariaPlural + ".",
         "- Si el JSON incluye " + contexto.etiquetas.cuartaPlural + " o " + contexto.etiquetas.terciariaPlural + ", debes incorporarlos de manera explicita en la lectura comparativa y no dejarlos como dato accesorio.",
         "- Debes cerrar esa seccion con una interpretacion de gestion y una implicancia operativa concreta."
       ].join("\n")
@@ -5617,21 +5891,21 @@ function solicitarInformeGemini_(prompt) {
 }
 
 /**
- * Función para configurar la API KEY de OpenRouter de forma segura.
+ * FunciÃ³n para configurar la API KEY de OpenRouter de forma segura.
  */
 function configurarOpenRouter() {
   const ui = SpreadsheetApp.getUi();
-  const res = ui.prompt("Configuración de OpenRouter", "Ingresa tu API KEY de OpenRouter:", ui.ButtonSet.OK_CANCEL);
+  const res = ui.prompt("ConfiguraciÃ³n de OpenRouter", "Ingresa tu API KEY de OpenRouter:", ui.ButtonSet.OK_CANCEL);
   
   if (res.getSelectedButton() == ui.Button.OK) {
     const key = res.getResponseText().trim();
     if (key.indexOf("sk-or-") !== 0) {
-      ui.alert("⚠️ Error: La clave ingresada no parece ser una clave de OpenRouter válida.");
+      ui.alert("âš ï¸ Error: La clave ingresada no parece ser una clave de OpenRouter vÃ¡lida.");
       return;
     }
     PropertiesService.getScriptProperties().setProperty("OPENROUTER_API_KEY", key);
     PropertiesService.getScriptProperties().setProperty("OPENROUTER_MODEL", "anthropic/claude-3-haiku");
-    ui.alert("✅ Configuración exitosa. Ahora el sistema usará Claude 3 Haiku vía OpenRouter.");
+    ui.alert("âœ… ConfiguraciÃ³n exitosa. Ahora el sistema usarÃ¡ Claude 3 Haiku vÃ­a OpenRouter.");
   }
 }
 
@@ -5644,14 +5918,14 @@ function solicitarInformeOpenRouter_(prompt) {
   const model = props.getProperty("OPENROUTER_MODEL") || "anthropic/claude-3-haiku";
 
   if (!apiKey) {
-    throw new Error("⚠️ Falta configurar OPENROUTER_API_KEY. Ve al menú Administración > Configurar OpenRouter.");
+    throw new Error("âš ï¸ Falta configurar OPENROUTER_API_KEY. Ve al menÃº AdministraciÃ³n > Configurar OpenRouter.");
   }
 
   const url = "https://openrouter.ai/api/v1/chat/completions";
   const payload = {
     "model": model,
     "messages": [
-      {"role": "system", "content": "Eres un analista experto en gestión operativa de estaciones saludables. Tu objetivo es generar informes precisos y profesionales."},
+      {"role": "system", "content": "Eres un analista experto en gestiÃ³n operativa de estaciones saludables. Tu objetivo es generar informes precisos y profesionales."},
       {"role": "user", "content": prompt}
     ],
     "temperature": 0.3,
@@ -5689,7 +5963,7 @@ function solicitarInformeOpenRouter_(prompt) {
     return data.choices[0].message.content;
   }
 
-  throw new Error("OpenRouter no devolvió contenido de texto.");
+  throw new Error("OpenRouter no devolviÃ³ contenido de texto.");
 }
 
 function obtenerFinishReasonGemini_(data) {
@@ -5777,7 +6051,7 @@ function construirNombreArchivoInformeIA_(nombreSolapa, contexto, origenInforme)
 }
 
 /**
- * Genera una solapa de GRAFICOS con tablas dinámicas y gráficos basados en TALLERES.
+ * Genera una solapa de GRAFICOS con tablas dinÃ¡micas y grÃ¡ficos basados en TALLERES.
  */
 function generarDashboardGerencial() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -5790,7 +6064,7 @@ function generarDashboardGerencial() {
   
   const hojaTalleres = ss.getSheetByName("TALLERES");
   if (!hojaTalleres || hojaTalleres.getLastRow() < 2) {
-    SpreadsheetApp.getUi().alert("❌ Error: La solapa TALLERES está vacía o no existe. No se pueden generar gráficos.");
+    SpreadsheetApp.getUi().alert("âŒ Error: La solapa TALLERES estÃ¡ vacÃ­a o no existe. No se pueden generar grÃ¡ficos.");
     return;
   }
   
@@ -5838,36 +6112,36 @@ function generarDashboardGerencial() {
   const dataMes = [["MES", "PARTICIPANTES"]].concat(Object.entries(resumenMensual).sort((a,b) => a[0].localeCompare(b[0])));
   hojaGraficos.getRange(1, 7, dataMes.length, 2).setValues(dataMes);
   
-  // 3. Crear Gráficos
+  // 3. Crear GrÃ¡ficos
   
-  // Gráfico 1: Barras - Estaciones (A tope)
+  // GrÃ¡fico 1: Barras - Estaciones (A tope)
   const chartEst = hojaGraficos.newChart()
     .setChartType(Charts.ChartType.BAR)
     .addRange(hojaGraficos.getRange(1, 1, Math.min(dataEst.length, 15), 2))
     .setPosition(2, 10, 0, 0)
-    .setOption('title', 'Top 15 Estaciones con Mayor Participación')
+    .setOption('title', 'Top 15 Estaciones con Mayor ParticipaciÃ³n')
     .setOption('width', 600)
     .setOption('height', 400)
     .setOption('colors', ['#153244'])
     .build();
     
-  // Gráfico 2: Torta - Actividades
+  // GrÃ¡fico 2: Torta - Actividades
   const chartAct = hojaGraficos.newChart()
     .setChartType(Charts.ChartType.PIE)
     .addRange(hojaGraficos.getRange(1, 4, Math.min(dataAct.length, 10), 2))
     .setPosition(2, 20, 0, 0)
-    .setOption('title', 'Distribución por Tipo de Actividad (Top 10)')
+    .setOption('title', 'DistribuciÃ³n por Tipo de Actividad (Top 10)')
     .setOption('width', 500)
     .setOption('height', 400)
     .setOption('is3D', true)
     .build();
 
-  // Gráfico 3: Líneas/Áreas - Evolución Mensual
+  // GrÃ¡fico 3: LÃ­neas/Ãreas - EvoluciÃ³n Mensual
   const chartMes = hojaGraficos.newChart()
     .setChartType(Charts.ChartType.AREA)
     .addRange(hojaGraficos.getRange(1, 7, dataMes.length, 2))
     .setPosition(23, 10, 0, 0)
-    .setOption('title', 'Evolución Mensual de Asistencia')
+    .setOption('title', 'EvoluciÃ³n Mensual de Asistencia')
     .setOption('width', 1110)
     .setOption('height', 350)
     .setOption('colors', ['#ffcb00'])
@@ -5882,25 +6156,51 @@ function generarDashboardGerencial() {
   hojaGraficos.getRange("A1:H1").setFontWeight("bold").setBackground("#f3f3f3");
   hojaGraficos.autoResizeColumns(1, 8);
   
-  // Ocultar las columnas de datos crudos si prefieres que se vea solo el gráfico
+  // Ocultar las columnas de datos crudos si prefieres que se vea solo el grÃ¡fico
   // hojaGraficos.hideColumns(1, 8); 
 
   ss.setActiveSheet(hojaGraficos);
-  SpreadsheetApp.getUi().alert("✅ Dashboard de Gráficos generado con éxito en la solapa GRAFICOS.");
+  SpreadsheetApp.getUi().alert("âœ… Dashboard de GrÃ¡ficos generado con Ã©xito en la solapa GRAFICOS.");
 }
 
 /**
  * Procesa los datos de TALLERES para el frontend.
- * Evita enviar miles de filas, solo envía los totales agregados.
+ * Evita enviar miles de filas, solo envÃ­a los totales agregados.
  */
 function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const hojaTalleres = ss.getSheetByName("TALLERES");
-  if (!hojaTalleres || hojaTalleres.getLastRow() < 2) return { ok: false, msg: "Sin datos" };
+  if (!hojaTalleres) return { ok: false, msg: "Sin datos" };
 
-  const datos = hojaTalleres.getDataRange().getValues();
-  const headers = datos[0].map(h => String(h).toUpperCase().trim());
+  let datos = hojaTalleres.getDataRange().getValues();
+  let headers = datos[0].map(h => String(h).toUpperCase().trim());
+  let filas = datos.slice(1);
+
+  // --- BUSQUEDA BAJO DEMANDA DE HISTORICOS (2024/2025) ---
+  const necesitaHistorico = (modo === "comparacion" || (filtroMeses && filtroMeses.some(m => m.startsWith("2024") || m.startsWith("2025"))));
   
+  if (necesitaHistorico) {
+    try {
+      const fuenteExtra = FUENTES_ESPECIALES_EXTERNAS["TALLERES"];
+      const libroExtra = SpreadsheetApp.openById(fuenteExtra.spreadsheetId);
+      const aniosABuscar = ["2025"];
+      
+      aniosABuscar.forEach(function(anio) {
+        const hojaAnio = libroExtra.getSheetByName(anio);
+        if (hojaAnio) {
+          const uFila = hojaAnio.getLastRow();
+          if (uFila > 1) {
+             const datosExtra = hojaAnio.getRange(2, 1, uFila - 1, 6).getValues();
+             datosExtra.forEach(function(f) {
+               // Mapeamos al formato de TALLERES local: DNI, FECHA, ESTACION, PROFESOR, ACTIVIDAD, SECTOR
+               filas.push([f[0], f[1], f[2], f[3], f[4], f[5]]);
+             });
+          }
+        }
+      });
+    } catch(e) { console.log("Error trayendo historicos: " + e); }
+  }
+
   const idxDni = headers.indexOf("DNI");
   const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
   
@@ -5920,8 +6220,6 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     else if (h.includes("FERIADO") || h.includes("FINDE") || h.includes("SADOFE")) idxTipoDia = i;
   }
   if (idxTipoDia === -1) idxTipoDia = headers.length - 1;
-
-  const filas = datos.slice(1);
 
   const mesesDisponibles = {};
   const dataAgrupada = {}; 
@@ -5976,14 +6274,14 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     if (!target.mesUnicos[m]) target.mesUnicos[m] = {};
     if (d) target.mesUnicos[m][d] = true;
 
-    // Desglose por día del mes (1-31)
+    // Desglose por dÃ­a del mes (1-31)
     const dia = f.getDate();
     if (!target.dias[dia]) target.dias[dia] = { participaciones: 0, unicos: {} };
     target.dias[dia].participaciones++;
     if (d) target.dias[dia].unicos[d] = true;
   });
 
-  // Re-procesar estaciones si el filtro de asterisco dejó todo vacío
+  // Re-procesar estaciones si el filtro de asterisco dejÃ³ todo vacÃ­o
   Object.keys(dataAgrupada).forEach(clave => {
     const t = dataAgrupada[clave];
     if (Object.keys(t.est).length === 0) {
@@ -6038,21 +6336,21 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
 }
 
 /**
- * Rellena automáticamente la columna "TIPO DIA" (H) en TALLERES.
- * Si ya tiene la palabra "SADOFE", la respeta (útil para feriados cargados a mano).
- * Si está vacía o dice "SEMANA", evalúa si es fin de semana o no y la sobrescribe.
+ * Rellena automÃ¡ticamente la columna "TIPO DIA" (H) en TALLERES.
+ * Si ya tiene la palabra "SADOFE", la respeta (Ãºtil para feriados cargados a mano).
+ * Si estÃ¡ vacÃ­a o dice "SEMANA", evalÃºa si es fin de semana o no y la sobrescribe.
  */
 function actualizarColumnaSadofe(silencioso = false) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const hoja = ss.getSheetByName("TALLERES");
   if (!hoja) {
-    if (!silencioso) SpreadsheetApp.getUi().alert("❌ No se encontró la solapa TALLERES");
+    if (!silencioso) SpreadsheetApp.getUi().alert("âŒ No se encontrÃ³ la solapa TALLERES");
     return;
   }
   
   const datos = hoja.getDataRange().getValues();
   if (datos.length < 2) {
-    if (!silencioso) SpreadsheetApp.getUi().alert("⚠️ La solapa TALLERES está vacía.");
+    if (!silencioso) SpreadsheetApp.getUi().alert("âš ï¸ La solapa TALLERES estÃ¡ vacÃ­a.");
     return;
   }
   
@@ -6060,11 +6358,11 @@ function actualizarColumnaSadofe(silencioso = false) {
   const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
   
   if (idxFecha === -1) {
-    if (!silencioso) SpreadsheetApp.getUi().alert("❌ No se encontró la columna 'FECHA ACTIVIDAD'");
+    if (!silencioso) SpreadsheetApp.getUi().alert("âŒ No se encontrÃ³ la columna 'FECHA ACTIVIDAD'");
     return;
   }
   
-  // Buscar columna TIPO DIA, o usar la H (índice 7)
+  // Buscar columna TIPO DIA, o usar la H (Ã­ndice 7)
   let idxTipoDia = -1;
   for (let i = 0; i < headers.length; i++) {
     const h = String(headers[i]).toUpperCase();
@@ -6074,7 +6372,7 @@ function actualizarColumnaSadofe(silencioso = false) {
     }
   }
   
-  // Forzar el índice 7 si el usuario pidió la columna H y no había un header previo claro
+  // Forzar el Ã­ndice 7 si el usuario pidiÃ³ la columna H y no habÃ­a un header previo claro
   if (idxTipoDia === -1) {
     idxTipoDia = 7; // Columna H
     hoja.getRange(1, idxTipoDia + 1).setValue("TIPO DIA");
@@ -6089,7 +6387,7 @@ function actualizarColumnaSadofe(silencioso = false) {
     const f = datos[i][idxFecha];
     const valorActual = String(datos[i][idxTipoDia] || "").toUpperCase().trim();
     
-    // Si ya dice explícitamente SADOFE o FERIADO, lo respetamos por si fue cargado a mano
+    // Si ya dice explÃ­citamente SADOFE o FERIADO, lo respetamos por si fue cargado a mano
     if (valorActual === "SADOFE" || valorActual.includes("FERIADO")) {
       valoresNuevos.push([valorActual]);
       continue;
@@ -6103,7 +6401,7 @@ function actualizarColumnaSadofe(silencioso = false) {
       if (valorActual !== valorNuevo) cambiados++;
       valoresNuevos.push([valorNuevo]);
     } else {
-      valoresNuevos.push([datos[i][idxTipoDia]]); // dejar como estaba si la fecha es inválida
+      valoresNuevos.push([datos[i][idxTipoDia]]); // dejar como estaba si la fecha es invÃ¡lida
     }
   }
   
@@ -6112,6 +6410,6 @@ function actualizarColumnaSadofe(silencioso = false) {
   }
   
   if (!silencioso) {
-    SpreadsheetApp.getUi().alert(`✅ Columna actualizada correctamente en ${cambiados} filas.\n\nTodos los fines de semana dicen 'SADOFE' y los días hábiles dicen 'SEMANA'.\n\nSi hay un feriado en día de semana, puedes escribir manualmente 'SADOFE' en esa celda y este script lo respetará.`);
+    SpreadsheetApp.getUi().alert(`âœ… Columna actualizada correctamente en ${cambiados} filas.\n\nTodos los fines de semana dicen 'SADOFE' y los dÃ­as hÃ¡biles dicen 'SEMANA'.\n\nSi hay un feriado en dÃ­a de semana, puedes escribir manualmente 'SADOFE' en esa celda y este script lo respetarÃ¡.`);
   }
 }
