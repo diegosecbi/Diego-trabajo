@@ -403,8 +403,8 @@ main.main-content {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 15px;
 }
 
 .estacion {
@@ -423,26 +423,28 @@ main.main-content {
 
 .estacionHeader {
   background-color: var(--color-amarillo);
-  padding: 18px 22px;
+  padding: 10px 15px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   color: var(--color-negro);
+  font-size: 13px;
 }
 
 .profList{
 display:none;
-padding:10px;
+padding:5px 10px;
 }
 
 .profesor{
 display:flex;
 justify-content:space-between;
 border-bottom:1px solid #eee;
-padding:4px 0;
-font-size:13px;
+padding:2px 0;
+font-size:11px;
+gap: 5px;
 }
 
 .luz{
@@ -945,7 +947,8 @@ grid-template-columns:1fr;
     <div class="loginTexto" style="margin-bottom: 15px; color: #666; font-size: 13px;">Acceso al Sistema - Ingresa tu correo oficial</div>
     
     <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-      <input type="email" id="loginCorreo" class="loginInput" placeholder="nombre@ejemplo.com" style="width: 100%; text-align: center;" onkeydown="if(event.key==='Enter'){iniciarSesionManual()}">
+      <input type="email" id="loginCorreo" class="loginInput" placeholder="nombre@ejemplo.com" style="width: 100%; text-align: center;" onkeydown="if(event.key==='Enter'){document.getElementById('loginPass').focus()}">
+      <input type="password" id="loginPass" class="loginInput" placeholder="Contraseña" style="width: 100%; text-align: center; margin-top: 10px;" onkeydown="if(event.key==='Enter'){iniciarSesionManual()}">
       <button onclick="iniciarSesionManual()" class="botonActualizar" style="width: auto; padding: 0 40px; border-radius: 12px; height: 45px; font-size: 14px;">Validar Credenciales</button>
     </div>
     <div id="loginMensaje" class="loginMensaje" style="margin-top: 15px;"></div>
@@ -1042,6 +1045,7 @@ grid-template-columns:1fr;
         <button id="btnDashboardGraficos" class="sidebar-btn" onclick="abrirDashboardGraficos()" style="display:none;">Ver Estadísticas</button>
         <button id="btnExportarExcel" class="sidebar-btn" onclick="exportarExcel()" style="display:none;">Exportar Excel</button>
         <button id="btnSupervision" class="sidebar-btn" onclick="toggleSupervision()" style="display:none;">Modo Supervisión</button>
+        <button id="btnToggleRefs" class="sidebar-btn" onclick="toggleReferenciasPermisos()" style="display:none; background-color: #ffeb3b; color: #333 !important;">👁️ Ver Permisos (Admin)</button>
     </div>
     
     <div class="sidebar-label">ACTIVIDADES PLUS</div>
@@ -1256,7 +1260,7 @@ grid-template-columns:1fr;
 
 <!-- NUEVO MODAL ESTADÍSTICAS PERSONAS ÚNICAS -->
 <div id="modalPersonasUnicas" class="modalOverlay" onclick="cerrarModalPersonasUnicas(event)">
-<div class="modalVentana" style="width:min(900px,96vw);" onclick="event.stopPropagation()">
+<div class="modalVentana" style="width:min(1250px,98vw); max-height: 92vh;" onclick="event.stopPropagation()">
 <div class="modalHeader" style="background-color: #004d99; color: white;">
 <div style="display:flex; align-items:center; gap:20px; flex:1;">
     <div class="ba-logo">BA</div>
@@ -1272,13 +1276,13 @@ grid-template-columns:1fr;
   <div style="display:flex; gap:15px; align-items: center; flex-wrap: wrap; background: white; padding: 20px; border-radius: 16px; box-shadow: var(--sombra-suave); margin-bottom: 20px;">
       <div style="flex: 1; min-width: 200px;">
           <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Estación Seleccionada</label>
-          <select id="filtroEstacionUnicas" class="campoTexto" onchange="aplicarFiltrosPersonasUnicas()">
+          <select id="filtroEstacionUnicas" class="campoTexto">
               <option value="">Todas las Estaciones Saludables</option>
           </select>
       </div>
       <div style="flex: 1; min-width: 150px;">
           <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Modo</label>
-          <select id="filtroModoUnicas" class="campoTexto" onchange="cambiarModoUnicas()">
+          <select id="filtroModoUnicas" class="campoTexto">
               <option value="general">Global (Acumulado)</option>
               <option value="comparacion">Comparación de Períodos</option>
           </select>
@@ -1289,20 +1293,23 @@ grid-template-columns:1fr;
               <label style="display:flex; align-items:center; gap:5px; font-size:12px; cursor:pointer;"><input type="checkbox" class="check-anio-unicas" value="2025" checked> 2025</label>
               <label style="display:flex; align-items:center; gap:5px; font-size:12px; cursor:pointer;"><input type="checkbox" class="check-anio-unicas" value="2026" checked> 2026</label>
           </div>
+          <div style="font-size: 9px; color: #999; margin-top: 4px; line-height: 1.1;">* Si se seleccionan ambos, se comparan períodos completos.</div>
       </div>
       <div style="flex: 2; min-width: 300px;">
-          <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Seleccionar Meses</label>
-          <div id="multiselectMesesUnicas" style="max-height: 150px; overflow-y: auto; border: 1px solid #c9d7df; border-radius: 10px; padding: 12px; background: #f9fcfe;">
+          <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Seleccionar Meses (Max. 2 para comparar)</label>
+          <div id="multiselectMesesUnicas" style="max-height: 180px; overflow-y: auto; border: 1px solid #c9d7df; border-radius: 10px; padding: 12px; background: #f9fcfe;">
               <!-- Se llena dinámicamente con columnas por año -->
               <div style="font-size:12px; color:#999; width:100%; text-align:center; margin-top:10px;">Cargando meses disponibles...</div>
           </div>
+          <div style="font-size: 9px; color: #999; margin-top: 4px;">* Selecciona hasta 2 meses. Al elegir un tercero, se reemplazará el más antiguo.</div>
       </div>
       <div style="flex: 0; min-width: 140px;">
           <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #777; margin-bottom: 5px; display: block;">Tipo de Día</label>
           <button id="btnFiltroDiasUnicas" class="botonSecundario" onclick="toggleFiltroDiasUnicas()" style="width: 100%; border-radius: 12px; height: 48px;">Días: Todos</button>
       </div>
-      <div style="flex: 0; min-width: 120px; display: flex; align-items: flex-end;">
-          <button class="botonActualizar" onclick="aplicarFiltrosPersonasUnicas()" style="height: 48px; width: 100%; font-size: 12px; background: #004d99; border: none; color: white; font-weight: bold; border-radius: 12px; cursor: pointer;">🔄 Actualizar</button>
+      <div style="flex: 0; min-width: 240px; display: flex; align-items: flex-end; gap: 8px;">
+          <button class="botonActualizar" onclick="aplicarFiltrosPersonasUnicas()" style="height: 48px; flex: 1; font-size: 12px; background: #004d99; border: none; color: white; font-weight: bold; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🔄 Actualizar</button>
+          <button class="botonSecundario" onclick="resetearFiltrosPersonasUnicas()" style="height: 48px; width: 100px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-weight: bold; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🧹 Resetear</button>
       </div>
   </div>
   
@@ -1355,28 +1362,35 @@ let iconosEstaciones = {
 };
 
 function iniciarAplicacion(){
-let input=document.getElementById("loginCorreo")
+  const inputMail = document.getElementById("loginCorreo");
+  const inputPass = document.getElementById("loginPass");
 
-if(input){
-input.value=""
-}
+  if(inputMail) inputMail.value = "";
+  if(inputPass) inputPass.value = "";
 
-mostrarPantallaLogin("Ingresa tu correo para continuar.")
+  mostrarPantallaLogin("Ingresa tus credenciales para continuar.");
 }
 
 function iniciarSesionManual(){
-let input=document.getElementById("loginCorreo")
-let correo=input ? input.value : ""
-iniciarSesionConCorreoFrontend(correo)
+  const inputMail = document.getElementById("loginCorreo");
+  const inputPass = document.getElementById("loginPass");
+  const correo = inputMail ? inputMail.value : "";
+  const pass = inputPass ? inputPass.value : "";
+  iniciarSesionConCorreoFrontend(correo, pass);
 }
 
-function iniciarSesionConCorreoFrontend(correo){
-let email=String(correo || "").trim().toLowerCase()
+function iniciarSesionConCorreoFrontend(correo, pass){
+  const email = String(correo || "").trim().toLowerCase();
+  const password = String(pass || "").trim();
 
-if(!email){
-mostrarPantallaLogin("Ingresa tu correo para continuar.")
-return
-}
+  if(!email){
+    mostrarPantallaLogin("Ingresa tu correo para continuar.");
+    return;
+  }
+  if(!password){
+    mostrarPantallaLogin("Ingresa tu contraseña.");
+    return;
+  }
 
 if(typeof google==="undefined" || !google.script || !google.script.run){
 mostrarPantallaLogin("No se pudo iniciar la aplicacion.")
@@ -1385,7 +1399,7 @@ return
 
 let mensaje=document.getElementById("loginMensaje")
 if(mensaje){
-mensaje.textContent="Validando acceso..."
+mensaje.textContent="Validando credenciales..."
 }
 
 google.script.run
@@ -1402,7 +1416,7 @@ cargarDatos()
 .withFailureHandler(function(error){
 mostrarPantallaLogin(error && error.message ? error.message : "No se pudo validar el acceso.")
 })
-.iniciarSesionConCorreo(email)
+.iniciarSesionConCorreo(email, password)
 }
 
 function mostrarPantallaLogin(mensaje){
@@ -1465,7 +1479,7 @@ function aplicarPermisosUI(puede, restricciones) {
   if (btnGraficos) btnGraficos.style.display = puede.verDashboardGraficos ? "flex" : "none";
 
   const btnPersonasUnicas = document.getElementById("btnPersonasUnicas");
-  if (btnPersonasUnicas) btnPersonasUnicas.style.display = puede.verDashboardGraficos ? "flex" : "none";
+  if (btnPersonasUnicas) btnPersonasUnicas.style.display = puede.verPersonasUnicas ? "block" : "none";
 
   const btnExcel = document.getElementById("btnExportarExcel");
   if (btnExcel) btnExcel.style.display = puede.verExportarExcel ? "flex" : "none";
@@ -1623,8 +1637,8 @@ function renderBotonesEspeciales() {
 
   nombresSolapasEspeciales.forEach(nombre => {
     // Seguridad adicional: Si hay una lista blanca y el nombre no está, lo salteamos
-    if (sesionActual && sesionActual.solapasVisibles && sesionActual.solapasVisibles.length > 0) {
-       if (sesionActual.solapasVisibles.indexOf(nombre) === -1) return;
+    if (sesionActual && sesionActual.solapasVisibles && sesionActual.solapasVisibles !== "todas") {
+       if (Array.isArray(sesionActual.solapasVisibles) && sesionActual.solapasVisibles.indexOf(nombre) === -1) return;
     }
 
     let boton = document.createElement("button");
@@ -3315,7 +3329,9 @@ function toggleReferenciasPermisos() {
         { selector: "#filtroComuna", key: "verFiltrosAvanzados" },
         { selector: "header", key: "verPanelAdministracion" },
         { selector: "#btnInformeIA", key: "verGenerarInformes" },
-        { selector: "#btnEnviarInformeIA", key: "verGenerarInformes" }
+        { selector: "#btnEnviarInformeIA", key: "verGenerarInformes" },
+        { selector: "#btnPersonasUnicas", key: "verPersonasUnicas" },
+        { selector: "#btnDashboardGraficos", key: "verDashboardGraficos" }
     ];
 
     mapeo.forEach(item => {
@@ -3795,24 +3811,6 @@ if (typeof ChartDataLabels !== 'undefined') {
   Chart.register(ChartDataLabels);
 }
 
-// Inyectar en el mapeo de referencias para que el admin sepa qué clave es
-const originalToggleRefs = toggleReferenciasPermisos;
-toggleReferenciasPermisos = function() {
-    originalToggleRefs();
-    if (mostrandoReferencias) {
-        const btnGraf = document.getElementById("btnDashboardGraficos");
-        if (btnGraf) {
-            const badge = document.createElement("div");
-            badge.className = "permiso-ref";
-            badge.textContent = "verDashboardGraficos";
-            const rect = btnGraf.getBoundingClientRect();
-            badge.style.top = (window.scrollY + rect.top) + "px";
-            badge.style.left = (window.scrollX + rect.left) + "px";
-            document.body.appendChild(badge);
-        }
-    }
-}
-
 iniciarAplicacion()
 
 // --- FUNCIONES PERSONAS UNICAS ---
@@ -3837,7 +3835,49 @@ function abrirModalPersonasUnicas() {
 }
 
 function cambiarModoUnicas() {
-  aplicarFiltrosPersonasUnicas();
+  // Ya no actualizamos automáticamente
+}
+
+let seleccionMesesQueueUnicas = [];
+
+function manejarSeleccionMesUnicas(checkbox) {
+    if (checkbox.checked) {
+        seleccionMesesQueueUnicas.push(checkbox.value);
+        if (seleccionMesesQueueUnicas.length > 2) {
+            const extra = seleccionMesesQueueUnicas.shift();
+            // Desmarcar el anterior
+            const todos = document.querySelectorAll('.check-mes-unicas');
+            todos.forEach(cb => {
+                if (cb.value === extra) cb.checked = false;
+            });
+        }
+    } else {
+        seleccionMesesQueueUnicas = seleccionMesesQueueUnicas.filter(v => v !== checkbox.value);
+    }
+}
+
+function resetearFiltrosPersonasUnicas() {
+    document.getElementById("filtroEstacionUnicas").value = "";
+    document.getElementById("filtroModoUnicas").value = "general";
+    
+    // Resetear años
+    document.querySelectorAll(".check-anio-unicas").forEach(c => c.checked = true);
+    
+    // Resetear meses
+    document.querySelectorAll(".check-mes-unicas").forEach(c => c.checked = false);
+    seleccionMesesQueueUnicas = [];
+    
+    // Resetear Tipo de Día
+    filtroDiasUnicas = "Todos";
+    const btn = document.getElementById("btnFiltroDiasUnicas");
+    if (btn) {
+        btn.innerText = "Días: Todos";
+        btn.style.background = "";
+        btn.style.color = "";
+    }
+    
+    // Limpiar vista
+    document.getElementById("modalPersonasUnicasBody").innerHTML = '<div class="estadoVacio">Configura los filtros y presiona Actualizar...</div>';
 }
 
 function toggleFiltroDiasUnicas() {
@@ -3858,7 +3898,6 @@ function toggleFiltroDiasUnicas() {
         btn.style.background = "";
         btn.style.color = "";
     }
-    aplicarFiltrosPersonasUnicas();
 }
 
 function obtenerMesesSeleccionadosUnicas() {
@@ -3917,20 +3956,17 @@ function aplicarFiltrosPersonasUnicas() {
   };
 
   if (modo === "comparacion") {
-      // Separamos los seleccionados en dos mitades (P1 y P2) como hace gráficos, o asumimos la misma lógica de UI
-      // Para simplificar, dividimos en dos periodos iguales si hay varios meses, o simplemente usamos mesesP1 y mesesP2.
-      // Ya que el multiselect es único, asumiremos que los primeros N/2 van a P1 y el resto a P2, 
-      // o le pedimos al backend que haga un split.
-      // Lo mejor es mandar todos los meses y que el backend haga el split si es necesario, 
-      // o podemos enviar P1 = primer mes seleccionado, P2 = segundo mes seleccionado.
-      filtros.mesesP1 = meses.length > 0 ? [meses[0]] : null;
-      filtros.mesesP2 = meses.length > 1 ? [meses[1]] : null;
-      
+      // Dividir meses seleccionados en dos grupos cronológicos (mitad y mitad)
       if (meses.length < 2) {
           if(body) body.innerHTML = '<div class="estadoVacio">⚠️ Para comparar, selecciona al menos 2 meses en los filtros.</div>';
           if(btnAct) btnAct.innerText = "🔄 Actualizar";
           return;
       }
+      
+      const mitad = Math.ceil(meses.length / 2);
+      filtros.mesesP1 = meses.slice(0, mitad);
+      filtros.mesesP2 = meses.slice(mitad);
+      
   } else {
       filtros.meses = meses;
   }
@@ -3968,7 +4004,7 @@ function aplicarFiltrosPersonasUnicas() {
               mesesPorAnio[anio].sort((a,b) => a.valor.localeCompare(b.valor)).forEach(mObj => {
                   htmlMeses += `
                       <label style="display:flex; align-items:center; gap:6px; font-size:11px; background:white; padding:5px 8px; border-radius:8px; border:1px solid #e2e8f0; cursor:pointer; transition: all 0.2s;">
-                          <input type="checkbox" class="check-mes-unicas" value="${mObj.valor}"> ${mObj.nombre}
+                          <input type="checkbox" class="check-mes-unicas" value="${mObj.valor}" onclick="manejarSeleccionMesUnicas(this)"> ${mObj.nombre}
                       </label>`;
               });
               htmlMeses += '</div></div>';
@@ -4054,7 +4090,7 @@ function renderModalPersonasUnicas(data) {
         html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">';
         
         data.resumenAnual.forEach(function(anioData) {
-          const fidelizados = Math.max(0, (anioData.unicas || 0) - (anioData.nuevas || 0));
+          const fidelizados = anioData.fidelizados || 0;
           const es2025 = anioData.anio === "2025";
           const colorAnio = es2025 ? "#14b8a6" : "#2563eb"; // Turquesa para 2025, Azul para 2026
           const colorTurquesa2025 = "#14b8a6";

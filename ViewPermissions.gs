@@ -11,7 +11,8 @@ const PERMISOS_KEYS = [
   "verFiltrosAvanzados",
   "verPanelAdministracion",
   "modificarConfiguracion",
-  "verDashboardGraficos"
+  "verDashboardGraficos",
+  "verPersonasUnicas"
 ];
 
 const VIEW_PERMISSIONS = {
@@ -27,7 +28,8 @@ const VIEW_PERMISSIONS = {
       verFiltrosAvanzados: true,
       verPanelAdministracion: true,
       modificarConfiguracion: true,
-      verDashboardGraficos: true
+      verDashboardGraficos: true,
+      verPersonasUnicas: true
     },
     restricciones: [],
     solapasVisibles: "todas",
@@ -46,7 +48,8 @@ const VIEW_PERMISSIONS = {
       verFiltrosAvanzados: true,
       verPanelAdministracion: false,
       modificarConfiguracion: false,
-      verDashboardGraficos: true
+      verDashboardGraficos: true,
+      verPersonasUnicas: true
     },
     restricciones: [
       "panelSupervision",

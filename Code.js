@@ -107,7 +107,7 @@ const CABECERAS_USUARIOS = [
   "EMAIL",
   "PERFIL",
   "ACTIVO",
-  "OBSERVACIONES",
+  "PASSWORD",
   "verDashboardCompleto",
   "verModosSupervision",
   "verBotonesEspeciales",
@@ -116,7 +116,8 @@ const CABECERAS_USUARIOS = [
   "verFiltrosAvanzados",
   "verPanelAdministracion",
   "modificarConfiguracion",
-  "verDashboardGraficos"
+  "verDashboardGraficos",
+  "verPersonasUnicas"
 ];
 
 const CABECERAS_CRONOGRAMA_NORMALIZADO = [
@@ -754,11 +755,12 @@ function onOpen() {
   
   ui.createMenu("Administracion")
     .addItem("Preparar Hoja De Usuarios", "prepararHojaUsuarios")
-    .addItem("ðŸ” Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
+    .addItem("🔍 Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
+    .addItem("📅 Normalizar Tipo de Día 2025", "normalizarTipoDia2025")
     .addSeparator()
-    .addItem("ðŸ“Š Generar Dashboard de GrÃ¡ficos", "generarDashboardGerencial")
+    .addItem("📊 Generar Dashboard de Gráficos", "generarDashboardGerencial")
     .addSeparator()
-    .addItem("âš™ï¸ Configurar OpenRouter (Claude)", "configurarOpenRouter")
+    .addItem("🤖 Configurar OpenRouter (Claude)", "configurarOpenRouter")
     .addToUi();
     
   ui.createMenu("Talleres")
@@ -814,7 +816,7 @@ function prepararHojaUsuarios() {
   SpreadsheetApp.flush();
 
   SpreadsheetApp.getUi().alert(
-    "La hoja USUARIOS ha sido actualizada. Ahora puedes asignar permisos individuales (SI/NO) en las columnas de la E a la M para sobreescribir el perfil base."
+    "La hoja USUARIOS ha sido actualizada. Ahora puedes asignar permisos individuales (SI/NO) en las columnas de la E a la N para sobreescribir el perfil base."
   );
 }
 
@@ -968,9 +970,13 @@ function sincronizarTalleresDesdeSeguimiento() {
     .setFontColor("#ffffff")
     .setFontWeight("bold");
 
-  SpreadsheetApp.getUi().alert(
-    "TALLERES sincronizada. Filas copiadas: " + filas.length
-  );
+  try {
+    SpreadsheetApp.getUi().alert(
+      "TALLERES sincronizada. Filas copiadas: " + filas.length
+    );
+  } catch (e) {
+    console.log("Sincronización terminada (Background): " + filas.length + " filas.");
+  }
 }
 
 function obtenerFuentesTalleresDesdeDatos_(ss) {
@@ -2573,8 +2579,9 @@ function extraerFechaTextoDesdeCodigoComparacion_(codigo) {
   return convertirSerialHojaAFechaTexto_(match[1]);
 }
 
-function iniciarSesionConCorreo(emailIngresado) {
+function iniciarSesionConCorreo(emailIngresado, passIngresado, bypassPassword = false) {
   const email = String(emailIngresado || "").trim().toLowerCase();
+  const password = String(passIngresado || "").trim();
   console.log("[LOGIN] Intentando ingresar con: " + email);
 
   if (!email) {
@@ -2588,7 +2595,12 @@ function iniciarSesionConCorreo(emailIngresado) {
 
   const datosUsuario = resolverPerfilUsuario_(email);
   const perfil = datosUsuario.perfil;
-  console.log("[LOGIN] Resultado para " + email + ": " + perfil);
+  
+  // Si no hay password en la hoja, usamos el default 123456
+  let passwordCorrecta = String(datosUsuario.password || "").trim();
+  if (!passwordCorrecta) passwordCorrecta = "123456";
+
+  console.log("[LOGIN] Email: " + email + " | Perfil: " + perfil + " | Pass Ingresada: " + password + " | Pass Correcta (H): " + passwordCorrecta);
 
   if (perfil === "sin_acceso") {
     return {
@@ -2596,6 +2608,19 @@ function iniciarSesionConCorreo(emailIngresado) {
       email: email,
       perfil: "sin_acceso",
       mensaje: "El correo " + email + " no figura como ACTIVO en la solapa USUARIOS. Revisa que el estado sea 'SI'."
+    };
+  }
+
+  // Limpieza profunda de caracteres invisibles
+  const cleanPass = password.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+  const cleanCorrecta = passwordCorrecta.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+
+  if (!bypassPassword && cleanPass !== cleanCorrecta) {
+    return {
+      ok: false,
+      email: email,
+      perfil: "sin_acceso",
+      mensaje: "Contraseña incorrecta. (Detalle técnico: Ingresada=" + cleanPass.length + ", Base=" + cleanCorrecta.length + ")"
     };
   }
 
@@ -2630,7 +2655,8 @@ function iniciarSesionConCorreo(emailIngresado) {
 }
 
 function obtenerDatos(emailSesion){
-  const acceso = iniciarSesionConCorreo(emailSesion);
+  // Para obtener datos una vez logueado, hacemos bypass del password
+  const acceso = iniciarSesionConCorreo(emailSesion, null, true);
   if (!acceso.ok) {
     throw new Error(acceso.mensaje || "Comunicarse con el administrador.");
   }
@@ -2792,37 +2818,52 @@ function resolverPerfilUsuario_(email) {
     if (!hoja) return { perfil: "sin_acceso", overrides: {} };
 
     const ultimaFila = hoja.getLastRow();
-    if (ultimaFila < 2) return { perfil: "sin_acceso", overrides: {} };
+    if (ultimaFila < 1) return { perfil: "sin_acceso", overrides: {} };
 
     const ultCol = hoja.getLastColumn();
-    const datos = hoja.getRange(2, 1, ultimaFila - 1, ultCol).getDisplayValues();
+    const headers = hoja.getRange(1, 1, 1, ultCol).getValues()[0].map(h => String(h || "").trim().toUpperCase());
+    
+    const colIdxEmail = headers.indexOf("EMAIL");
+    const colIdxPerfil = headers.indexOf("PERFIL");
+    const colIdxActivo = headers.indexOf("ACTIVO");
+    const colIdxPass = headers.findIndex(h => {
+      const limpio = h.replace(/[^A-Z]/g, "");
+      return limpio === "PASSWORD" || 
+             limpio === "CONTRASENA" || 
+             limpio === "CONTRASEA" || 
+             limpio === "PASS" ||
+             h.indexOf("CONTRASE") !== -1 ||
+             h.indexOf("PASS") !== -1;
+    });
+
+    if (colIdxEmail === -1) return { perfil: "sin_acceso", overrides: {} };
+
+    const datos = hoja.getRange(2, 1, Math.max(1, ultimaFila - 1), ultCol).getDisplayValues();
     
     for (let i = 0; i < datos.length; i++) {
-      const emailHoja = String(datos[i][0] || "").trim().toLowerCase();
-      const perfilHoja = String(datos[i][1] || "").trim().toLowerCase();
-      const activoHoja = String(datos[i][2] || "").trim().toUpperCase();
-
+      const emailHoja = String(datos[i][colIdxEmail] || "").trim().toLowerCase();
       if (emailHoja === emailBusqueda) {
-        if (activoHoja === "SI" || activoHoja === "SÃ") {
+        const activoHoja = (colIdxActivo !== -1) ? String(datos[i][colIdxActivo] || "").trim().toUpperCase() : "SI";
+        if (activoHoja === "SI" || activoHoja === "SÃ ") {
+          const perfilHoja = (colIdxPerfil !== -1) ? String(datos[i][colIdxPerfil] || "").trim().toLowerCase() : "operativo";
           let perfilReal = perfilHoja;
           if (perfilHoja === "administrador") perfilReal = "admin";
-          if (perfilHoja === "coordinaciÃ³n") perfilReal = "coordinacion";
+          if (perfilHoja === "coordinaciÃ³n" || perfilHoja === "coordinacion") perfilReal = "coordinacion";
 
-          // Capturar Overrides de permisos
           const overrides = {};
-          // Las columnas de permisos empiezan en la E (Ã­ndice 4)
-          PERMISOS_KEYS.forEach((key, index) => {
-            const colIndex = 4 + index;
-            if (colIndex < datos[i].length) {
-              const valor = String(datos[i][colIndex] || "").trim().toUpperCase();
-              if (valor === "SI") overrides[key] = true;
-              if (valor === "NO") overrides[key] = false;
+          PERMISOS_KEYS.forEach(key => {
+            const idx = headers.indexOf(key.toUpperCase());
+            if (idx !== -1 && idx < datos[i].length) {
+              const valor = String(datos[i][idx] || "").trim().toUpperCase();
+              overrides[key] = (valor === "SI");
             }
           });
 
           return {
             perfil: perfilReal,
-            overrides: overrides
+            password: colIdxPass !== -1 ? String(datos[i][colIdxPass] || "").trim() : "",
+            overrides: overrides,
+            columnaPassEncontrada: colIdxPass !== -1
           };
         }
       }
@@ -2842,7 +2883,13 @@ function diagnosticarMiAcceso() {
   
   let msg = "DIAGNÃ“STICO DE ACCESO\n\n";
   msg += "1. Tu email detectado por Google: " + email + "\n";
-  msg += "2. Perfil resuelto por el sistema: " + (perfil === "sin_acceso" ? "NO ENCONTRADO O INACTIVO" : perfil.toUpperCase()) + "\n\n";
+  msg += "2. Perfil resuelto por el sistema: " + (perfil === "sin_acceso" ? "NO ENCONTRADO O INACTIVO" : perfil.toUpperCase()) + "\n";
+  msg += "3. ¿Se encontró columna de Contraseña?: " + (datosUsuario.columnaPassEncontrada ? "SÍ" : "NO") + "\n";
+  if (datosUsuario.columnaPassEncontrada) {
+    msg += "4. Largo de tu contraseña en la hoja: " + (datosUsuario.password ? datosUsuario.password.length : 0) + " caracteres\n\n";
+  } else {
+    msg += "4. Usando contraseña por defecto: 123456\n\n";
+  }
   
   if (perfil === "sin_acceso") {
     msg += "RECOMENDACIÃ“N:\n";
@@ -3089,7 +3136,14 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
       const anioReal = String(fechaObj.getFullYear());
       if (anioReal !== "2025" && anioReal !== "2026") continue;
 
-      let dniLimpio = String(fila[idxDni] || "").replace(/[^\d]/g, "");
+      let valDni = fila[idxDni];
+      let dniLimpio = "";
+      if (typeof valDni === "number") {
+        dniLimpio = Math.floor(valDni).toString();
+      } else {
+        dniLimpio = String(valDni || "").replace(/[^\d]/g, "");
+      }
+      
       if (!dniLimpio || dniLimpio.length < 6) continue;
 
       todosLosRegistros.push({
@@ -3132,14 +3186,12 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   // 2. Ordenar por Fecha para detectar primer contacto (Nuevas)
   todosLosRegistros.sort((a, b) => a.fecha - b.fecha);
 
-  // 3. Marcar "esNueva" (Globalmente en el histórico cargado)
-  let historialDni = {};
+  // 3. Detectar Primer Año de visita para cada DNI (Baseline de fidelización)
+  let primerAnioDni = {};
   todosLosRegistros.forEach(reg => {
-    if (!historialDni[reg.dni]) {
-      reg.esNueva = true;
-      historialDni[reg.dni] = true;
-    } else {
-      reg.esNueva = false;
+    const anio = reg.anioHoja;
+    if (!primerAnioDni[reg.dni] || anio < primerAnioDni[reg.dni]) {
+      primerAnioDni[reg.dni] = anio;
     }
   });
 
@@ -3151,13 +3203,23 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   const fMesesP1 = filtros && filtros.mesesP1 && filtros.mesesP1.length > 0 ? filtros.mesesP1 : null;
   const fMesesP2 = filtros && filtros.mesesP2 && filtros.mesesP2.length > 0 ? filtros.mesesP2 : null;
   const modo = (filtros && filtros.modo) || "general";
+  
+  // Diagnóstico de filtros
+  let diagnostico = {
+    totalCargados: todosLosRegistros.length,
+    descartadosAnio: 0,
+    descartadosEstacion: 0,
+    descartadosTipoDia: 0,
+    descartadosMes: 0,
+    procesadosFinal: 0
+  };
 
   // Pre-calcular canónico de la estación elegida para comparación robusta
   const canonicoFiltro = obtenerNombreEstacionCanonico_(fEstacion);
 
   let res = {
     modo: modo,
-    totalUnicasHistorico: Object.keys(historialDni).length,
+    totalUnicasHistorico: Object.keys(primerAnioDni).length,
     totalUnicasSeleccion: 0,
     resumenAnual: {},
     mesesDisponiblesSet: {}
@@ -3178,14 +3240,20 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
     res.mesesDisponiblesSet[mesAnio] = true;
 
     // Filtro Año
-    if (!fAnios.includes(anioReg)) return;
-
+    if (!fAnios.includes(anioReg)) {
+      diagnostico.descartadosAnio++;
+      return;
+    }
+    
     // Filtro Estacion (Usando alias)
     if (fEstacion !== "Todas") {
       const canonicoReg = obtenerNombreEstacionCanonico_(reg.estacion);
-      if (canonicoReg !== canonicoFiltro) return;
+      if (canonicoReg !== canonicoFiltro) {
+        diagnostico.descartadosEstacion++;
+        return;
+      }
     }
-
+    
     // Filtro Tipo Dia
     if (fTipoDia !== "Todos") {
       let esSadofe = (reg.tipoDiaVal === "SADOFE" || reg.tipoDiaVal.includes("FERIADO") || reg.tipoDiaVal.includes("FINDE"));
@@ -3193,33 +3261,80 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
          const day = reg.fecha.getDay();
          esSadofe = (day === 0 || day === 6);
       }
-      if (fTipoDia === "SADOFE" && !esSadofe) return;
-      if (fTipoDia === "SEMANA" && esSadofe) return;
+      if (fTipoDia === "SADOFE" && !esSadofe) {
+        diagnostico.descartadosTipoDia++;
+        return;
+      }
+      if (fTipoDia === "SEMANA" && esSadofe) {
+        diagnostico.descartadosTipoDia++;
+        return;
+      }
     }
 
+    const anioNum = parseInt(anioReg);
+    const primerAnioNum = parseInt(primerAnioDni[reg.dni] || 0);
+    const esNuevaEnSistema = (primerAnioNum === anioNum);
+    const esFidelizadaDeAniosAnteriores = (primerAnioNum > 0 && primerAnioNum < anioNum);
+
     if (modo === "comparacion") {
-      if (fMesesP1 && fMesesP1.includes(mesAnio)) {
+      let enP1 = (fMesesP1 && fMesesP1.includes(mesAnio));
+      let enP2 = (fMesesP2 && fMesesP2.includes(mesAnio));
+      
+      if (enP1) {
         res.periodo1.prestaciones++;
         res.periodo1.unicasSet[reg.dni] = true;
-        if (reg.esNueva) res.periodo1.nuevas++;
+        // En comparación, "nuevas" son las que su primera visita histórica fue en este periodo o año
+        // Pero para mantener consistencia, usamos la marca de "primera vez en el sistema"
+        if (esNuevaEnSistema) {
+           // Check adicional: ¿es su primera visita absoluta?
+           // Para simplificar al usuario: si su primer año es este, y es su primer registro
+           // Pero la lógica anual es más robusta.
+           res.periodo1.nuevasSet = res.periodo1.nuevasSet || {};
+           res.periodo1.nuevasSet[reg.dni] = true;
+        }
       }
-      if (fMesesP2 && fMesesP2.includes(mesAnio)) {
+      if (enP2) {
         res.periodo2.prestaciones++;
         res.periodo2.unicasSet[reg.dni] = true;
-        if (reg.esNueva) res.periodo2.nuevas++;
+        if (esNuevaEnSistema) {
+           res.periodo2.nuevasSet = res.periodo2.nuevasSet || {};
+           res.periodo2.nuevasSet[reg.dni] = true;
+        }
+      }
+      
+      if (enP1 || enP2) {
+        diagnostico.procesadosFinal++;
+      } else {
+        diagnostico.descartadosMes++;
       }
     } else {
       // Filtro Meses (Solo en modo general)
-      if (fMeses && !fMeses.includes(mesAnio)) return;
+      if (fMeses && !fMeses.includes(mesAnio)) {
+        diagnostico.descartadosMes++;
+        return;
+      }
       
       // Si llegó hasta aquí, pasó todos los filtros
+      diagnostico.procesadosFinal++;
       unicasFiltradasSet[reg.dni] = true;
 
-      if (!res.resumenAnual[anioReg]) res.resumenAnual[anioReg] = { unicasSet: {}, prestaciones: 0, nuevas: 0 };
+      if (!res.resumenAnual[anioReg]) {
+        res.resumenAnual[anioReg] = { 
+          unicasSet: {}, 
+          prestaciones: 0, 
+          nuevasSet: {},
+          fidelizadasSet: {} 
+        };
+      }
       
       res.resumenAnual[anioReg].prestaciones++;
       res.resumenAnual[anioReg].unicasSet[reg.dni] = true;
-      if (reg.esNueva) res.resumenAnual[anioReg].nuevas++;
+      
+      if (esNuevaEnSistema) {
+        res.resumenAnual[anioReg].nuevasSet[reg.dni] = true;
+      } else if (esFidelizadaDeAniosAnteriores) {
+        res.resumenAnual[anioReg].fidelizadasSet[reg.dni] = true;
+      }
     }
   });
 
@@ -3229,10 +3344,21 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   
   if (modo === "comparacion") {
     res.periodo1.unicas = Object.keys(res.periodo1.unicasSet).length;
+    res.periodo1.nuevas = res.periodo1.nuevasSet ? Object.keys(res.periodo1.nuevasSet).length : 0;
+    
     res.periodo2.unicas = Object.keys(res.periodo2.unicasSet).length;
-    res.totalUnicasSeleccion = res.periodo1.unicas + res.periodo2.unicas;
+    res.periodo2.nuevas = res.periodo2.nuevasSet ? Object.keys(res.periodo2.nuevasSet).length : 0;
+    
+    // El total de la selección es la unión de ambos períodos (personas únicas totales en el rango)
+    const unionSet = {};
+    Object.keys(res.periodo1.unicasSet).forEach(k => unionSet[k] = true);
+    Object.keys(res.periodo2.unicasSet).forEach(k => unionSet[k] = true);
+    res.totalUnicasSeleccion = Object.keys(unionSet).length;
+    
     delete res.periodo1.unicasSet;
+    delete res.periodo1.nuevasSet;
     delete res.periodo2.unicasSet;
+    delete res.periodo2.nuevasSet;
   } else {
     res.totalUnicasSeleccion = Object.keys(unicasFiltradasSet).length;
     let finalAnual = [];
@@ -3241,13 +3367,15 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
         anio: anio,
         unicas: Object.keys(res.resumenAnual[anio].unicasSet).length,
         prestaciones: res.resumenAnual[anio].prestaciones,
-        nuevas: res.resumenAnual[anio].nuevas
+        nuevas: Object.keys(res.resumenAnual[anio].nuevasSet).length,
+        fidelizadas: Object.keys(res.resumenAnual[anio].fidelizadasSet).length
       });
     });
     res.resumenAnual = finalAnual.sort((a, b) => b.anio.localeCompare(a.anio));
   }
 
-  console.log("[STATS] Finalizado. Unicas en selección:", res.totalUnicasSeleccion);
+  res.diagnostico = diagnostico;
+  console.log("[STATS] Finalizado. Diagnóstico:", JSON.stringify(diagnostico));
   return res;
 }
 
