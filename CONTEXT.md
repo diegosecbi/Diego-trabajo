@@ -180,17 +180,14 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 - `CATALOGO_ACTIVIDADES` es la base canónica principal para actividades.
 - `ROSETA_ACTIVIDADES_CRONOGRAMA` es la capa operativa para absorber suciedad del cronograma.
 
-## Actualizaciones Recientes (2026-05-12)
+### 🛰️ Sincronización de Estaciones Independientes (*)
+- **Eliminación de IMPORTRANGE**: Se reemplazaron las fórmulas inestables por un motor en `UtilidadesSincronizacion.gs` que lee directamente de las fuentes externas.
+- **Detección de Marca "FINAL"**: La importación se detiene automáticamente al encontrar la palabra "FINAL" en la Columna I del origen, optimizando el uso de celdas.
+- **Automatización**: Sistema de gatillos (triggers) que ejecutan la sincronización 3 veces al día (8:00, 14:00, 20:00).
+- **Restauración de Datos S1**: El script recupera automáticamente el dato de la celda `S1` de las solapas individuales, eliminando la necesidad de fórmulas pesadas en la columna C.
 
-### 👤 Módulo Avanzado de Personas Únicas
-- **Filtros Multi-dimensionales**: Filtrado por Estación (alias robusto), Tipo de Día (Lunes a Viernes vs SADOFE) y Meses específicos.
-- **Selector de Años**: Filtro explícito para 2025 y 2026 con lectura optimizada de datos locales e históricos.
-- **UX Optimizada**: Rediseño de selección de meses en columnas por año, nombres en español y contador regresivo de 60s para procesos pesados.
-- **Identidad Visual**: Codificación por colores (Turquesa para 2025, Azul para 2026) y métricas de fidelización (usuarios que regresan).
+### 👤 Módulo de Personas Únicas (Mejoras Finales)
+- **Métricas de Fidelización**: Visualización corregida y resaltada de "Fidelizados" (usuarios 2025 que regresan en 2026).
+- **Filtro SADOFE Robusto**: Lógica de detección de días mejorada que cruza etiquetas de "Tipo de Día" con el calendario perpetuo (Sábado/Domingo/Feriados).
+- **Normalización de Históricos**: Herramienta para procesar masivamente el `2025_HISTORICO` y habilitar filtros precisos por tipo de día.
 
-> [!WARNING]
-> **Estado de Modo Comparación**: Se ha reportado que el modo "Comparación de Períodos" dentro de Personas Únicas presenta demoras excesivas o fallos en el cálculo debido al volumen de datos (52k+ registros). Se recomienda usar el modo Global con filtros de año por el momento.
-
-### 📊 Otras Mejoras
-- **Branding A.L.F.**: Interfaz rediseñada con el nombre "Asistente de Lectura Funcional".
-- **RBAC**: Implementación de Control de Acceso Basado en Roles (Fase 2) con filtrado dinámico de UI según el perfil del usuario.

@@ -757,6 +757,8 @@ function onOpen() {
     .addItem("Preparar Hoja De Usuarios", "prepararHojaUsuarios")
     .addItem("🔍 Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
     .addItem("📅 Normalizar Tipo de Día 2025", "normalizarTipoDia2025")
+    .addItem("🔍 Ver Solapas de Hoja Maestra", "diagnosticarSolapasMaestras")
+    .addItem("📋 Ver Cabeceras de 2026", "revisarCabeceras2026Maestra")
     .addSeparator()
     .addItem("📊 Generar Dashboard de Gráficos", "generarDashboardGerencial")
     .addSeparator()
@@ -764,11 +766,13 @@ function onOpen() {
     .addToUi();
     
   ui.createMenu("Talleres")
-    .addItem("ðŸ”„ Sincronizar Datos Ahora", "sincronizarTalleresDesdeSeguimiento")
-    .addItem("â° Activar Sincronizacion Automatica (2x/dia)", "instalarGatillosSincronizacionTalleres")
+    .addItem("🛰️ Sincronizar Estaciones Independientes (*)", "sincronizarTodasLasEstacionesIndependientes")
+    .addItem("🕒 Activar Sincro Auto Estaciones (*) (3x/dia)", "instalarGatillosSincronizacionEstaciones")
+    .addItem("🔄 Sincronizar Datos TALLERES Ahora", "sincronizarTalleresDesdeSeguimiento")
+    .addItem("🕒 Activar Sincronizacion Automatica (2x/dia)", "instalarGatillosSincronizacionTalleres")
     .addSeparator()
-    .addItem("ðŸ“… Completar Columna SADOFE/SEMANA Ahora", "actualizarColumnaSadofe")
-    .addItem("â° Activar Llenado Auto SADOFE (2x/dia)", "instalarGatilloSadofe")
+    .addItem("📅 Completar Columna SADOFE/SEMANA Ahora", "actualizarColumnaSadofe")
+    .addItem("⏰ Activar Llenado Auto SADOFE (2x/dia)", "instalarGatilloSadofe")
     .addToUi();
 }
 
@@ -3254,18 +3258,23 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
       }
     }
     
-    // Filtro Tipo Dia
+    // Filtro Tipo Dia (Mejorado)
     if (fTipoDia !== "Todos") {
-      let esSadofe = (reg.tipoDiaVal === "SADOFE" || reg.tipoDiaVal.includes("FERIADO") || reg.tipoDiaVal.includes("FINDE"));
-      if (!esSadofe) {
-         const day = reg.fecha.getDay();
-         esSadofe = (day === 0 || day === 6);
-      }
-      if (fTipoDia === "SADOFE" && !esSadofe) {
+      let tipoDiaCelda = String(reg.tipoDiaVal || "").toUpperCase();
+      let esSadofe = (tipoDiaCelda === "SADOFE" || tipoDiaCelda.includes("FERIADO") || tipoDiaCelda.includes("FINDE") || tipoDiaCelda.includes("SAB") || tipoDiaCelda.includes("DOM"));
+      
+      // Fallback: Si no dice nada, calculamos por día de la semana
+      const day = reg.fecha.getDay();
+      const esFindeSemana = (day === 0 || day === 6);
+      
+      // Combinamos: Si es finde OR la celda dice SADOFE/FERIADO
+      let esRealmenteSadofe = esSadofe || esFindeSemana;
+
+      if (fTipoDia === "SADOFE" && !esRealmenteSadofe) {
         diagnostico.descartadosTipoDia++;
         return;
       }
-      if (fTipoDia === "SEMANA" && esSadofe) {
+      if (fTipoDia === "SEMANA" && esRealmenteSadofe) {
         diagnostico.descartadosTipoDia++;
         return;
       }
