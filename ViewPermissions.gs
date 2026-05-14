@@ -12,7 +12,8 @@ const PERMISOS_KEYS = [
   "verPanelAdministracion",
   "modificarConfiguracion",
   "verDashboardGraficos",
-  "verPersonasUnicas"
+  "verPersonasUnicas",
+  "verExportarIncidencias"
 ];
 
 const VIEW_PERMISSIONS = {
@@ -29,7 +30,8 @@ const VIEW_PERMISSIONS = {
       verPanelAdministracion: true,
       modificarConfiguracion: true,
       verDashboardGraficos: true,
-      verPersonasUnicas: true
+      verPersonasUnicas: true,
+      verExportarIncidencias: true
     },
     restricciones: [],
     solapasVisibles: "todas",
@@ -49,7 +51,8 @@ const VIEW_PERMISSIONS = {
       verPanelAdministracion: false,
       modificarConfiguracion: false,
       verDashboardGraficos: true,
-      verPersonasUnicas: true
+      verPersonasUnicas: true,
+      verExportarIncidencias: true
     },
     restricciones: [
       "panelSupervision",
@@ -79,7 +82,8 @@ const VIEW_PERMISSIONS = {
       verGenerarInformes: false,
       verFiltrosAvanzados: false,
       verPanelAdministracion: false,
-      modificarConfiguracion: false
+      modificarConfiguracion: false,
+      verExportarIncidencias: false
     },
     restricciones: [
       "panelSupervision",
@@ -111,7 +115,8 @@ const VIEW_PERMISSIONS = {
       verGenerarInformes: false,
       verFiltrosAvanzados: true,
       verPanelAdministracion: false,
-      modificarConfiguracion: false
+      modificarConfiguracion: false,
+      verExportarIncidencias: false
     },
     restricciones: [
       "panelSupervision",

@@ -932,12 +932,12 @@ grid-template-columns:1fr;
     <div class="ba-logo">BA</div>
     <div class="header-titulo">A.L.F. Asistente de Lectura Funcional - Estaciones Saludables</div>
   </div>
-  <span class="versionTag">v-debug-2026-03-25-02</span>
+  <span class="versionTag">v-debug-2026-05-14-V3</span>
 </header>
 
 <!-- LOGIN CENTRADO -->
 <div id="loginOverlay" class="loginOverlay">
-  <span class="versionTag" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; font-family: monospace;">v-debug-2026-03-25-02</span>
+  <span class="versionTag" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; font-family: monospace;">v-debug-2026-05-14-V3</span>
   
   <div class="loginCard" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
     <div class="ba-logo" style="margin-bottom: 5px;">BA</div>
@@ -1044,6 +1044,7 @@ grid-template-columns:1fr;
         <button id="btnPersonasUnicas" class="sidebar-btn" onclick="abrirModalPersonasUnicas()" style="display:none; background: #e6f0ff; color: #004d99; border: 1px solid #004d99; font-weight: bold;">👤 Personas Únicas</button>
         <button id="btnDashboardGraficos" class="sidebar-btn" onclick="abrirDashboardGraficos()" style="display:none;">Ver Estadísticas</button>
         <button id="btnExportarExcel" class="sidebar-btn" onclick="exportarExcel()" style="display:none;">Exportar Excel</button>
+        <button id="btnExportarIncidencias" class="sidebar-btn" onclick="exportarIncidenciasExcel()" style="display:none; background: #fff1f2; color: #be123c; border: 1px solid #fda4af; font-weight: 600;">📥 Exportar Incidencias</button>
         <button id="btnSupervision" class="sidebar-btn" onclick="toggleSupervision()" style="display:none;">Modo Supervisión</button>
         <button id="btnToggleRefs" class="sidebar-btn" onclick="toggleReferenciasPermisos()" style="display:none; background-color: #ffeb3b; color: #333 !important;">👁️ Ver Permisos (Admin)</button>
     </div>
@@ -1074,17 +1075,17 @@ grid-template-columns:1fr;
     </div>
 
     <div class="contenedor">
-      <div class="seccion">
+      <div class="seccion" id="seccionVerdes" style="display:none">
         <div class="tituloSeccion">🟢 Estaciones Activas</div>
         <div class="grid" id="verdes"></div>
       </div>
 
-      <div class="seccion">
+      <div class="seccion" id="seccionAmarillas" style="display:none">
         <div class="tituloSeccion">🟡 Sin actividad hoy</div>
         <div class="grid" id="amarillas"></div>
       </div>
 
-      <div class="seccion">
+      <div class="seccion" id="seccionRojas" style="display:none">
         <div class="tituloSeccion">🔴 Más de 7 días sin actividad</div>
         <div class="grid" id="rojas"></div>
       </div>
@@ -1115,6 +1116,127 @@ grid-template-columns:1fr;
     </div> <!-- Cierre Contenedor -->
   </main>
 </div> <!-- Cierre App Wrapper -->
+
+<!-- MODAL DETALLE DE ESTACIÓN -->
+<div id="modalDetalleEstacion" class="modalOverlay" onclick="cerrarModalDetalleEstacion(event)">
+  <div class="modalVentana" style="width: min(1200px, 98vw); max-height: 95vh;">
+    <div class="modalHeader" id="headerDetalleEstacion">
+      <div>
+        <div class="modalTitulo" id="tituloDetalleEstacion">Nombre de Estación</div>
+        <div class="modalSubtitulo" id="comunaDetalleEstacion">Comuna X</div>
+      </div>
+      <button class="modalCerrar" onclick="cerrarModalDetalleEstacion()">×</button>
+    </div>
+    <div class="modalBody" style="display: flex; flex-direction: column; gap: 20px; background: #f1f5f9;">
+      
+      <!-- Fila Superior: Profesores y Gráfico -->
+      <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px;">
+        
+        <!-- Columna Izquierda: Profesores -->
+        <div class="resumenCard" style="display: flex; flex-direction: column; max-height: 450px;">
+          <div class="resumenLabel" style="font-weight: 800; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">Profesores y Actividad</div>
+          <div id="listaProfesoresDetalle" style="overflow-y: auto; flex: 1;">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Gráfico con Filtros -->
+        <div class="resumenCard" style="display: flex; flex-direction: column; min-height: 450px; position: relative;">
+          <!-- Overlay de carga para el gráfico -->
+          <div id="loadingChartDetalle" style="position: absolute; inset: 0; background: rgba(255,255,255,0.7); display: none; align-items: center; justify-content: center; z-index: 10; border-radius: 14px; font-weight: bold; color: #153244;">
+             ⏳ Actualizando...
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div class="resumenLabel" style="font-weight: 800; margin-bottom: 0;">Rendimiento 2026</div>
+            <div style="display: flex; gap: 10px;">
+              <select id="filtroMesDetalle" class="campoTexto" style="height: 38px; font-size: 13px; min-width: 140px; padding: 0 10px;" onchange="actualizarGraficoDetalle()"></select>
+              <select id="filtroDiaDetalle" class="campoTexto" style="height: 38px; font-size: 13px; min-width: 160px; padding: 0 10px;" onchange="actualizarGraficoDetalle()">
+                <option value="Todos">Días: Todos</option>
+                <option value="SEMANA">Lunes a Viernes</option>
+                <option value="SADOFE">Sáb. Dom. Fer.</option>
+              </select>
+            </div>
+          </div>
+          <div style="flex: 1; position: relative; height: 300px;">
+            <canvas id="chartDetalleEstacion"></canvas>
+          </div>
+          <div id="metricasDetalleEstacion" style="display: flex; gap: 15px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+             <!-- Métricas rápidas -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila Inferior: Calendario de Gestión -->
+      <div class="resumenCard" style="border-top: 4px solid var(--color-azul-gcba);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+           <div class="resumenLabel" style="font-weight: 800; margin-bottom: 0;">Calendario de Gestión Operativa</div>
+           <div style="font-size: 11px; color: #64748b;">🟢 Eventos | 🔴 Incidencias (Haz clic en un día para registrar)</div>
+        </div>
+        <div id="calendarioGestion" class="calendario-grid">
+           <!-- Calendario dinámico -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  background: #e2e8f0;
+  padding: 5px;
+  border-radius: 8px;
+}
+.cal-dia {
+  background: white;
+  min-height: 60px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cal-dia:hover { background: #f8fafc; transform: scale(1.02); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.cal-dia.otro-mes { opacity: 0.3; pointer-events: none; }
+.cal-hoy { border: 2px solid var(--color-celeste-es); font-weight: 800; }
+.cal-item {
+  font-size: 9px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: white;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+.cal-evento { background: #166534; }
+.cal-incidencia { background: #991b1b; }
+.btn-delete-cal {
+  cursor: pointer;
+  margin-left: 5px;
+  opacity: 0.6;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 2px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.btn-delete-cal:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.2);
+}
+.header-dia { font-size: 10px; font-weight: 800; color: #64748b; text-align: center; padding-bottom: 5px; text-transform: uppercase; }
+</style>
 
 <div id="modalEspecial" class="modalOverlay" onclick="cerrarModalEspecial(event)">
 <div class="modalVentana" onclick="event.stopPropagation()">
@@ -1320,7 +1442,28 @@ grid-template-columns:1fr;
 </div>
 </div>
 
+<div id="modalDetalleDia" class="modalOverlay" onclick="cerrarModalDetalleDia(event)" style="z-index: 5001;">
+  <div class="modalVentana" style="width:min(600px,95vw); max-height: 85vh; border-radius: 20px; overflow: hidden; margin-top: 5vh; background: #1e293b;" onclick="event.stopPropagation()">
+    <div class="modalHeader" style="background-color: #0f172a; border-bottom: 1px solid #334155; padding: 20px 25px;">
+        <div style="flex:1">
+            <div class="modalTitulo" id="tituloDetalleDia" style="color: #f8fafc; font-size: 20px;">Detalle del Día</div>
+            <div class="modalSubtitulo" id="subtituloDetalleDia" style="color: #94a3b8;">Consultando registros...</div>
+        </div>
+        <button class="modalCerrar" onclick="cerrarModalDetalleDia()" style="background: #1e293b; color: #f8fafc; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #334155;">×</button>
+    </div>
+    <div class="modalBody" id="bodyDetalleDia" style="padding: 25px; background: #1e293b; color: white;">
+        <div style="display:flex; justify-content:center; padding: 40px;">
+            <div class="estadoVacio" style="color: #94a3b8;">Buscando datos...</div>
+        </div>
+    </div>
+    <div class="modalFooter" style="background: #0f172a; padding: 15px 25px; border-top: 1px solid #334155; display: flex; justify-content: flex-end;">
+        <button class="botonSecundario" onclick="cerrarModalDetalleDia()" style="border-radius: 10px; padding: 10px 20px; background: #334155; color: white; border: none;">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
+Chart.register(ChartDataLabels);
 
 let estacionesGlobal=[]
 let datosTabla=[]
@@ -1483,6 +1626,9 @@ function aplicarPermisosUI(puede, restricciones) {
 
   const btnExcel = document.getElementById("btnExportarExcel");
   if (btnExcel) btnExcel.style.display = puede.verExportarExcel ? "flex" : "none";
+
+  const btnIncidencias = document.getElementById("btnExportarIncidencias");
+  if (btnIncidencias) btnIncidencias.style.display = puede.verExportarIncidencias ? "flex" : "none";
 
   const btnSupervision = document.getElementById("btnSupervision");
   if (btnSupervision) btnSupervision.style.display = puede.verModosSupervision ? "flex" : "none";
@@ -1699,9 +1845,18 @@ function pintarEstaciones(lista){
   if(document.getElementById("sinActividad")) document.getElementById("sinActividad").innerText = cAmarillas;
   if(document.getElementById("pendientes")) document.getElementById("pendientes").innerText = cRojas;
 
-  if(document.getElementById("verdes")) document.getElementById("verdes").innerHTML = verdes;
-  if(document.getElementById("amarillas")) document.getElementById("amarillas").innerHTML = amarillas;
-  if(document.getElementById("rojas")) document.getElementById("rojas").innerHTML = rojas;
+  if(document.getElementById("verdes")) {
+    document.getElementById("verdes").innerHTML = verdes;
+    document.getElementById("seccionVerdes").style.display = cActivas > 0 ? "block" : "none";
+  }
+  if(document.getElementById("amarillas")) {
+    document.getElementById("amarillas").innerHTML = amarillas;
+    document.getElementById("seccionAmarillas").style.display = cAmarillas > 0 ? "block" : "none";
+  }
+  if(document.getElementById("rojas")) {
+    document.getElementById("rojas").innerHTML = rojas;
+    document.getElementById("seccionRojas").style.display = cRojas > 0 ? "block" : "none";
+  }
 }
 
 function normalizarParaBusqueda(t) {
@@ -1717,8 +1872,12 @@ function crearTarjeta(est, busqueda){
     const regex = new RegExp(`(${b})`, "gi");
     return String(texto).replace(regex, '<mark style="background:#ccff00;color:black;font-weight:bold;padding:0 2px;border-radius:3px;">$1</mark>');
   };
-  let html = `<div class="estacion">` +
-    `<div class="estacionHeader" onclick="toggle(this)">` +
+  
+  // Pasamos solo el nombre para evitar problemas con strings largos o caracteres especiales
+  let nombreEscapado = est.estacion.replace(/'/g, "\\'");
+
+  let html = `<div class="estacion" onclick="abrirModalDetalleEstacionByName('${nombreEscapado}')" style="cursor:pointer">` +
+    `<div class="estacionHeader">` +
     `<span class="luz ${est.estado}"></span>` +
     `<div style="flex:1">` +
     `<div>${icono} ${resaltar(est.estacion)}</div>` +
@@ -1726,12 +1885,354 @@ function crearTarjeta(est, busqueda){
     `</div>` +
     `<div style="font-size:12px;font-weight:bold">${est.profesoresConFecha} / ${est.totalProfesores}</div>` +
     `</div>` +
-    `<div class="profList">`;
-  est.profesores.forEach(p => {
-    html += `<div class="profesor"><div>${resaltar(p.profesor)}</div><div>${p.fecha}</div></div>`;
-  });
-  html += `</div></div>`;
+    `</div>`;
   return html;
+}
+
+let estacionDetalleActual = null;
+let chartInstanciaDetalle = null;
+
+function abrirModalDetalleEstacionByName(nombre) {
+  console.log("Intentando abrir detalle para: " + nombre);
+  const est = estacionesGlobal.find(e => e.estacion === nombre);
+  if(!est) {
+    console.error("No se encontró la estación en estacionesGlobal");
+    return;
+  }
+  
+  estacionDetalleActual = est;
+  
+  document.getElementById("tituloDetalleEstacion").innerText = est.estacion;
+  document.getElementById("comunaDetalleEstacion").innerText = est.comuna;
+  
+  // Llenar lista de profesores
+  let htmlProfs = "";
+  est.profesores.forEach(p => {
+    htmlProfs += `<div class="profesor" style="padding: 10px; border-bottom: 1px solid #f1f5f9;">
+      <div style="font-weight:bold">${p.profesor}</div>
+      <div style="font-size:10px; color:#64748b">${p.fecha || "Sin actividad reciente"}</div>
+    </div>`;
+  });
+  document.getElementById("listaProfesoresDetalle").innerHTML = htmlProfs;
+
+  // Poblar select de meses (solo una vez)
+  const selectMes = document.getElementById("filtroMesDetalle");
+  if (selectMes && selectMes.options.length === 0) {
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    meses.forEach((m, i) => {
+      let opt = document.createElement("option");
+      opt.value = `2026-${String(i+1).padStart(2,'0')}`;
+      opt.innerText = m;
+      if (i === new Date().getMonth()) opt.selected = true;
+      selectMes.appendChild(opt);
+    });
+  }
+
+  const modal = document.getElementById("modalDetalleEstacion");
+  if(modal) {
+    modal.classList.add("visible");
+    actualizarGraficoDetalle();
+    renderCalendarioGestion();
+  } else {
+    console.error("No se encontró el elemento modalDetalleEstacion");
+  }
+}
+
+function cerrarModalDetalleEstacion(event) {
+  if (event && event.target.id !== "modalDetalleEstacion") return;
+  document.getElementById("modalDetalleEstacion").classList.remove("visible");
+}
+
+function actualizarGraficoDetalle() {
+  if (!estacionDetalleActual) return;
+  
+  const mes = document.getElementById("filtroMesDetalle").value;
+  const tipoDia = document.getElementById("filtroDiaDetalle").value;
+  const containerMetricas = document.getElementById("metricasDetalleEstacion");
+  const overlay = document.getElementById("loadingChartDetalle");
+  
+  if (overlay) overlay.style.display = "flex";
+  containerMetricas.innerHTML = '<div style="font-size:12px; color:#64748b">Sincronizando datos...</div>';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (overlay) overlay.style.display = "none";
+      if (!res.ok) {
+        containerMetricas.innerHTML = '<div style="color:red">Error al cargar datos.</div>';
+        return;
+      }
+
+      containerMetricas.innerHTML = `
+        <div style="flex:1; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0">
+          <div style="font-size:10px; color:#64748b; text-transform:uppercase">Participaciones</div>
+          <div style="font-size:18px; font-weight:800; color:#153244">${res.totalParticipaciones}</div>
+        </div>
+        <div style="flex:1; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0">
+          <div style="font-size:10px; color:#64748b; text-transform:uppercase">Personas Únicas</div>
+          <div style="font-size:18px; font-weight:800; color:#153244">${res.totalUnicos}</div>
+        </div>
+      `;
+
+      const ctx = document.getElementById('chartDetalleEstacion').getContext('2d');
+      if (chartInstanciaDetalle) chartInstanciaDetalle.destroy();
+      
+      chartInstanciaDetalle = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: res.labels,
+          datasets: [
+            {
+              label: 'Participaciones',
+              data: res.participaciones,
+              borderColor: '#004d99',
+              backgroundColor: 'rgba(0, 77, 153, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Personas Únicas',
+              data: res.unicos,
+              borderColor: '#14b8a6',
+              backgroundColor: 'rgba(20, 184, 166, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          onClick: (e, elements) => {
+            if (elements.length > 0) {
+              const index = elements[0].index;
+              const diaLabel = res.labels[index];
+              const dia = diaLabel.replace("Día ", "");
+              abrirDetalleDia(estacionDetalleActual.estacion, mes, dia);
+            }
+          },
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+            datalabels: {
+              anchor: 'end',
+              align: 'top',
+              color: '#000',
+              offset: 2,
+              font: {
+                weight: 'bold',
+                size: 11
+              },
+              formatter: function(value) {
+                return value > 0 ? value : ''; // Solo mostrar si es > 0 para no saturar
+              }
+            }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true, 
+              grid: { color: '#f1f5f9' }, 
+              ticks: { 
+                font: { size: 11, weight: 'bold' }, 
+                color: '#000' 
+              } 
+            },
+            x: { 
+              grid: { display: false }, 
+              ticks: { 
+                font: { size: 11, weight: 'bold' }, 
+                color: '#000' 
+              } 
+            }
+          }
+        }
+      });
+    })
+    .obtenerEstadisticasEstacionDetalle(estacionDetalleActual.estacion, mes, tipoDia);
+}
+
+function renderCalendarioGestion() {
+  if (!estacionDetalleActual) return;
+  
+  const container = document.getElementById("calendarioGestion");
+  const mesActual = new Date();
+  const anio = mesActual.getFullYear();
+  const mes = mesActual.getMonth();
+  
+  const primerDia = new Date(anio, mes, 1).getDay();
+  const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+  const hoy = new Date().toISOString().split('T')[0];
+
+  container.innerHTML = "";
+  
+  // Headers
+  ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].forEach(d => {
+    container.innerHTML += `<div class="header-dia">${d}</div>`;
+  });
+
+  // Espacios vacíos
+  for (let i = 0; i < primerDia; i++) {
+    container.innerHTML += `<div class="cal-dia otro-mes"></div>`;
+  }
+
+  // Obtener eventos guardados
+  google.script.run
+    .withSuccessHandler(function(eventos) {
+      const mapaEventos = {};
+      eventos.forEach(ev => {
+        if (!mapaEventos[ev.fecha]) mapaEventos[ev.fecha] = [];
+        mapaEventos[ev.fecha].push(ev);
+      });
+
+      for (let d = 1; d <= diasEnMes; d++) {
+        const fechaStr = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const esHoy = fechaStr === hoy ? "cal-hoy" : "";
+        let itemsHtml = "";
+        
+        if (mapaEventos[fechaStr]) {
+          mapaEventos[fechaStr].forEach(ev => {
+            const clase = ev.tipo === "Evento" ? "cal-evento" : "cal-incidencia";
+            itemsHtml += `<div class="cal-item ${clase}" title="${ev.comentario}">
+              <span style="flex:1; overflow:hidden; text-overflow:ellipsis;">${ev.tipo}: ${ev.comentario}</span>
+              <span class="btn-delete-cal" onclick="confirmarEliminarEvento(${ev.fila}, event)">×</span>
+            </div>`;
+          });
+        }
+
+        container.innerHTML += `
+          <div class="cal-dia ${esHoy}" onclick="registrarAccionDia('${fechaStr}')">
+            <div style="font-weight:bold">${d}</div>
+            <div style="flex:1">${itemsHtml}</div>
+          </div>
+        `;
+      }
+    })
+    .obtenerGestionOperativa(estacionDetalleActual.estacion);
+}
+
+function abrirDetalleDia(estacion, mesClave, dia) {
+  const modal = document.getElementById("modalDetalleDia");
+  const titulo = document.getElementById("tituloDetalleDia");
+  const subtitulo = document.getElementById("subtituloDetalleDia");
+  const body = document.getElementById("bodyDetalleDia");
+
+  titulo.innerText = "Detalle: " + estacion;
+  subtitulo.innerText = "Día " + dia + " | Período: " + mesClave;
+  body.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; gap:15px; padding:40px;"><div style="font-size:12px; color:#64748b;">Consultando detalles en TALLERES...</div></div>';
+  
+  modal.classList.add("visible");
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res.ok) {
+        body.innerHTML = '<div class="estadoVacio" style="color:#991b1b;">' + (res.mensaje || "Error al cargar detalle") + '</div>';
+        return;
+      }
+
+      if (res.detalle.length === 0) {
+        body.innerHTML = '<div class="estadoVacio">No se encontraron registros detallados para este día en la solapa TALLERES.</div>';
+        return;
+      }
+
+      let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
+      
+      res.detalle.forEach(reg => {
+        html += `
+          <div style="background:#334155; border:1px solid #475569; border-radius:12px; padding:15px; transition:all 0.2s;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <div style="font-weight:800; color:#f8fafc; font-size:14px; flex:1;">${reg.actividad}</div>
+              <div style="background:#0369a1; color:#f0f9ff; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; text-transform:uppercase;">${reg.participaciones} Asist.</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; color:#94a3b8; font-size:12px;">
+              <span>👤 ${reg.profesor}</span>
+              <span style="color:#475569;">|</span>
+              <span>🆔 ${reg.unicos} Unicos</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      body.innerHTML = html;
+    })
+    .withFailureHandler(function(err) {
+      body.innerHTML = '<div class="estadoVacio" style="color:#991b1b;">Error crítico: ' + err.message + '</div>';
+    })
+    .obtenerDetalleDiaEstacion(estacion, mesClave, dia);
+}
+
+function cerrarModalDetalleDia(event) {
+  if (event && event.target.id !== "modalDetalleDia") return;
+  document.getElementById("modalDetalleDia").classList.remove("visible");
+}
+
+function confirmarEliminarEvento(fila, event) {
+  if (event) event.stopPropagation();
+  
+  if (!confirm("¿Estás seguro de que deseas eliminar este registro?")) return;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.ok) {
+        alert("Registro eliminado con éxito.");
+        renderCalendarioGestion();
+      } else {
+        alert("Error: " + res.mensaje);
+      }
+    })
+    .eliminarGestionOperativa(fila);
+}
+
+function registrarAccionDia(fecha) {
+  const tipo = prompt("¿Qué deseas registrar?\n1. Evento (Verde)\n2. Incidencia (Rojo)\nEscribe 1 o 2:");
+  if (tipo !== "1" && tipo !== "2") return;
+  
+  const comentario = prompt("Escribe un breve comentario:");
+  if (!comentario) return;
+
+  const datos = {
+    fecha: fecha,
+    estacion: estacionDetalleActual.estacion,
+    tipo: tipo === "1" ? "Evento" : "Incidencia",
+    comentario: comentario,
+    usuario: sesionActual ? sesionActual.email : "Anonimo"
+  };
+
+  google.script.run
+    .withSuccessHandler(function() {
+      alert("Registro guardado con éxito.");
+      renderCalendarioGestion();
+    })
+    .registrarGestionOperativa(datos);
+}
+
+function exportarIncidenciasExcel() {
+  const btn = document.getElementById("btnExportarIncidencias");
+  const originalText = btn.innerText;
+  btn.innerText = "⏳ Generando...";
+  btn.disabled = true;
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+
+      if (!data || data.length === 0) {
+        alert("No hay incidencias para exportar.");
+        return;
+      }
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Incidencias");
+      
+      const nombreArchivo = "Reporte_Incidencias_" + new Date().toLocaleDateString().replace(/\//g, "-") + ".xlsx";
+      XLSX.writeFile(wb, nombreArchivo);
+    })
+    .withFailureHandler(function() {
+      btn.innerText = originalText;
+      btn.disabled = false;
+      alert("Error al obtener los datos.");
+    })
+    .obtenerTodasIncidencias();
 }
 
 function toggle(el){

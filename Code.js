@@ -117,7 +117,9 @@ const CABECERAS_USUARIOS = [
   "verPanelAdministracion",
   "modificarConfiguracion",
   "verDashboardGraficos",
-  "verPersonasUnicas"
+  "verPersonasUnicas",
+  "ESTACION_ASIGNADA",
+  "verExportarIncidencias"
 ];
 
 const CABECERAS_CRONOGRAMA_NORMALIZADO = [
@@ -754,7 +756,9 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   
   ui.createMenu("Administracion")
+    .addItem("Inicializar Permisos Exportar", "inicializarPermisosExportarIncidencias")
     .addItem("Preparar Hoja De Usuarios", "prepararHojaUsuarios")
+    .addSeparator()
     .addItem("🔍 Diagnosticar Mi Acceso", "diagnosticarMiAcceso")
     .addItem("📅 Normalizar Tipo de Día 2025", "normalizarTipoDia2025")
     .addItem("🔍 Ver Solapas de Hoja Maestra", "diagnosticarSolapasMaestras")
@@ -774,6 +778,55 @@ function onOpen() {
     .addItem("📅 Completar Columna SADOFE/SEMANA Ahora", "actualizarColumnaSadofe")
     .addItem("⏰ Activar Llenado Auto SADOFE (2x/dia)", "instalarGatilloSadofe")
     .addToUi();
+}
+
+function inicializarPermisosExportarIncidencias() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hoja = ss.getSheetByName("USUARIOS");
+  if (!hoja) {
+    SpreadsheetApp.getUi().alert("No se encontró la solapa 'USUARIOS'. Ejecuta primero 'Preparar Hoja De Usuarios'.");
+    return;
+  }
+
+  // Aseguramos que las cabeceras estén actualizadas según la definición en Code.js
+  asegurarSolapaEstructural_(ss, "USUARIOS", CABECERAS_USUARIOS);
+
+  const ultimaFila = hoja.getLastRow();
+  if (ultimaFila < 2) return;
+
+  const headers = hoja.getRange(1, 1, 1, hoja.getLastColumn()).getValues()[0].map(h => String(h || "").trim().toUpperCase());
+  const colIdxPerfil = headers.indexOf("PERFIL");
+  const colIdxExportar = headers.indexOf("VEREXPORTARINCIDENCIAS");
+
+  if (colIdxPerfil === -1 || colIdxExportar === -1) {
+    SpreadsheetApp.getUi().alert("No se encontraron las columnas necesarias (PERFIL o verExportarIncidencias).");
+    return;
+  }
+
+  const rangoPerfil = hoja.getRange(2, colIdxPerfil + 1, ultimaFila - 1, 1).getValues();
+  const rangoExportar = hoja.getRange(2, colIdxExportar + 1, ultimaFila - 1, 1);
+  const valoresExportar = rangoExportar.getValues();
+
+  let cambios = 0;
+  for (let i = 0; i < valoresExportar.length; i++) {
+    // Si la celda está vacía, aplicamos el default según el perfil
+    if (String(valoresExportar[i][0] || "").trim() === "") {
+      const perfil = String(rangoPerfil[i][0] || "").trim().toLowerCase();
+      if (perfil === "admin" || perfil === "gerencia") {
+        valoresExportar[i][0] = "SI";
+      } else {
+        valoresExportar[i][0] = "NO";
+      }
+      cambios++;
+    }
+  }
+
+  if (cambios > 0) {
+    rangoExportar.setValues(valoresExportar);
+    SpreadsheetApp.getUi().alert("Se inicializaron " + cambios + " registros en la columna verExportarIncidencias.");
+  } else {
+    SpreadsheetApp.getUi().alert("No se detectaron celdas vacías en la columna de exportación. No se realizaron cambios.");
+  }
 }
 
 function prepararHojaUsuarios() {
@@ -817,10 +870,22 @@ function prepararHojaUsuarios() {
   rangoPermisos.setDataValidation(validacionSino);
 
   hoja.autoResizeColumns(1, CABECERAS_USUARIOS.length);
+  
+  // Validación para Estación Asignada (Columna O)
+  const colIdxEstacionAsignada = CABECERAS_USUARIOS.indexOf("ESTACION_ASIGNADA");
+  if (colIdxEstacionAsignada !== -1) {
+    const listadoEstaciones = ESTACIONES_SALUDABLES_VISIBLES.map(e => e.replace("*", "").trim());
+    const validacionEstaciones = SpreadsheetApp.newDataValidation()
+      .requireValueInList(listadoEstaciones, true)
+      .setAllowInvalid(true) // Permitimos inválidos por si hay nombres viejos, pero el dropdown ayuda
+      .build();
+    hoja.getRange(2, colIdxEstacionAsignada + 1, totalFilas, 1).setDataValidation(validacionEstaciones);
+  }
+
   SpreadsheetApp.flush();
 
   SpreadsheetApp.getUi().alert(
-    "La hoja USUARIOS ha sido actualizada. Ahora puedes asignar permisos individuales (SI/NO) en las columnas de la E a la N para sobreescribir el perfil base."
+    "La hoja USUARIOS ha sido actualizada. Se añadió la columna O (ESTACION_ASIGNADA) con desplegable para roles operativos."
   );
 }
 
@@ -2654,7 +2719,8 @@ function iniciarSesionConCorreo(emailIngresado, passIngresado, bypassPassword = 
     restricciones: restricciones,
     solapasVisibles: solapasVisibles,
     colorPerfil: colorPerfil,
-    mensaje: "Acceso autorizado. Perfil: " + perfil + (Object.keys(datosUsuario.overrides).length > 0 ? " (con permisos personalizados)" : "") + "."
+    mensaje: "Acceso autorizado. Perfil: " + perfil + (Object.keys(datosUsuario.overrides).length > 0 ? " (con permisos personalizados)" : "") + ".",
+    estacionAsignada: datosUsuario.estacionAsignada || ""
   };
 }
 
@@ -2677,7 +2743,8 @@ function obtenerDatos(emailSesion){
     permisos: acceso.permisos,
     restricciones: acceso.restricciones,
     solapasVisibles: acceso.solapasVisibles,
-    colorPerfil: contextual.color
+    colorPerfil: contextual.color,
+    estacionAsignada: acceso.estacionAsignada || ""
   };
 
   const solapasEspecialesRaw = obtenerNombresSolapasEspeciales_();
@@ -2692,10 +2759,29 @@ function obtenerDatos(emailSesion){
   hojas.forEach(hoja => {
     let nombreOriginal = hoja.getName();
 
-    // Solo procesamos solapas que tienen el marcador de estaciÃ³n "*"
+    // Solo procesamos solapas que tienen el marcador de estación "*"
     if (nombreOriginal.indexOf("*") === -1) return;
 
     let nombre = nombreOriginal.replace("*", "").trim();
+
+    // FILTRO RBAC OPERATIVO: Si el usuario es operativo y tiene una estación asignada, solo mostramos esa
+    if (acceso.perfil === "operativo" && acceso.estacionAsignada) {
+      const normalizar = (t) => String(t || "").toLowerCase()
+        .replace(/estación saludable/gi, "")
+        .replace(/estacion saludable/gi, "")
+        .replace(/parque/gi, "")
+        .replace(/plaza/gi, "")
+        .replace(/[^a-z0-9]/g, "")
+        .trim();
+
+      const nombreLimpio = normalizar(nombre);
+      const asignadaLimpia = normalizar(acceso.estacionAsignada);
+      
+      // Si la estación asignada no coincide con esta solapa, la ignoramos
+      if (nombreLimpio !== asignadaLimpia && !nombreLimpio.includes(asignadaLimpia) && !asignadaLimpia.includes(nombreLimpio)) {
+        return;
+      }
+    }
 
     let comuna = hoja.getRange("D1").getValue() || "";
     let datos = hoja.getRange("B2:C50").getValues();
@@ -2863,10 +2949,14 @@ function resolverPerfilUsuario_(email) {
             }
           });
 
+          const colIdxAsignada = headers.indexOf("ESTACION_ASIGNADA");
+          const estacionAsignada = (colIdxAsignada !== -1) ? String(datos[i][colIdxAsignada] || "").trim() : "";
+
           return {
             perfil: perfilReal,
             password: colIdxPass !== -1 ? String(datos[i][colIdxPass] || "").trim() : "",
             overrides: overrides,
+            estacionAsignada: estacionAsignada,
             columnaPassEncontrada: colIdxPass !== -1
           };
         }
@@ -6550,3 +6640,292 @@ function actualizarColumnaSadofe(silencioso = false) {
     SpreadsheetApp.getUi().alert(`âœ… Columna actualizada correctamente en ${cambiados} filas.\n\nTodos los fines de semana dicen 'SADOFE' y los dÃ­as hÃ¡biles dicen 'SEMANA'.\n\nSi hay un feriado en dÃ­a de semana, puedes escribir manualmente 'SADOFE' en esa celda y este script lo respetarÃ¡.`);
   }
 }
+
+/**
+ * Obtiene estadísticas específicas para el detalle de una estación.
+ */
+function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hojaTalleres = ss.getSheetByName("TALLERES");
+  if (!hojaTalleres) return { ok: false };
+
+  const datos = hojaTalleres.getDataRange().getValues();
+  const headers = datos[0].map(h => String(h).toUpperCase().trim());
+  const filas = datos.slice(1);
+
+  const idxDni = headers.indexOf("DNI");
+  const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+  const idxEstacion = headers.indexOf("ESTACION");
+  
+  // Buscar columna de tipo de día (SADOFE/SEMANA)
+  let idxTipoDia = -1;
+  for (let i = 0; i < headers.length; i++) {
+    const h = headers[i];
+    if (h.includes("TIPO") && h.includes("DIA")) idxTipoDia = i;
+  }
+
+  const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
+  const asignadaLimpia = normalizar(estacion);
+
+  const diasData = {}; 
+  
+  filas.forEach(fila => {
+    const f = fila[idxFecha];
+    if (!(f instanceof Date)) return;
+    
+    // Solo 2026
+    if (f.getFullYear() !== 2026) return;
+
+    const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, "0");
+    if (m !== mesClave) return;
+
+    const e = fila[idxEstacion];
+    if (normalizar(e) !== asignadaLimpia) return;
+
+    const tDia = idxTipoDia !== -1 ? String(fila[idxTipoDia]).toUpperCase() : "";
+    if (tipoDia !== "Todos" && !tDia.includes(tipoDia)) return;
+
+    const dia = f.getDate();
+    const dni = String(fila[idxDni] || "").trim();
+
+    if (!diasData[dia]) diasData[dia] = { participaciones: 0, unicos: {} };
+    diasData[dia].participaciones++;
+    if (dni) diasData[dia].unicos[dni] = true;
+  });
+
+  const labels = Object.keys(diasData).sort((a,b) => a-b);
+  const participaciones = labels.map(d => diasData[d].participaciones);
+  const unicos = labels.map(d => Object.keys(diasData[d].unicos).length);
+
+  return {
+    ok: true,
+    labels: labels.map(l => "Día " + l),
+    participaciones: participaciones,
+    unicos: unicos,
+    totalParticipaciones: participaciones.reduce((a,b) => a+b, 0),
+    totalUnicos: unicos.reduce((a,b) => a+b, 0)
+  };
+}
+
+/**
+ * Obtiene el detalle de actividades de una estación en un día específico.
+ */
+function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const hojaTalleres = ss.getSheetByName("TALLERES");
+    if (!hojaTalleres) return { ok: false, mensaje: "No se encontró la solapa TALLERES" };
+
+    const datos = hojaTalleres.getDataRange().getValues();
+    const headers = datos[0].map(h => String(h).toUpperCase().trim());
+    const filas = datos.slice(1);
+
+    const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+    const idxEstacion = headers.indexOf("ESTACION");
+    const idxActividad = headers.indexOf("ACTIVIDAD");
+    const idxProfesor = headers.indexOf("PROFESOR");
+    const idxDni = headers.indexOf("DNI");
+
+    const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
+    const asignadaLimpia = normalizar(estacion);
+
+    const resumen = {}; // Agrupamos por actividad y profesor
+
+    filas.forEach(fila => {
+      const f = fila[idxFecha];
+      if (!(f instanceof Date)) return;
+      if (f.getFullYear() !== 2026) return;
+
+      const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, "0");
+      const d = f.getDate();
+
+      if (m === mesClave && String(d) === String(dia)) {
+        const e = fila[idxEstacion];
+        if (normalizar(e) === asignadaLimpia) {
+          const actividad = String(fila[idxActividad] || "Sin Actividad").trim();
+          const profesor = String(fila[idxProfesor] || "Sin Profesor").trim();
+          const dni = String(fila[idxDni] || "").trim();
+
+          const clave = actividad + "|" + profesor;
+          if (!resumen[clave]) {
+            resumen[clave] = { actividad, profesor, participaciones: 0, dnis: new Set() };
+          }
+          resumen[clave].participaciones++;
+          if (dni) resumen[clave].dnis.add(dni);
+        }
+      }
+    });
+
+    const detalle = Object.values(resumen).map(r => ({
+      actividad: r.actividad,
+      profesor: r.profesor,
+      participaciones: r.participaciones,
+      unicos: r.dnis.size
+    }));
+
+    return { ok: true, detalle: detalle };
+  } catch (e) {
+    return { ok: false, mensaje: e.message };
+  }
+}
+
+/**
+ * Registra una incidencia o evento en la nueva solapa de gestión.
+ */
+function registrarGestionOperativa(datos) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let hoja = ss.getSheetByName("GESTION_OPERATIVA");
+  
+  if (!hoja) {
+    hoja = ss.insertSheet("GESTION_OPERATIVA");
+    hoja.appendRow(["FECHA", "ESTACION", "TIPO", "COMENTARIO", "USUARIO", "TIMESTAMP"]);
+    hoja.getRange(1,1,1,6).setBackground("#153244").setFontColor("white").setFontWeight("bold");
+    hoja.setFrozenRows(1);
+  }
+
+  hoja.appendRow([
+    datos.fecha,
+    datos.estacion,
+    datos.tipo,
+    datos.comentario,
+    datos.usuario || "Sistema",
+    new Date()
+  ]);
+
+  return { ok: true };
+}
+
+/**
+ * Obtiene los eventos e incidencias para el calendario.
+ */
+function obtenerGestionOperativa(estacion) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hoja = ss.getSheetByName("GESTION_OPERATIVA");
+  if (!hoja) return [];
+
+  const datos = hoja.getDataRange().getValues();
+  const filas = datos.slice(1);
+  
+  const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
+  const buscar = normalizar(estacion);
+
+  return filas
+    .map((f, index) => ({
+      fila: index + 2,
+      fecha: f[0] instanceof Date ? Utilities.formatDate(f[0], Session.getScriptTimeZone(), "yyyy-MM-dd") : String(f[0]),
+      estacionOriginal: f[1],
+      tipo: f[2],
+      comentario: f[3]
+    }))
+    .filter(f => normalizar(f.estacionOriginal) === buscar);
+}
+
+function eliminarGestionOperativa(fila) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const hoja = ss.getSheetByName("GESTION_OPERATIVA");
+    if (!hoja) return { ok: false, mensaje: "No se encontró la solapa GESTION_OPERATIVA" };
+    
+    if (fila <= 1 || fila > hoja.getLastRow()) {
+      return { ok: false, mensaje: "Índice de registro inválido" };
+    }
+
+    hoja.deleteRow(fila);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, mensaje: e.message };
+  }
+}
+
+/**
+ * Obtiene todas las incidencias y eventos para exportación masiva.
+ */
+/**
+ * Obtiene todas las incidencias y eventos para exportación masiva.
+ */
+function obtenerTodasIncidencias() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hoja = ss.getSheetByName("GESTION_OPERATIVA");
+  if (!hoja) return [];
+
+  const datos = hoja.getDataRange().getValues();
+  if (datos.length < 2) return [];
+
+  const filas = datos.slice(1);
+  return filas.map(f => ({
+    "Fecha": f[0] instanceof Date ? Utilities.formatDate(f[0], Session.getScriptTimeZone(), "dd/MM/yyyy") : String(f[0]),
+    "Estacion": f[1],
+    "Tipo": f[2],
+    "Comentario": f[3],
+    "Usuario": f[4],
+    "Timestamp": f[5] instanceof Date ? Utilities.formatDate(f[5], Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss") : String(f[5])
+  }));
+}
+
+/**
+ * Configura automáticamente los desplegables y permisos iniciales en la hoja USUARIOS.
+ * Ejecutar esta función para dejar la hoja lista para usar.
+ */
+function configurarHojaUsuariosCompleta() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hoja = ss.getSheetByName("USUARIOS");
+  if (!hoja) {
+    SpreadsheetApp.getUi().alert("❌ No se encontró la solapa USUARIOS.");
+    return;
+  }
+
+  const ultimaFila = Math.max(hoja.getLastRow(), 2);
+  const datos = hoja.getDataRange().getValues();
+  const headers = datos[0];
+  
+  // Columna O: Estaciones (15)
+  // Columna P: Exportar Incidencias (16)
+  
+  // 1. Configurar Desplegable SI/NO para Columna P
+  const reglaSiNo = SpreadsheetApp.newDataValidation()
+    .requireValueInList(["SI", "NO"], true)
+    .setAllowInvalid(false)
+    .setHelpText("Seleccione SI para permitir la exportación masiva.")
+    .build();
+  hoja.getRange(2, 16, ultimaFila - 1).setDataValidation(reglaSiNo);
+
+  // 2. Configurar Desplegable de Estaciones para Columna O
+  // Obtenemos lista de estaciones de las solapas
+  const estaciones = ss.getSheets()
+    .map(s => s.getName())
+    .filter(n => n.includes("*"))
+    .map(n => n.replace("*", "").trim())
+    .sort();
+  
+  if (estaciones.length > 0) {
+    const reglaEstaciones = SpreadsheetApp.newDataValidation()
+      .requireValueInList(estaciones, true)
+      .setAllowInvalid(false)
+      .setHelpText("Seleccione la estación asignada para el operativo.")
+      .build();
+    hoja.getRange(2, 15, ultimaFila - 1).setDataValidation(reglaEstaciones);
+  }
+
+  // 3. Asignación automática por Rol
+  const idxRol = 1; // Columna B (0-indexed es 1)
+  const valoresP = [];
+  
+  for (let i = 1; i < datos.length; i++) {
+    const rol = String(datos[i][idxRol] || "").toLowerCase().trim();
+    // Si es gerencia, admin o coordinacion, ponemos SI por defecto en la columna P (índice 15)
+    if (rol === "admin" || rol === "gerencia" || rol === "coordinacion") {
+      valoresP.push(["SI"]);
+    } else {
+      // Si ya tiene un valor, lo respetamos, si no, NO
+      const valorActual = datos[i][15];
+      valoresP.push([valorActual === "SI" ? "SI" : "NO"]);
+    }
+  }
+  
+  if (valoresP.length > 0) {
+    hoja.getRange(2, 16, valoresP.length).setValues(valoresP);
+  }
+
+  SpreadsheetApp.getUi().alert("✅ Configuración de USUARIOS completada.\n\n- Columna O: Desplegable de Estaciones actualizado.\n- Columna P: Desplegable SI/NO y permisos por rol asignados.");
+}
+

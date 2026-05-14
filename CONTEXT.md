@@ -165,6 +165,10 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
   Pide un resumen de solapa especial y abre modal.
 - `abrirModalPersonasUnicas()`
   Análisis avanzado de identidades únicas, nuevas incorporaciones y métricas de fidelización (2025-2026).
+- `renderCalendarioGestion()`
+  Dibuja un calendario interactivo por estación para registrar eventos (verde) e incidencias (rojo). Permite la eliminación de registros.
+- `abrirDetalleDia(estacion, mes, dia)`
+  Función de drill-down que abre un desglose detallado de actividades al hacer clic en los puntos del gráfico de la estación.
 - `exportarExcel()`
   Exporta el tablero principal.
 
@@ -190,4 +194,14 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 - **Métricas de Fidelización**: Visualización corregida y resaltada de "Fidelizados" (usuarios 2025 que regresan en 2026).
 - **Filtro SADOFE Robusto**: Lógica de detección de días mejorada que cruza etiquetas de "Tipo de Día" con el calendario perpetuo (Sábado/Domingo/Feriados).
 - **Normalización de Históricos**: Herramienta para procesar masivamente el `2025_HISTORICO` y habilitar filtros precisos por tipo de día.
+
+### 🔐 Gestión de Accesos y Permisos (RBAC Avanzado)
+- **Control por Columna P**: Se implementó el permiso `verExportarIncidencias` gestionable individualmente desde la solapa `USUARIOS`.
+- **Inicialización Masiva**: Herramienta en el menú de Administración para configurar por defecto los permisos según el perfil (Admin/Gerencia = SI, Otros = NO).
+- **Overlays de Login**: Sistema de protección que oculta funciones críticas (Dashboard, Exportar, etc.) según los privilegios del usuario.
+
+### 📊 Interactividad y Gestión Operativa
+- **Calendario de Gestión**: Registro centralizado en la solapa `GESTION_OPERATIVA` para eventos e incidencias diarias por estación.
+- **Drill-Down en Gráficos**: Integración con `ChartDataLabels` y eventos de clic para explorar el detalle de actividades de cualquier día directamente desde el modal de estación.
+- **Exportación de Incidencias**: Herramienta de descarga masiva de la gestión operativa en formato Excel para auditoría externa.
 
