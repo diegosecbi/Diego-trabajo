@@ -2069,16 +2069,27 @@ function actualizarGraficoDetalle() {
       const partSuave = suavizar(res.participaciones, 7);
       const unicosSuave = suavizar(res.unicos, 7);
 
-      // Crear Gradientes
-      const gradientPart = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
-      gradientPart.addColorStop(0, '#004d99');
-      gradientPart.addColorStop(0.5, '#2563eb');
-      gradientPart.addColorStop(1, '#60a5fa');
+      // Función para generar gradiente dinámico según meses
+      const getGradiente = (ctx, chartArea, colors) => {
+        if (!chartArea) return colors[0];
+        const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+        const total = res.mesesData.length;
+        let lastMonth = -1;
+        res.mesesData.forEach((m, i) => {
+          if (m !== lastMonth) {
+            const stop = Math.max(0, Math.min(1, i / total));
+            gradient.addColorStop(stop, colors[(m-1) % colors.length]);
+            lastMonth = m;
+          }
+        });
+        return gradient;
+      };
 
-      const gradientUnicos = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
-      gradientUnicos.addColorStop(0, '#14b8a6');
-      gradientUnicos.addColorStop(0.5, '#0d9488');
-      gradientUnicos.addColorStop(1, '#2dd4bf');
+      const colorsPart = ['rgba(0, 77, 153, 0.8)', 'rgba(30, 64, 175, 0.8)', 'rgba(29, 78, 216, 0.8)', 'rgba(37, 99, 235, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(96, 165, 250, 0.8)'];
+      const colorsUnicos = ['rgba(20, 184, 166, 0.8)', 'rgba(13, 148, 136, 0.8)', 'rgba(15, 118, 110, 0.8)', 'rgba(17, 94, 89, 0.8)', 'rgba(19, 78, 74, 0.8)', 'rgba(20, 184, 166, 0.8)'];
+      
+      const colorsPartArea = colorsPart.map(c => c.replace('0.8', '0.15'));
+      const colorsUnicosArea = colorsUnicos.map(c => c.replace('0.8', '0.15'));
 
       chartInstanciaDetalle = new Chart(ctx, {
         type: 'line',
@@ -2088,8 +2099,8 @@ function actualizarGraficoDetalle() {
             {
               label: 'Participaciones',
               data: partSuave,
-              borderColor: res.esAnual ? gradientPart : '#004d99',
-              backgroundColor: 'rgba(0, 77, 153, 0.05)',
+              borderColor: (context) => getGradiente(context.chart.ctx, context.chart.chartArea, colorsPart),
+              backgroundColor: (context) => getGradiente(context.chart.ctx, context.chart.chartArea, colorsPartArea),
               fill: true,
               tension: res.esAnual ? 0.6 : 0.4,
               pointRadius: res.esAnual ? 0 : 3,
@@ -2098,8 +2109,8 @@ function actualizarGraficoDetalle() {
             {
               label: 'Personas Únicas',
               data: unicosSuave,
-              borderColor: res.esAnual ? gradientUnicos : '#14b8a6',
-              backgroundColor: 'rgba(20, 184, 166, 0.05)',
+              borderColor: (context) => getGradiente(context.chart.ctx, context.chart.chartArea, colorsUnicos),
+              backgroundColor: (context) => getGradiente(context.chart.ctx, context.chart.chartArea, colorsUnicosArea),
               fill: true,
               tension: res.esAnual ? 0.6 : 0.4,
               pointRadius: res.esAnual ? 0 : 3,
@@ -2124,8 +2135,8 @@ function actualizarGraficoDetalle() {
                 color: context => {
                   if (!res.esAnual) return 'rgba(0,0,0,0.05)';
                   const i = context.index;
-                  if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return '#ef4444'; // Rojo para separador mes
-                  return 'rgba(0,0,0,0.03)';
+                  if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return 'rgba(0,0,0,0.4)';
+                  return 'rgba(0,0,0,0.02)';
                 },
                 lineWidth: context => {
                   if (!res.esAnual) return 1;
@@ -2162,15 +2173,22 @@ function actualizarGraficoDetalle() {
             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
             datalabels: {
               display: (context) => {
-                if (res.esAnual) return false; // Ocultar en anual para máxima limpieza
-                return context.dataset.data[context.dataIndex] > 0;
+                if (!res.esAnual) return context.dataset.data[context.dataIndex] > 0;
+                const i = context.dataIndex;
+                const dia = parseInt(res.labels[i]);
+                const esUltimoDelMes = (i === res.labels.length - 1 || res.mesesData[i] !== res.mesesData[i+1]);
+                // Mostrar solo en día 1, día 15 y fin de mes
+                return dia === 1 || dia === 15 || esUltimoDelMes;
               },
               anchor: 'end',
               align: 'top',
-              color: '#000',
-              offset: 2,
-              font: { weight: 'bold', size: 10 },
-              formatter: (value) => Math.round(value)
+              color: '#1d1d1b',
+              offset: 4,
+              font: { weight: '900', size: 11 },
+              formatter: (value) => Math.round(value),
+              padding: 4,
+              backgroundColor: 'rgba(255,255,255,0.7)',
+              borderRadius: 4
             }
           }
         }
