@@ -441,10 +441,11 @@ padding:5px 10px;
 .profesor{
 display:flex;
 justify-content:space-between;
+align-items: center;
 border-bottom:1px solid #eee;
-padding:2px 0;
+padding:6px 0;
 font-size:11px;
-gap: 5px;
+gap: 10px;
 }
 
 .luz{
@@ -1042,6 +1043,8 @@ grid-template-columns:1fr;
     <div class="sidebar-label">Panel de Control</div>
     <div id="sidebarMenu">
         <button id="btnPersonasUnicas" class="sidebar-btn" onclick="abrirModalPersonasUnicas()" style="display:none; background: #e6f0ff; color: #004d99; border: 1px solid #004d99; font-weight: bold;">👤 Personas Únicas</button>
+        <button id="btnSincronizarTalleres" class="sidebar-btn" onclick="sincronizarTalleresManual()" style="display:none; background: #f0fdf4; color: #166534; border: 1px solid #166534; font-weight: bold;">🔄 Sincronizar TALLERES</button>
+        <div id="lastSyncLabel" style="font-size: 9px; color: #166534; margin: -5px 0 10px 12px; font-style: italic; display: none;">Última sincro: ---</div>
         <button id="btnDashboardGraficos" class="sidebar-btn" onclick="abrirDashboardGraficos()" style="display:none;">Ver Estadísticas</button>
         <button id="btnExportarExcel" class="sidebar-btn" onclick="exportarExcel()" style="display:none;">Exportar Excel</button>
         <button id="btnExportarIncidencias" class="sidebar-btn" onclick="exportarIncidenciasExcel()" style="display:none; background: #fff1f2; color: #be123c; border: 1px solid #fda4af; font-weight: 600;">📥 Exportar Incidencias</button>
@@ -1630,6 +1633,12 @@ function aplicarPermisosUI(puede, restricciones) {
   const btnIncidencias = document.getElementById("btnExportarIncidencias");
   if (btnIncidencias) btnIncidencias.style.display = puede.verExportarIncidencias ? "flex" : "none";
 
+  const btnSincro = document.getElementById("btnSincronizarTalleres");
+  if (btnSincro) btnSincro.style.display = puede.verSincronizarTalleres ? "flex" : "none";
+
+  const lastSync = document.getElementById("lastSyncLabel");
+  if (lastSync) lastSync.style.display = puede.verSincronizarTalleres ? "block" : "none";
+
   const btnSupervision = document.getElementById("btnSupervision");
   if (btnSupervision) btnSupervision.style.display = puede.verModosSupervision ? "flex" : "none";
 
@@ -1873,10 +1882,9 @@ function crearTarjeta(est, busqueda){
     return String(texto).replace(regex, '<mark style="background:#ccff00;color:black;font-weight:bold;padding:0 2px;border-radius:3px;">$1</mark>');
   };
   
-  // Pasamos solo el nombre para evitar problemas con strings largos o caracteres especiales
   let nombreEscapado = est.estacion.replace(/'/g, "\\'");
 
-  let html = `<div class="estacion" onclick="abrirModalDetalleEstacionByName('${nombreEscapado}')" style="cursor:pointer">` +
+  let html = `<div class="estacion" onclick="toggleProfList(this, event)" ondblclick="abrirModalDetalleEstacionByName('${nombreEscapado}')" style="cursor:pointer">` +
     `<div class="estacionHeader">` +
     `<span class="luz ${est.estado}"></span>` +
     `<div style="flex:1">` +
@@ -1885,8 +1893,69 @@ function crearTarjeta(est, busqueda){
     `</div>` +
     `<div style="font-size:12px;font-weight:bold">${est.profesoresConFecha} / ${est.totalProfesores}</div>` +
     `</div>` +
-    `</div>`;
+    `<div class="profList">`;
+    
+    est.profesores.forEach(p => {
+      let dias = p.orden ? Math.floor((new Date().getTime() - p.orden)/(1000*60*60*24)) : 999;
+      let colorLuz = dias < 1 ? "verde" : (dias < 7 ? "amarillo" : "rojo");
+      html += `<div class="profesor">
+        <span class="luz ${colorLuz}" style="width:6px; height:6px;"></span>
+        <span style="flex:1">${resaltar(p.profesor)}</span>
+        <span style="color:#666; font-size:9px;">${p.fecha || '---'}</span>
+      </div>`;
+    });
+
+    html += `</div></div>`;
   return html;
+}
+
+function toggleProfList(el, event) {
+  const list = el.querySelector('.profList');
+  if (list) {
+    const isVisible = list.style.display === 'block';
+    list.style.display = isVisible ? 'none' : 'block';
+  }
+}
+
+function sincronizarTalleresManual() {
+  const btn = document.getElementById("btnSincronizarTalleres");
+  const label = document.getElementById("lastSyncLabel");
+  const originalText = btn ? btn.innerText : "🔄 Sincronizar TALLERES";
+  
+  if (!confirm("¿Deseas sincronizar los datos de TALLERES ahora?\nEsto puede tardar unos segundos.")) return;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "⏳ Sincronizando...";
+  }
+  
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+      if (res && res.ok) {
+        alert("Sincronización completada con éxito.\nRegistros procesados: " + res.filas);
+        if (res.timestamp) {
+          if (label) {
+            label.innerText = "Última sincro: " + res.timestamp;
+            label.style.display = "block";
+          }
+        }
+        cargarDatos();
+      } else {
+        alert("Error en la sincronización: " + (res ? res.mensaje : "Error desconocido"));
+      }
+    })
+    .withFailureHandler(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+      alert("Error crítico: " + err.message);
+    })
+    .sincronizarTalleresDesdeSeguimiento(true);
 }
 
 let estacionDetalleActual = null;
@@ -1918,6 +1987,14 @@ function abrirModalDetalleEstacionByName(nombre) {
   // Poblar select de meses (solo una vez)
   const selectMes = document.getElementById("filtroMesDetalle");
   if (selectMes && selectMes.options.length === 0) {
+    // Opción Anual
+    let optAnual = document.createElement("option");
+    optAnual.value = "TOTAL_2026";
+    optAnual.innerText = "⭐ TOTAL 2026 (Anual)";
+    optAnual.style.fontWeight = "bold";
+    optAnual.style.backgroundColor = "#f0fdf4";
+    selectMes.appendChild(optAnual);
+
     const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     meses.forEach((m, i) => {
       let opt = document.createElement("option");
@@ -1977,7 +2054,7 @@ function actualizarGraficoDetalle() {
       if (chartInstanciaDetalle) chartInstanciaDetalle.destroy();
       
       chartInstanciaDetalle = new Chart(ctx, {
-        type: 'line',
+        type: res.esAnual ? 'bar' : 'line',
         data: {
           labels: res.labels,
           datasets: [
@@ -1985,7 +2062,7 @@ function actualizarGraficoDetalle() {
               label: 'Participaciones',
               data: res.participaciones,
               borderColor: '#004d99',
-              backgroundColor: 'rgba(0, 77, 153, 0.1)',
+              backgroundColor: res.esAnual ? 'rgba(0, 77, 153, 0.7)' : 'rgba(0, 77, 153, 0.1)',
               fill: true,
               tension: 0.4
             },
@@ -1993,7 +2070,7 @@ function actualizarGraficoDetalle() {
               label: 'Personas Únicas',
               data: res.unicos,
               borderColor: '#14b8a6',
-              backgroundColor: 'rgba(20, 184, 166, 0.1)',
+              backgroundColor: res.esAnual ? 'rgba(20, 184, 166, 0.7)' : 'rgba(20, 184, 166, 0.1)',
               fill: true,
               tension: 0.4
             }
@@ -2003,7 +2080,7 @@ function actualizarGraficoDetalle() {
           responsive: true,
           maintainAspectRatio: false,
           onClick: (e, elements) => {
-            if (elements.length > 0) {
+            if (elements.length > 0 && !res.esAnual) {
               const index = elements[0].index;
               const diaLabel = res.labels[index];
               const dia = diaLabel.replace("Día ", "");

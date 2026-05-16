@@ -194,14 +194,31 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 - **Métricas de Fidelización**: Visualización corregida y resaltada de "Fidelizados" (usuarios 2025 que regresan en 2026).
 - **Filtro SADOFE Robusto**: Lógica de detección de días mejorada que cruza etiquetas de "Tipo de Día" con el calendario perpetuo (Sábado/Domingo/Feriados).
 - **Normalización de Históricos**: Herramienta para procesar masivamente el `2025_HISTORICO` y habilitar filtros precisos por tipo de día.
+- **Vista Analítica Anual (TOTAL 2026)**: Implementación de vista "Full 2026" con agrupamiento mensual, colores segmentados por año (Turquesa 2025 / Azul 2026) y separadores verticales.
+
+### 🛰️ Sincronización Manual y Monitoreo
+- **Gatillo Manual de TALLERES**: Botón de sincronización manual para la solapa TALLERES con estados visuales de carga.
+- **Timestamp de Actualización**: Visualización del tiempo transcurrido desde la última sincronización exitosa para evitar ejecuciones redundantes.
+- **RBAC de Sincronización**: Control granular del permiso de sincronización desde la solapa `USUARIOS`.
+
+### 🛠️ Recuperación y Estabilización Post-Corrupción (15/05/2026)
+- **Reintegración Manual**: Tras la corrupción de sintaxis (operadores `?.` eliminados o inyectados), se realizó una restauración manual controlada sobre la base estable `ec84985`.
+- **Sincronización TALLERES V2**:
+  - **Frecuencia Horaria**: Gatillo automático actualizado a 1 hora.
+  - **Restricción Operativa**: El proceso automático solo se ejecuta de 6hs a 20hs para optimizar recursos.
+  - **Feedback en Tiempo Real**: Persistencia de timestamp en `ScriptProperties` visible en el frontend (`lastSyncLabel`).
+- **Interacción de Estaciones Dual**: Implementación robusta de clic simple (lista rápida de profesores) y doble clic (modal analítico completo).
+- **Analítica Anual 2026**: Nueva vista "TOTAL 2026" con cambio dinámico de gráfico (líneas para mensual / barras para anual).
+- **Soporte de Alias (Móviles)**: Lógica en `Code.js` que agrupa automáticamente datos de múltiples ubicaciones satélite bajo el paraguas de "Móvil 1" y "Móvil 2".
+- **Sistema RBAC Reforzado**: Nuevo permiso `verSincronizarTalleres` integrado en `ViewPermissions.gs` para control granular.
 
 ### 🔐 Gestión de Accesos y Permisos (RBAC Avanzado)
-- **Control por Columna P**: Se implementó el permiso `verExportarIncidencias` gestionable individualmente desde la solapa `USUARIOS`.
-- **Inicialización Masiva**: Herramienta en el menú de Administración para configurar por defecto los permisos según el perfil (Admin/Gerencia = SI, Otros = NO).
-- **Overlays de Login**: Sistema de protección que oculta funciones críticas (Dashboard, Exportar, etc.) según los privilegios del usuario.
+- **Control por Columna P/Q**: Permisos de exportación y sincronización gestionables individualmente.
+- **Inicialización Masiva**: Herramienta de Administración para configurar permisos por defecto según el perfil.
+- **Overlays de Login**: Protección de UI sensible basada en privilegios verificados por el backend.
 
 ### 📊 Interactividad y Gestión Operativa
-- **Calendario de Gestión**: Registro centralizado en la solapa `GESTION_OPERATIVA` para eventos e incidencias diarias por estación.
-- **Drill-Down en Gráficos**: Integración con `ChartDataLabels` y eventos de clic para explorar el detalle de actividades de cualquier día directamente desde el modal de estación.
-- **Exportación de Incidencias**: Herramienta de descarga masiva de la gestión operativa en formato Excel para auditoría externa.
+- **Calendario de Gestión**: Registro centralizado en `GESTION_OPERATIVA` para eventos e incidencias.
+- **Drill-Down en Gráficos**: Exploración de detalles de `TALLERES` haciendo clic en puntos de datos de la gráfica de estación.
+- **Exportación masiva**: Herramienta de descarga Excel para auditoría de incidencias operativas.
 

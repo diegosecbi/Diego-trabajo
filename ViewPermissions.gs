@@ -13,7 +13,8 @@ const PERMISOS_KEYS = [
   "modificarConfiguracion",
   "verDashboardGraficos",
   "verPersonasUnicas",
-  "verExportarIncidencias"
+  "verExportarIncidencias",
+  "verSincronizarTalleres"
 ];
 
 const VIEW_PERMISSIONS = {
@@ -31,7 +32,8 @@ const VIEW_PERMISSIONS = {
       modificarConfiguracion: true,
       verDashboardGraficos: true,
       verPersonasUnicas: true,
-      verExportarIncidencias: true
+      verExportarIncidencias: true,
+      verSincronizarTalleres: true
     },
     restricciones: [],
     solapasVisibles: "todas",

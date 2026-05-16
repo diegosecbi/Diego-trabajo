@@ -921,12 +921,13 @@ function instalarGatillosSincronizacionTalleres() {
     }
   }
   
+  // Frecuencia horaria (Paso de 1h)
   ScriptApp.newTrigger(funcionSincronizacion)
     .timeBased()
-    .everyHours(12)
+    .everyHours(1)
     .create();
     
-  SpreadsheetApp.getUi().alert("âœ… Â¡Listo! La sincronizacion de Talleres se ejecutara automaticamente cada 12 horas.");
+  SpreadsheetApp.getUi().alert("✅ ¡Listo! La sincronización de Talleres se ejecutará automáticamente cada 1 hora (restringido a horario operativo).");
 }
 
 function instalarGatilloSadofe() {
@@ -951,7 +952,16 @@ function ejecutarActualizacionSadofeProgramada() {
   actualizarColumnaSadofe(true);
 }
 
-function sincronizarTalleresDesdeSeguimiento() {
+function sincronizarTalleresDesdeSeguimiento(forzar = false) {
+  const ahora = new Date();
+  const horaActual = ahora.getHours();
+
+  // Restricción de horario: 6hs a 20hs inclusive (solo si no es forzado)
+  if (!forzar && (horaActual < 6 || horaActual > 20)) {
+    console.log("Sincronización omitida por fuera de horario (6hs-20hs).");
+    return { ok: true, mensaje: "Fuera de horario", filas: 0 };
+  }
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const origenes = obtenerFuentesTalleresDesdeDatos_(ss);
 
@@ -1040,11 +1050,19 @@ function sincronizarTalleresDesdeSeguimiento() {
     .setFontWeight("bold");
 
   try {
-    SpreadsheetApp.getUi().alert(
-      "TALLERES sincronizada. Filas copiadas: " + filas.length
-    );
+    const timestamp = Utilities.formatDate(new Date(), Session.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm");
+    PropertiesService.getScriptProperties().setProperty('ULTIMA_SINCRO_TALLERES', timestamp);
+    
+    const respuesta = { ok: true, filas: filas.length, timestamp: timestamp };
+    
+    if (forzar) {
+      return respuesta;
+    } else {
+      console.log("Sincronización terminada: " + filas.length + " filas.");
+    }
   } catch (e) {
-    console.log("Sincronización terminada (Background): " + filas.length + " filas.");
+    console.log("Error al finalizar sincronización: " + e.message);
+    if (forzar) return { ok: false, mensaje: e.message };
   }
 }
 
@@ -2744,7 +2762,8 @@ function obtenerDatos(emailSesion){
     restricciones: acceso.restricciones,
     solapasVisibles: acceso.solapasVisibles,
     colorPerfil: contextual.color,
-    estacionAsignada: acceso.estacionAsignada || ""
+    estacionAsignada: acceso.estacionAsignada || "",
+    lastSyncTalleres: PropertiesService.getScriptProperties().getProperty('ULTIMA_SINCRO_TALLERES') || "---"
   };
 
   const solapasEspecialesRaw = obtenerNombresSolapasEspeciales_();
@@ -6657,7 +6676,6 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
   const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
   const idxEstacion = headers.indexOf("ESTACION");
   
-  // Buscar columna de tipo de día (SADOFE/SEMANA)
   let idxTipoDia = -1;
   for (let i = 0; i < headers.length; i++) {
     const h = headers[i];
@@ -6665,41 +6683,59 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
   }
 
   const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
-  const asignadaLimpia = normalizar(estacion);
+  
+  // Soporte para ALIAS (Móvil 1, Móvil 2, etc.)
+  let nombresABuscar = [normalizar(estacion)];
+  for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
+    if (normalizar(oficial) === normalizar(estacion)) {
+      const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizar(a));
+      nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
+      break;
+    }
+  }
 
-  const diasData = {}; 
+  const esAnual = mesClave === "TOTAL_2026";
+  const dataAgrupada = {}; 
   
   filas.forEach(fila => {
     const f = fila[idxFecha];
-    if (!(f instanceof Date)) return;
-    
-    // Solo 2026
-    if (f.getFullYear() !== 2026) return;
+    if (!(f instanceof Date) || f.getFullYear() !== 2026) return;
 
-    const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, "0");
-    if (m !== mesClave) return;
+    if (!esAnual) {
+      const m = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, "0");
+      if (m !== mesClave) return;
+    }
 
-    const e = fila[idxEstacion];
-    if (normalizar(e) !== asignadaLimpia) return;
+    const eNorm = normalizar(fila[idxEstacion]);
+    if (!nombresABuscar.includes(eNorm)) return;
 
     const tDia = idxTipoDia !== -1 ? String(fila[idxTipoDia]).toUpperCase() : "";
     if (tipoDia !== "Todos" && !tDia.includes(tipoDia)) return;
 
-    const dia = f.getDate();
+    const clave = esAnual ? (f.getMonth() + 1) : f.getDate();
     const dni = String(fila[idxDni] || "").trim();
 
-    if (!diasData[dia]) diasData[dia] = { participaciones: 0, unicos: {} };
-    diasData[dia].participaciones++;
-    if (dni) diasData[dia].unicos[dni] = true;
+    if (!dataAgrupada[clave]) dataAgrupada[clave] = { participaciones: 0, unicos: {} };
+    dataAgrupada[clave].participaciones++;
+    if (dni) dataAgrupada[clave].unicos[dni] = true;
   });
 
-  const labels = Object.keys(diasData).sort((a,b) => a-b);
-  const participaciones = labels.map(d => diasData[d].participaciones);
-  const unicos = labels.map(d => Object.keys(diasData[d].unicos).length);
+  const labelsRaw = Object.keys(dataAgrupada).sort((a,b) => a-b);
+  const participaciones = labelsRaw.map(k => dataAgrupada[k].participaciones);
+  const unicos = labelsRaw.map(k => Object.keys(dataAgrupada[k].unicos).length);
+
+  let labels = labelsRaw;
+  if (esAnual) {
+    const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    labels = labelsRaw.map(m => nombresMeses[m-1]);
+  } else {
+    labels = labelsRaw.map(d => "Día " + d);
+  }
 
   return {
     ok: true,
-    labels: labels.map(l => "Día " + l),
+    esAnual: esAnual,
+    labels: labels,
     participaciones: participaciones,
     unicos: unicos,
     totalParticipaciones: participaciones.reduce((a,b) => a+b, 0),
@@ -6727,7 +6763,16 @@ function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
     const idxDni = headers.indexOf("DNI");
 
     const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
-    const asignadaLimpia = normalizar(estacion);
+    
+    // Soporte para ALIAS
+    let nombresABuscar = [normalizar(estacion)];
+    for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
+      if (normalizar(oficial) === normalizar(estacion)) {
+        const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizar(a));
+        nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
+        break;
+      }
+    }
 
     const resumen = {}; // Agrupamos por actividad y profesor
 
@@ -6740,8 +6785,8 @@ function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
       const d = f.getDate();
 
       if (m === mesClave && String(d) === String(dia)) {
-        const e = fila[idxEstacion];
-        if (normalizar(e) === asignadaLimpia) {
+        const eNorm = normalizar(fila[idxEstacion]);
+        if (nombresABuscar.includes(eNorm)) {
           const actividad = String(fila[idxActividad] || "Sin Actividad").trim();
           const profesor = String(fila[idxProfesor] || "Sin Profesor").trim();
           const dni = String(fila[idxDni] || "").trim();
