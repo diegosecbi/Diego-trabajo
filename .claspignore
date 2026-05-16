@@ -1,0 +1,15 @@
+**/**
+!appsscript.json
+!*.gs
+!*.js
+!*.html
+
+# Ignore scratch files
+scratch_*
+*.bak
+*.txt
+*.md
+.git/**
+.gitignore
+.clasp.json
+~$*

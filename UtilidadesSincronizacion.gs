@@ -7,78 +7,60 @@ function sincronizarTodasLasEstacionesIndependientes() {
   const hojas = ss.getSheets();
   const stationsToProcess = hojas.filter(h => h.getName().startsWith("*"));
   
-  let logs = "Sincronización Completa (B y C):\n";
-
-  stationsToProcess.forEach(hojaDestino => {
-    const nombreEstacion = hojaDestino.getName().replace("*", "").trim();
-    let rawValue = hojaDestino.getRange("A2").getValue();
-    const externalId = extraerIdDeUrl_(rawValue);
-    
-    if (!externalId) {
-      logs += "⚠️ " + nombreEstacion + ": Sin ID en A2\n";
-      return;
-    }
-
-    try {
-      const extSs = SpreadsheetApp.openById(externalId);
-      const hojaFinal = extSs.getSheetByName("FINAL");
-      
-      if (!hojaFinal) {
-        logs += "❌ " + nombreEstacion + ": No existe solapa 'FINAL'\n";
-        return;
-      }
-
-      const ultimaFilaFinal = hojaFinal.getLastRow();
-      const valoresRaw = hojaFinal.getRange(2, 9, Math.min(ultimaFilaFinal - 1, 500), 1).getValues();
-      
-      let nombres = [];
-      for (let i = 0; i < valoresRaw.length; i++) {
-        const valor = String(valoresRaw[i][0] || "").trim();
-        nombres.push(valor);
-        if (valor.toUpperCase() === "FINAL") break;
-      }
-
-      if (nombres.length === 0) {
-        logs += "ℹ️ " + nombreEstacion + ": No se encontraron nombres\n";
-        return;
-      }
-
-      let resultadosC = [];
-      nombres.forEach(nombre => {
-        if (nombre.toUpperCase() === "FINAL") {
-          resultadosC.push([""]); 
-          return;
-        }
-
-        try {
-          const hojaPersona = extSs.getSheetByName(nombre);
-          if (hojaPersona) {
-            const datoS1 = hojaPersona.getRange("S1").getValue();
-            resultadosC.push([datoS1]);
-          } else {
-            resultadosC.push(["No encontrado"]);
-          }
-        } catch (err) {
-          resultadosC.push(["Error"]);
-        }
-      });
-
-      const numFilas = nombres.length;
-      hojaDestino.getRange(2, 2, Math.max(hojaDestino.getMaxRows() - 1, 1), 2).clearContent();
-      const matrizB = nombres.map(n => [n]);
-      hojaDestino.getRange(2, 2, numFilas, 1).setValues(matrizB);
-      hojaDestino.getRange(2, 3, numFilas, 1).setValues(resultadosC);
-      
-      logs += "✅ " + nombreEstacion + ": OK\n";
-      
-    } catch (e) {
-      logs += "🚫 " + nombreEstacion + ": Error (" + e.message.split(".")[0] + ")\n";
+  // 1. Agrupar solapas locales por el ID del archivo externo (A2)
+  const fuentesUnicas = {};
+  stationsToProcess.forEach(hoja => {
+    const rawValue = hoja.getRange("A2").getValue();
+    const id = extraerIdDeUrl_(rawValue);
+    if (id) {
+      if (!fuentesUnicas[id]) fuentesUnicas[id] = [];
+      fuentesUnicas[id].push(hoja);
     }
   });
 
-  // Solo mostramos alerta si la ejecución NO es automática (interactiva)
-  if (typeof MailApp !== "undefined") {
-     // En ejecución manual, podríamos avisar, pero en automática no es posible usar Ui.alert
+  // 2. Procesar cada archivo externo una sola vez (o n veces si son todos distintos)
+  for (const idExterno in fuentesUnicas) {
+    try {
+      const extSs = SpreadsheetApp.openById(idExterno);
+      const hojaFinal = extSs.getSheetByName("FINAL");
+      if (!hojaFinal) continue;
+
+      // Obtener lista de nombres de la columna I (limitamos a 100 filas por seguridad)
+      const dataI = hojaFinal.getRange("I2:I100").getValues();
+      const nombres = [];
+      for (let i = 0; i < dataI.length; i++) {
+        const val = String(dataI[i][0] || "").trim();
+        // Traer todo hasta encontrar la primera celda vacía
+        if (!val) break; 
+        nombres.push(val);
+      }
+
+      if (nombres.length === 0) continue;
+
+      // Obtener valores S1 de cada profesor
+      const mapaS1 = {};
+      nombres.forEach(nombre => {
+        try {
+          const hProf = extSs.getSheetByName(nombre);
+          mapaS1[nombre] = hProf ? hProf.getRange("S1").getValue() : "No encontrado";
+        } catch (e) { mapaS1[nombre] = "Error"; }
+      });
+
+      // 3. Actualizar todas las solapas locales que dependen de este origen
+      const matrizB = nombres.map(n => [n]);
+      const matrizC = nombres.map(n => [mapaS1[n]]);
+
+      fuentesUnicas[idExterno].forEach(hojaLocal => {
+        const maxR = Math.max(hojaLocal.getMaxRows() - 1, 1);
+        hojaLocal.getRange(2, 2, maxR, 2).clearContent();
+        
+        hojaLocal.getRange(2, 2, nombres.length, 1).setValues(matrizB);
+        hojaLocal.getRange(2, 3, nombres.length, 1).setValues(matrizC);
+      });
+
+    } catch (err) {
+      console.error("Error procesando origen " + idExterno + ": " + err.message);
+    }
   }
 }
 

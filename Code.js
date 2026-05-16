@@ -1050,7 +1050,7 @@ function sincronizarTalleresDesdeSeguimiento(forzar = false) {
     .setFontWeight("bold");
 
   try {
-    const timestamp = Utilities.formatDate(new Date(), Session.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm");
+    const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
     PropertiesService.getScriptProperties().setProperty('ULTIMA_SINCRO_TALLERES', timestamp);
     
     const respuesta = { ok: true, filas: filas.length, timestamp: timestamp };
@@ -3161,7 +3161,8 @@ function obtenerResumenesEspeciales_(ss, nombresSolapas) {
 }
 
 function obtenerResumenSolapaEspecial(nombreSolapa, filtros, emailSesion) {
-  const acceso = iniciarSesionConCorreo(emailSesion);
+  // Para cargar módulos una vez logueado, hacemos bypass del password
+  const acceso = iniciarSesionConCorreo(emailSesion, null, true);
   if (!acceso.ok) {
     throw new Error(acceso.mensaje || "Comunicarse con el administrador.");
   }
@@ -5663,7 +5664,8 @@ function generarInformeEspecialIA(nombreSolapa, mesClave, fechaPlanilla, compara
     alcance: contexto.titulo,
     archivo: pdf.archivo,
     mimeType: pdf.mimeType,
-    base64: pdf.base64
+    base64: pdf.base64,
+    contenido: texto
   };
 }
 
