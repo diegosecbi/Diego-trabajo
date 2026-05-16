@@ -170,6 +170,7 @@ const CABECERAS_TALLERES = [
   "PROFESOR",
   "ACTIVIDAD",
   "SECTOR DE CARGA",
+  "TIPO DIA",
   "CODIGO_CRUCE"
 ];
 
@@ -1005,15 +1006,28 @@ function sincronizarTalleresDesdeSeguimiento(forzar = false) {
     } catch (error) {}
   });
 
+  const tz = Session.getScriptTimeZone();
+  const feriados = obtenerFeriados2026();
+
   const filas = filasOrigen.map(function(fila) {
     const dni = fila.dni || "";
     const fechaValor = fila.fechaValor || "";
-    const fechaTexto = normalizarFechaTalleresControl_(fechaValor);
+    const fechaTexto = normalizarFechaTalleresControl_(fechaValor, tz);
     const estacion = fila.estacion || "";
     const profesor = fila.profesor || "";
     const actividad = fila.actividad || "";
     const sector = fila.sector || "";
     const codigo = construirCodigoComparacionVisible_(fechaTexto, estacion, actividad);
+
+    const f = (fechaValor instanceof Date) ? fechaValor : null;
+    let tipoDia = "SEMANA";
+    if (f) {
+      const day = f.getDay();
+      const iso = Utilities.formatDate(f, tz, "yyyy-MM-dd");
+      if (day === 0 || day === 6 || feriados.indexOf(iso) !== -1) {
+        tipoDia = "SADOFE";
+      }
+    }
 
     return [
       dni,
@@ -1022,6 +1036,7 @@ function sincronizarTalleresDesdeSeguimiento(forzar = false) {
       profesor,
       actividad,
       sector,
+      tipoDia,
       codigo
     ];
   }).filter(function(fila) {
@@ -1461,15 +1476,16 @@ function leerRegistrosTalleresDesdeHoja_(hoja) {
   });
 }
 
-function normalizarFechaTalleresControl_(valor) {
+function normalizarFechaTalleresControl_(valor, tz) {
+  const timeZone = tz || "GMT-3"; // Fallback a Argentina si no se provee
   if (valor instanceof Date && !isNaN(valor.getTime())) {
-    return Utilities.formatDate(valor, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    return Utilities.formatDate(valor, timeZone, "dd/MM/yyyy");
   }
 
   if (typeof valor === "number" && !isNaN(valor)) {
     const base = new Date(Date.UTC(1899, 11, 30));
     const fecha = new Date(base.getTime() + Math.round(valor) * 24 * 60 * 60 * 1000);
-    return Utilities.formatDate(fecha, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    return Utilities.formatDate(fecha, timeZone, "dd/MM/yyyy");
   }
 
   return normalizarFechaCarga_(valor);
@@ -2785,16 +2801,8 @@ function obtenerDatos(emailSesion){
 
     // FILTRO RBAC OPERATIVO: Si el usuario es operativo y tiene una estación asignada, solo mostramos esa
     if (acceso.perfil === "operativo" && acceso.estacionAsignada) {
-      const normalizar = (t) => String(t || "").toLowerCase()
-        .replace(/estación saludable/gi, "")
-        .replace(/estacion saludable/gi, "")
-        .replace(/parque/gi, "")
-        .replace(/plaza/gi, "")
-        .replace(/[^a-z0-9]/g, "")
-        .trim();
-
-      const nombreLimpio = normalizar(nombre);
-      const asignadaLimpia = normalizar(acceso.estacionAsignada);
+      const nombreLimpio = normalizarNombreEstacion_(nombre);
+      const asignadaLimpia = normalizarNombreEstacion_(acceso.estacionAsignada);
       
       // Si la estación asignada no coincide con esta solapa, la ignoramos
       if (nombreLimpio !== asignadaLimpia && !nombreLimpio.includes(asignadaLimpia) && !asignadaLimpia.includes(nombreLimpio)) {
@@ -4894,6 +4902,25 @@ function limpiarTexto_(texto) {
     .replace(/\s+/g, " ");
 }
 
+/**
+ * Normaliza nombres de estaciones de forma robusta manejando acentos y variaciones.
+ * @param {string} texto Texto a normalizar.
+ * @return {string} Texto normalizado para comparación.
+ */
+function normalizarNombreEstacion_(texto) {
+  if (!texto) return "";
+  return String(texto)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Elimina acentos
+    .replace(/estacion saludable/gi, "")
+    .replace(/estacion/gi, "")
+    .replace(/parque/gi, "")
+    .replace(/plaza/gi, "")
+    .replace(/[^a-z0-9]/g, "") // Limpia todo lo demas
+    .trim();
+}
+
 function pluralizarEtiquetaBackend_(texto) {
   let valor = String(texto || "").trim();
   if (!valor) return "Items";
@@ -6440,8 +6467,14 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
           if (uFila > 1) {
              const datosExtra = hojaAnio.getRange(2, 1, uFila - 1, 6).getValues();
              datosExtra.forEach(function(f) {
-               // Mapeamos al formato de TALLERES local: DNI, FECHA, ESTACION, PROFESOR, ACTIVIDAD, SECTOR
-               filas.push([f[0], f[1], f[2], f[3], f[4], f[5]]);
+               const fDate = (f[1] instanceof Date) ? f[1] : null;
+               let tDia = "SEMANA";
+               if (fDate) {
+                 const d = fDate.getDay();
+                 if (d === 0 || d === 6) tDia = "SADOFE";
+               }
+               // Mapeamos al formato de TALLERES local: DNI, FECHA, ESTACION, PROFESOR, ACTIVIDAD, SECTOR, TIPO DIA, CODIGO
+               filas.push([f[0], f[1], f[2], f[3], f[4], f[5], tDia, ""]);
              });
           }
         }
@@ -6705,14 +6738,13 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     if (h.includes("TIPO") && h.includes("DIA")) idxTipoDia = i;
   }
 
-  const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
-  const asignadaLimpia = normalizar(estacion);
+  const asignadaLimpia = normalizarNombreEstacion_(estacion);
 
   // Soporte para ALIAS (Móvil 1, Móvil 2, etc.)
   let nombresABuscar = [asignadaLimpia];
   for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
-    if (normalizar(oficial) === asignadaLimpia) {
-      const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizar(a));
+    if (normalizarNombreEstacion_(oficial) === asignadaLimpia) {
+      const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
       nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
       break;
     }
@@ -6720,12 +6752,13 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
 
   const esAnual = mesClave === "TOTAL_2026";
   const dataAgrupada = {}; 
+  const tz = Session.getScriptTimeZone();
 
   // Si es anual, inicializamos los 365 días del año para asegurar eje X completo
   if (esAnual) {
     const iter = new Date(2026, 0, 1);
     while (iter.getFullYear() === 2026) {
-      const k = Utilities.formatDate(iter, Session.getScriptTimeZone(), "MM-dd");
+      const k = Utilities.formatDate(iter, tz, "MM-dd");
       dataAgrupada[k] = { participaciones: 0, unicos: {}, mes: iter.getMonth() + 1 };
       iter.setDate(iter.getDate() + 1);
     }
@@ -6740,14 +6773,14 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
       if (m !== mesClave) return;
     }
 
-    const eNorm = normalizar(fila[idxEstacion]);
+    const eNorm = normalizarNombreEstacion_(fila[idxEstacion]);
     if (!nombresABuscar.includes(eNorm)) return;
 
     const tDia = idxTipoDia !== -1 ? String(fila[idxTipoDia]).toUpperCase() : "";
     if (tipoDia !== "Todos" && !tDia.includes(tipoDia)) return;
 
     // CLAVE: Para anual usamos "MM-DD" para asegurar orden cronológico correcto
-    const clave = esAnual ? Utilities.formatDate(f, Session.getScriptTimeZone(), "MM-dd") : f.getDate();
+    const clave = esAnual ? Utilities.formatDate(f, tz, "MM-dd") : f.getDate();
     const dni = String(fila[idxDni] || "").trim();
 
     if (!dataAgrupada[clave]) {
@@ -6759,7 +6792,13 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     if (dni) dataAgrupada[clave].unicos[dni] = true;
   });
 
-  const labelsRaw = Object.keys(dataAgrupada).sort();
+  // Ordenamiento cronológico: Numérico si es por día, alfabético si es MM-DD (que ya coincide con cronológico)
+  const labelsRaw = Object.keys(dataAgrupada).sort(function(a, b) {
+    if (!esAnual) {
+      return Number(a) - Number(b);
+    }
+    return a.localeCompare(b);
+  });
   const participaciones = labelsRaw.map(k => dataAgrupada[k].participaciones);
   const unicos = labelsRaw.map(k => Object.keys(dataAgrupada[k].unicos).length);
   const mesesData = labelsRaw.map(k => dataAgrupada[k].mes);
@@ -6802,13 +6841,13 @@ function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
     const idxProfesor = headers.indexOf("PROFESOR");
     const idxDni = headers.indexOf("DNI");
 
-    const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
+    const asignadaLimpia = normalizarNombreEstacion_(estacion);
     
     // Soporte para ALIAS
-    let nombresABuscar = [normalizar(estacion)];
+    let nombresABuscar = [asignadaLimpia];
     for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
-      if (normalizar(oficial) === normalizar(estacion)) {
-        const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizar(a));
+      if (normalizarNombreEstacion_(oficial) === asignadaLimpia) {
+        const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
         nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
         break;
       }
@@ -6825,7 +6864,7 @@ function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
       const d = f.getDate();
 
       if (m === mesClave && String(d) === String(dia)) {
-        const eNorm = normalizar(fila[idxEstacion]);
+        const eNorm = normalizarNombreEstacion_(fila[idxEstacion]);
         if (nombresABuscar.includes(eNorm)) {
           const actividad = String(fila[idxActividad] || "Sin Actividad").trim();
           const profesor = String(fila[idxProfesor] || "Sin Profesor").trim();

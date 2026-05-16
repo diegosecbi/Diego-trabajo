@@ -224,3 +224,8 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 - **Drill-Down en Gráficos**: Exploración de detalles de `TALLERES` haciendo clic en puntos de datos de la gráfica de estación.
 - **Exportación masiva**: Herramienta de descarga Excel para auditoría de incidencias operativas.
 
+### 📊 Estabilización de Gráficos de Estaciones (16/05/2026)
+- **Normalización Robusta de Nombres (NFD)**: Se eliminó la normalización ad-hoc inestable por la función centralizada `normalizarNombreEstacion_` utilizando `normalize("NFD")`. Esto unifica el matching de estaciones con acentos como **"Móvil 1"** y **"Plaza Martín Fierro"** independientemente de cómo estén escritas en las planillas de origen.
+- **Activación de Filtros (TIPO DIA)**: Se incorporó la columna "TIPO DIA" a las `CABECERAS_TALLERES` y se actualizó la lógica de sincronización (tanto de 2026 como de datos históricos de 2025) para calcular y poblar automáticamente si el registro es **SEMANA** o **SADOFE** (fines de semana y feriados nacionales). Esto habilita los filtros de jornada en el modal de detalle por primera vez.
+- **Optimización Crítica de Rendimiento**: Se removieron las llamadas costosas al servicio `Session.getScriptTimeZone()` y `obtenerFeriados2026()` de los bucles iterativos de sincronización y renderizado, reduciendo el tiempo de procesamiento de minutos a pocos segundos al evitar miles de peticiones de red redundantes.
+- **Orden Cronológico Natural**: Se corrigió la clasificación del eje X en la vista mensual para que los días se ordenen numéricamente (`1, 2, 3...`) y no alfabéticamente (`1, 10, 11, 2...`).
