@@ -4913,6 +4913,7 @@ function normalizarNombreEstacion_(texto) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // Elimina acentos
+    .replace(/\([^)]*\)/g, "")       // Elimina sufijos entre paréntesis: (Mx), (J), (L), (M y V)
     .replace(/estacion saludable/gi, "")
     .replace(/estacion/gi, "")
     .replace(/parque/gi, "")
@@ -6740,12 +6741,14 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
 
   const asignadaLimpia = normalizarNombreEstacion_(estacion);
 
-  // Soporte para ALIAS (Móvil 1, Móvil 2, etc.)
+  // Soporte para ALIAS (Móvil 1, Móvil 2, etc.) — Búsqueda BIDIRECCIONAL
   let nombresABuscar = [asignadaLimpia];
   for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
-    if (normalizarNombreEstacion_(oficial) === asignadaLimpia) {
-      const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
-      nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
+    const keyNorm = normalizarNombreEstacion_(oficial);
+    const valsNorm = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
+    // Match por clave O por cualquier valor del alias
+    if (keyNorm === asignadaLimpia || valsNorm.includes(asignadaLimpia)) {
+      nombresABuscar = [...new Set([...nombresABuscar, keyNorm, ...valsNorm])];
       break;
     }
   }
@@ -6843,12 +6846,13 @@ function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
 
     const asignadaLimpia = normalizarNombreEstacion_(estacion);
     
-    // Soporte para ALIAS
+    // Soporte para ALIAS — Búsqueda BIDIRECCIONAL
     let nombresABuscar = [asignadaLimpia];
     for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
-      if (normalizarNombreEstacion_(oficial) === asignadaLimpia) {
-        const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
-        nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
+      const keyNorm = normalizarNombreEstacion_(oficial);
+      const valsNorm = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
+      if (keyNorm === asignadaLimpia || valsNorm.includes(asignadaLimpia)) {
+        nombresABuscar = [...new Set([...nombresABuscar, keyNorm, ...valsNorm])];
         break;
       }
     }
