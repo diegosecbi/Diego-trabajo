@@ -208,7 +208,7 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
   - **Restricción Operativa**: El proceso automático solo se ejecuta de 6hs a 20hs para optimizar recursos.
   - **Feedback en Tiempo Real**: Persistencia de timestamp en `ScriptProperties` visible en el frontend (`lastSyncLabel`).
 - **Interacción de Estaciones Dual**: Implementación robusta de clic simple (lista rápida de profesores) y doble clic (modal analítico completo).
-- **Analítica Anual 2026**: Nueva vista "TOTAL 2026" con cambio dinámico de gráfico (líneas para mensual / barras para anual).
+- **Analítica Anual 2026 (Premium)**: Nueva vista "TOTAL 2026" con resolución diaria (365 puntos), líneas curvas suavizadas, segmentación de colores por mes y separadores verticales en la cuadrícula para una experiencia de alta fidelidad.
 - **Soporte de Alias (Móviles)**: Lógica en `Code.js` que agrupa automáticamente datos de múltiples ubicaciones satélite bajo el paraguas de "Móvil 1" y "Móvil 2".
 - **Sistema RBAC Reforzado**: Nuevo permiso `verSincronizarTalleres` integrado en `ViewPermissions.gs` para control granular.
 
