@@ -6660,6 +6660,27 @@ function actualizarColumnaSadofe(silencioso = false) {
   }
 }
 
+function obtenerFeriados2026() {
+  // Lista de feriados nacionales Argentina 2026 (estimados/oficiales)
+  return [
+    "2026-01-01", // Año Nuevo
+    "2026-02-16", "2026-02-17", // Carnaval
+    "2026-03-24", // Memoria
+    "2026-04-02", // Malvinas
+    "2026-04-03", // Viernes Santo
+    "2026-05-01", // Trabajo
+    "2026-05-25", // Revolución de Mayo
+    "2026-06-15", // Güemes (trasladado)
+    "2026-06-20", // Belgrano
+    "2026-07-09", // Independencia
+    "2026-08-17", // San Martín
+    "2026-10-12", // Diversidad
+    "2026-11-23", // Soberanía (trasladado)
+    "2026-12-08", // Inmaculada
+    "2026-12-25"  // Navidad
+  ];
+}
+
 /**
  * Obtiene estadísticas específicas para el detalle de una estación.
  */
@@ -6697,6 +6718,16 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
 
   const esAnual = mesClave === "TOTAL_2026";
   const dataAgrupada = {}; 
+
+  // Si es anual, inicializamos los 365 días del año para asegurar eje X completo
+  if (esAnual) {
+    const iter = new Date(2026, 0, 1);
+    while (iter.getFullYear() === 2026) {
+      const k = Utilities.formatDate(iter, Session.getScriptTimeZone(), "MM-dd");
+      dataAgrupada[k] = { participaciones: 0, unicos: {}, mes: iter.getMonth() + 1 };
+      iter.setDate(iter.getDate() + 1);
+    }
+  }
   
   filas.forEach(fila => {
     const f = fila[idxFecha];
@@ -6717,7 +6748,11 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     const clave = esAnual ? Utilities.formatDate(f, Session.getScriptTimeZone(), "MM-dd") : f.getDate();
     const dni = String(fila[idxDni] || "").trim();
 
-    if (!dataAgrupada[clave]) dataAgrupada[clave] = { participaciones: 0, unicos: {}, mes: f.getMonth() + 1 };
+    if (!dataAgrupada[clave]) {
+      if (esAnual) return; // No debería pasar si inicializamos bien
+      dataAgrupada[clave] = { participaciones: 0, unicos: {}, mes: f.getMonth() + 1 };
+    }
+    
     dataAgrupada[clave].participaciones++;
     if (dni) dataAgrupada[clave].unicos[dni] = true;
   });
