@@ -208,7 +208,7 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
   - **Restricción Operativa**: El proceso automático solo se ejecuta de 6hs a 20hs para optimizar recursos.
   - **Feedback en Tiempo Real**: Persistencia de timestamp en `ScriptProperties` visible en el frontend (`lastSyncLabel`).
 - **Interacción de Estaciones Dual**: Implementación robusta de clic simple (lista rápida de profesores) y doble clic (modal analítico completo).
-- **Analítica Anual 2026 (Premium V4 - Trend-Master)**: Experiencia de visualización de alta fidelidad con año completo (Ene-Dic) garantizado, curva de tendencia ultra-suave (ventana 14 días), transición cromática continua y anchos de mes equitativos.
+- **Analítica Anual 2026 (Premium V6 - Rainbow Master)**: Refinamiento estético final con la implementación de una paleta arcoíris de 7 colores para la curva de tendencia, asegurando una transición vibrante y una distinción clara de los períodos mensuales en la vista TOTAL 2026.
 - **Calendario Operativo Inteligente**: Integración de feriados nacionales 2026 y resaltado automático de fines de semana para una mejor planificación operativa.
 - **Optimización Espacial**: Rediseño del modal para maximizar el área de visualización del gráfico (+100px de altura útil).
 - **Soporte de Alias (Móviles)**: Lógica en `Code.js` que agrupa automáticamente datos de múltiples ubicaciones satélite bajo el paraguas de "Móvil 1" y "Móvil 2".

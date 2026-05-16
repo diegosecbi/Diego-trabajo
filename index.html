@@ -2069,8 +2069,9 @@ function actualizarGraficoDetalle() {
       
       const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
       
-      const colorsPart = ['#004d99', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'];
-      const colorsUnicos = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#0d9488', '#14b8a6', '#5eead4', '#14b8a6', '#0d9488', '#0f766e', '#115e59', '#0d9488'];
+      const rainbowPalette = ['#FF0000', '#FFA500', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#8A2BE2'];
+      const colorsPart = rainbowPalette;
+      const colorsUnicos = rainbowPalette; // Usaremos transparencia para diferenciar
       
       // Lógica de Suavizado de Tendencia (Guía Min/Max Mensual)
       const generarTendenciaTrend = (arrOriginal) => {
@@ -2106,6 +2107,18 @@ function actualizarGraficoDetalle() {
         for (let x = puntosMensuales[puntosMensuales.length-1].x; x < arrOriginal.length; x++) tendenciaCompleta[x] = puntosMensuales[puntosMensuales.length-1].y;
         
         return tendenciaCompleta;
+      };
+
+      // Función para generar gradiente dinámico armonizado
+      const getGradiente = (ctx, chartArea, colors) => {
+        if (!chartArea) return colors[0];
+        const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+        const paradas = [0, 0.16, 0.33, 0.5, 0.66, 0.83, 1];
+        paradas.forEach((p, idx) => {
+          const colorIdx = Math.floor(p * (colors.length - 1));
+          gradient.addColorStop(p, colors[colorIdx]);
+        });
+        return gradient;
       };
 
       const partSuave = generarTendenciaTrend(res.participaciones);
