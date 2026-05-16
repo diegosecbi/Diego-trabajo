@@ -2053,8 +2053,10 @@ function actualizarGraficoDetalle() {
       const ctx = document.getElementById('chartDetalleEstacion').getContext('2d');
       if (chartInstanciaDetalle) chartInstanciaDetalle.destroy();
       
+      const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      
       chartInstanciaDetalle = new Chart(ctx, {
-        type: res.esAnual ? 'bar' : 'line',
+        type: 'line',
         data: {
           labels: res.labels,
           datasets: [
@@ -2062,17 +2064,33 @@ function actualizarGraficoDetalle() {
               label: 'Participaciones',
               data: res.participaciones,
               borderColor: '#004d99',
-              backgroundColor: res.esAnual ? 'rgba(0, 77, 153, 0.7)' : 'rgba(0, 77, 153, 0.1)',
+              backgroundColor: 'rgba(0, 77, 153, 0.1)',
               fill: true,
-              tension: 0.4
+              tension: 0.4,
+              segment: {
+                borderColor: ctx => {
+                  if (!res.esAnual) return '#004d99';
+                  const colors = ['#004d99', '#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa'];
+                  const m = res.mesesData[ctx.p0DataIndex];
+                  return colors[(m-1) % colors.length];
+                }
+              }
             },
             {
               label: 'Personas Únicas',
               data: res.unicos,
               borderColor: '#14b8a6',
-              backgroundColor: res.esAnual ? 'rgba(20, 184, 166, 0.7)' : 'rgba(20, 184, 166, 0.1)',
+              backgroundColor: 'rgba(20, 184, 166, 0.1)',
               fill: true,
-              tension: 0.4
+              tension: 0.4,
+              segment: {
+                borderColor: ctx => {
+                  if (!res.esAnual) return '#14b8a6';
+                  const colors = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#134e4a', '#14b8a6'];
+                  const m = res.mesesData[ctx.p0DataIndex];
+                  return colors[(m-1) % colors.length];
+                }
+              }
             }
           ]
         },
@@ -2087,6 +2105,41 @@ function actualizarGraficoDetalle() {
               abrirDetalleDia(estacionDetalleActual.estacion, mes, dia);
             }
           },
+          scales: {
+            x: {
+              grid: {
+                color: context => {
+                  if (!res.esAnual) return 'rgba(0,0,0,0.1)';
+                  const i = context.index;
+                  if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return 'rgba(21, 50, 68, 0.5)';
+                  return 'rgba(0,0,0,0.05)';
+                },
+                lineWidth: context => {
+                  if (!res.esAnual) return 1;
+                  const i = context.index;
+                  if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return 2;
+                  return 1;
+                }
+              },
+              ticks: {
+                callback: function(val, index) {
+                  if (!res.esAnual) return this.getLabelForValue(val);
+                  if (index === 0 || res.mesesData[index] !== res.mesesData[index-1]) {
+                    return mesesNombres[res.mesesData[index] - 1];
+                  }
+                  return null;
+                },
+                autoSkip: false,
+                maxRotation: 0,
+                font: { size: 11, weight: 'bold' }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              ticks: { font: { size: 11, weight: 'bold' }, color: '#000' }
+            }
+          },
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
             datalabels: {
@@ -2094,28 +2147,18 @@ function actualizarGraficoDetalle() {
               align: 'top',
               color: '#000',
               offset: 2,
-              font: {
-                weight: 'bold',
-                size: 11
+              display: (context) => {
+                if (!res.esAnual) return context.dataset.data[context.dataIndex] > 0;
+                const val = context.dataset.data[context.dataIndex];
+                const max = Math.max(...context.dataset.data);
+                return val > max * 0.85; 
               },
-              formatter: function(value) {
-                return value > 0 ? value : ''; // Solo mostrar si es > 0 para no saturar
-              }
+              font: { weight: 'bold', size: 10 },
+              formatter: (value) => value
             }
-          },
-          scales: {
-            y: { 
-              beginAtZero: true, 
-              grid: { color: '#f1f5f9' }, 
-              ticks: { 
-                font: { size: 11, weight: 'bold' }, 
-                color: '#000' 
-              } 
-            },
-            x: { 
-              grid: { display: false }, 
-              ticks: { 
-                font: { size: 11, weight: 'bold' }, 
+          }
+        }
+      });
                 color: '#000' 
               } 
             }

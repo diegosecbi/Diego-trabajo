@@ -6683,11 +6683,12 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
   }
 
   const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
-  
+  const asignadaLimpia = normalizar(estacion);
+
   // Soporte para ALIAS (Móvil 1, Móvil 2, etc.)
-  let nombresABuscar = [normalizar(estacion)];
+  let nombresABuscar = [asignadaLimpia];
   for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
-    if (normalizar(oficial) === normalizar(estacion)) {
+    if (normalizar(oficial) === asignadaLimpia) {
       const aliases = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizar(a));
       nombresABuscar = [...new Set([...nombresABuscar, ...aliases])];
       break;
@@ -6712,22 +6713,23 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     const tDia = idxTipoDia !== -1 ? String(fila[idxTipoDia]).toUpperCase() : "";
     if (tipoDia !== "Todos" && !tDia.includes(tipoDia)) return;
 
-    const clave = esAnual ? (f.getMonth() + 1) : f.getDate();
+    // CLAVE: Para anual usamos "MM-DD" para asegurar orden cronológico correcto
+    const clave = esAnual ? Utilities.formatDate(f, Session.getScriptTimeZone(), "MM-dd") : f.getDate();
     const dni = String(fila[idxDni] || "").trim();
 
-    if (!dataAgrupada[clave]) dataAgrupada[clave] = { participaciones: 0, unicos: {} };
+    if (!dataAgrupada[clave]) dataAgrupada[clave] = { participaciones: 0, unicos: {}, mes: f.getMonth() + 1 };
     dataAgrupada[clave].participaciones++;
     if (dni) dataAgrupada[clave].unicos[dni] = true;
   });
 
-  const labelsRaw = Object.keys(dataAgrupada).sort((a,b) => a-b);
+  const labelsRaw = Object.keys(dataAgrupada).sort();
   const participaciones = labelsRaw.map(k => dataAgrupada[k].participaciones);
   const unicos = labelsRaw.map(k => Object.keys(dataAgrupada[k].unicos).length);
+  const mesesData = labelsRaw.map(k => dataAgrupada[k].mes);
 
   let labels = labelsRaw;
   if (esAnual) {
-    const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    labels = labelsRaw.map(m => nombresMeses[m-1]);
+    labels = labelsRaw.map(k => k.split("-")[1]);
   } else {
     labels = labelsRaw.map(d => "Día " + d);
   }
@@ -6738,6 +6740,7 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     labels: labels,
     participaciones: participaciones,
     unicos: unicos,
+    mesesData: mesesData,
     totalParticipaciones: participaciones.reduce((a,b) => a+b, 0),
     totalUnicos: unicos.reduce((a,b) => a+b, 0)
   };
