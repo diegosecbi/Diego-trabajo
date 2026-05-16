@@ -2055,6 +2055,31 @@ function actualizarGraficoDetalle() {
       
       const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
       
+      // Función para suavizar datos (Media Móvil)
+      const suavizar = (arr, ventana) => {
+        if (!res.esAnual) return arr;
+        return arr.map((val, i) => {
+          const inicio = Math.max(0, i - Math.floor(ventana / 2));
+          const fin = Math.min(arr.length, i + Math.ceil(ventana / 2));
+          const sub = arr.slice(inicio, fin);
+          return sub.reduce((a, b) => a + b, 0) / sub.length;
+        });
+      };
+
+      const partSuave = suavizar(res.participaciones, 7);
+      const unicosSuave = suavizar(res.unicos, 7);
+
+      // Crear Gradientes
+      const gradientPart = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+      gradientPart.addColorStop(0, '#004d99');
+      gradientPart.addColorStop(0.5, '#2563eb');
+      gradientPart.addColorStop(1, '#60a5fa');
+
+      const gradientUnicos = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+      gradientUnicos.addColorStop(0, '#14b8a6');
+      gradientUnicos.addColorStop(0.5, '#0d9488');
+      gradientUnicos.addColorStop(1, '#2dd4bf');
+
       chartInstanciaDetalle = new Chart(ctx, {
         type: 'line',
         data: {
@@ -2062,35 +2087,23 @@ function actualizarGraficoDetalle() {
           datasets: [
             {
               label: 'Participaciones',
-              data: res.participaciones,
-              borderColor: '#004d99',
-              backgroundColor: 'rgba(0, 77, 153, 0.1)',
+              data: partSuave,
+              borderColor: res.esAnual ? gradientPart : '#004d99',
+              backgroundColor: 'rgba(0, 77, 153, 0.05)',
               fill: true,
-              tension: 0.4,
-              segment: {
-                borderColor: ctx => {
-                  if (!res.esAnual) return '#004d99';
-                  const colors = ['#004d99', '#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa'];
-                  const m = res.mesesData[ctx.p0DataIndex];
-                  return colors[(m-1) % colors.length];
-                }
-              }
+              tension: res.esAnual ? 0.6 : 0.4,
+              pointRadius: res.esAnual ? 0 : 3,
+              borderWidth: res.esAnual ? 3 : 2
             },
             {
               label: 'Personas Únicas',
-              data: res.unicos,
-              borderColor: '#14b8a6',
-              backgroundColor: 'rgba(20, 184, 166, 0.1)',
+              data: unicosSuave,
+              borderColor: res.esAnual ? gradientUnicos : '#14b8a6',
+              backgroundColor: 'rgba(20, 184, 166, 0.05)',
               fill: true,
-              tension: 0.4,
-              segment: {
-                borderColor: ctx => {
-                  if (!res.esAnual) return '#14b8a6';
-                  const colors = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#134e4a', '#14b8a6'];
-                  const m = res.mesesData[ctx.p0DataIndex];
-                  return colors[(m-1) % colors.length];
-                }
-              }
+              tension: res.esAnual ? 0.6 : 0.4,
+              pointRadius: res.esAnual ? 0 : 3,
+              borderWidth: res.esAnual ? 3 : 2
             }
           ]
         },
@@ -2109,16 +2122,21 @@ function actualizarGraficoDetalle() {
             x: {
               grid: {
                 color: context => {
-                  if (!res.esAnual) return 'rgba(0,0,0,0.1)';
+                  if (!res.esAnual) return 'rgba(0,0,0,0.05)';
                   const i = context.index;
-                  if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return 'rgba(21, 50, 68, 0.5)';
-                  return 'rgba(0,0,0,0.05)';
+                  if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return '#ef4444'; // Rojo para separador mes
+                  return 'rgba(0,0,0,0.03)';
                 },
                 lineWidth: context => {
                   if (!res.esAnual) return 1;
                   const i = context.index;
                   if (i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return 2;
                   return 1;
+                },
+                borderDash: context => {
+                  const i = context.index;
+                  if (res.esAnual && i > 0 && res.mesesData[i] !== res.mesesData[i-1]) return [5, 5];
+                  return [];
                 }
               },
               ticks: {
@@ -2143,18 +2161,16 @@ function actualizarGraficoDetalle() {
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
             datalabels: {
+              display: (context) => {
+                if (res.esAnual) return false; // Ocultar en anual para máxima limpieza
+                return context.dataset.data[context.dataIndex] > 0;
+              },
               anchor: 'end',
               align: 'top',
               color: '#000',
               offset: 2,
-              display: (context) => {
-                if (!res.esAnual) return context.dataset.data[context.dataIndex] > 0;
-                const val = context.dataset.data[context.dataIndex];
-                const max = Math.max(...context.dataset.data);
-                return val > max * 0.85; 
-              },
               font: { weight: 'bold', size: 10 },
-              formatter: (value) => value
+              formatter: (value) => Math.round(value)
             }
           }
         }
