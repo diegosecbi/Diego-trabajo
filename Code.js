@@ -6934,8 +6934,18 @@ function obtenerGestionOperativa(estacion) {
   const datos = hoja.getDataRange().getValues();
   const filas = datos.slice(1);
   
-  const normalizar = (t) => String(t || "").toLowerCase().replace(/estación saludable/gi, "").replace(/estacion saludable/gi, "").replace(/parque/gi, "").replace(/plaza/gi, "").replace(/[^a-z0-9]/g, "").trim();
-  const buscar = normalizar(estacion);
+  const asignadaLimpia = normalizarNombreEstacion_(estacion);
+
+  // Soporte para ALIAS — Búsqueda BIDIRECCIONAL
+  let nombresABuscar = [asignadaLimpia];
+  for (let oficial in ALIAS_ESTACIONES_SALUDABLES_VISIBLES) {
+    const keyNorm = normalizarNombreEstacion_(oficial);
+    const valsNorm = ALIAS_ESTACIONES_SALUDABLES_VISIBLES[oficial].map(a => normalizarNombreEstacion_(a));
+    if (keyNorm === asignadaLimpia || valsNorm.includes(asignadaLimpia)) {
+      nombresABuscar = [...new Set([...nombresABuscar, keyNorm, ...valsNorm])];
+      break;
+    }
+  }
 
   return filas
     .map((f, index) => ({
@@ -6945,7 +6955,10 @@ function obtenerGestionOperativa(estacion) {
       tipo: f[2],
       comentario: f[3]
     }))
-    .filter(f => normalizar(f.estacionOriginal) === buscar);
+    .filter(f => {
+      const eNorm = normalizarNombreEstacion_(f.estacionOriginal);
+      return nombresABuscar.includes(eNorm);
+    });
 }
 
 function eliminarGestionOperativa(fila) {
