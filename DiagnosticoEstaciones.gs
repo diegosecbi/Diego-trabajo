@@ -54,6 +54,7 @@ function diagnosticarEstacionesVsTabla() {
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\([^)]*\)/g, "")
       .replace(/estacion saludable/gi, "")
       .replace(/estacion/gi, "")
       .replace(/parque/gi, "")
@@ -99,13 +100,15 @@ function diagnosticarEstacionesVsTabla() {
   estacionesFrontend.forEach(function(nombreSolapa) {
     var normSolapa = normalizar(nombreSolapa);
     
-    // Buscar aliases
+    // Buscar aliases — BIDIRECCIONAL (busca en claves Y valores)
     var nombresABuscar = [normSolapa];
     for (var oficial in ALIAS) {
-      if (normalizar(oficial) === normSolapa) {
-        ALIAS[oficial].forEach(function(a) {
-          var na = normalizar(a);
-          if (nombresABuscar.indexOf(na) === -1) nombresABuscar.push(na);
+      var keyNorm = normalizar(oficial);
+      var valsNorm = ALIAS[oficial].map(function(a) { return normalizar(a); });
+      if (keyNorm === normSolapa || valsNorm.indexOf(normSolapa) !== -1) {
+        if (nombresABuscar.indexOf(keyNorm) === -1) nombresABuscar.push(keyNorm);
+        valsNorm.forEach(function(v) {
+          if (nombresABuscar.indexOf(v) === -1) nombresABuscar.push(v);
         });
         break;
       }
@@ -173,10 +176,13 @@ function diagnosticarEstacionesVsTabla() {
   resultados.forEach(function(r) {
     var normS = r.normalizado;
     allNorms[normS] = true;
-    // También registrar los aliases normalizados
+    // También registrar los aliases normalizados — BIDIRECCIONAL
     for (var oficial in ALIAS) {
-      if (normalizar(oficial) === normS) {
-        ALIAS[oficial].forEach(function(a) { allNorms[normalizar(a)] = true; });
+      var keyNorm = normalizar(oficial);
+      var valsNorm = ALIAS[oficial].map(function(a) { return normalizar(a); });
+      if (keyNorm === normS || valsNorm.indexOf(normS) !== -1) {
+        allNorms[keyNorm] = true;
+        valsNorm.forEach(function(v) { allNorms[v] = true; });
       }
     }
   });
