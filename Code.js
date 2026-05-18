@@ -5741,7 +5741,7 @@ function crearDocumentoInformeDashboard_(datos, imagenes) {
     resumenTexto += `- Estaciones LÃ­deres: ${r.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " part.)").join(", ")}\n`;
     resumenTexto += `- Actividades Predominantes: ${r.actividades.slice(0, 8).map(a => a[0] + " (" + a[1] + " part.)").join(", ")}\n`;
     const totalP = r.mensual.reduce((a, b) => a + b[1], 0);
-    const totalU = r.totalUnicosGlobal || 0;
+    const totalU = datos.totalUnicosGlobalRequest || 0;
     resumenTexto += `- MÃ©tricas Consolidadas: ${totalP} participaciones totales / ${totalU} usuarios Ãºnicos\n`;
   });
 
@@ -6505,6 +6505,7 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
 
   const mesesDisponibles = {};
   const dataAgrupada = {}; 
+  const totalUnicosGlobalRequest = {}; // Acumulador neto de todo el request
 
   filas.forEach(fila => {
     const f = fila[idxFecha];
@@ -6516,7 +6517,8 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     if (filtroMeses && filtroMeses.length > 0 && !filtroMeses.includes(m)) return;
 
     const e = String(fila[idxEstacion] || "Sin Datos");
-    const d = String(fila[idxDni] || "").trim();
+    const dRaw = String(fila[idxDni] || "");
+    const d = normalizarDni_(dRaw);
     const a = fila[idxActividad] || "Sin Datos";
     const p = fila[idxProfesor] || "Sin Datos";
     
@@ -6554,10 +6556,11 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     
     target.mesCounts[m] = (target.mesCounts[m] || 0) + 1;
     if (!target.mesUnicos[m]) target.mesUnicos[m] = {};
-    if (d) target.mesUnicos[m][d] = true;
-
-    // Acumulador de Personas Únicas Globales deduplicadas en todo el período
-    if (d) target.globalUnicos[d] = true;
+    if (d) {
+      target.mesUnicos[m][d] = true;
+      target.globalUnicos[d] = true;
+      totalUnicosGlobalRequest[d] = true;
+    }
 
     // Desglose por dÃ­a del mes (1-31)
     const dia = f.getDate();
@@ -6616,9 +6619,20 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     ok: true,
     modo: modo || "periodo",
     resultados: resultados,
+    totalUnicosGlobalRequest: Object.keys(totalUnicosGlobalRequest).length,
     mesesDisponibles: Object.keys(mesesDisponibles).sort(),
     listaEstaciones: Object.keys(listaEstaciones).sort()
   };
+}
+
+/**
+ * Normaliza y sanea DNIs argentinos descartando valores incompletos, vacíos o letras.
+ */
+function normalizarDni_(dniRaw) {
+  if (!dniRaw) return null;
+  const clean = String(dniRaw).trim().replace(/\D/g, "");
+  if (clean.length < 5) return null; // Descartar nulos, vacíos, guiones o DNIs inválidos de pocos dígitos
+  return clean;
 }
 
 /**
