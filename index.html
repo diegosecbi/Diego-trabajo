@@ -1059,9 +1059,9 @@ grid-template-columns:1fr;
         <button id="btnPersonasUnicas" class="sidebar-btn" onclick="abrirModalPersonasUnicas()" style="display:none; background: #e6f0ff; color: #004d99; border: 1px solid #004d99; font-weight: bold;">👤 Personas Únicas</button>
         <button id="btnSincronizarTalleres" class="sidebar-btn" onclick="sincronizarTalleresManual()" style="display:none; background: #f0fdf4; color: #166534; border: 1px solid #166534; font-weight: bold;">🔄 Sincronizar TALLERES</button>
         <div id="lastSyncLabel" style="font-size: 9px; color: #166534; margin: -5px 0 10px 12px; font-style: italic; display: none;">Última sincro: ---</div>
+        <button id="btnExportarIncidencias" class="sidebar-btn" onclick="exportarIncidenciasExcel()" style="display:none; background: #fff1f2; color: #be123c; border: 1px solid #fda4af; font-weight: 600;">📥 Exportar Incidencias</button>
         <button id="btnDashboardGraficos" class="sidebar-btn" onclick="abrirDashboardGraficos()" style="display:none;">Ver Estadísticas</button>
         <button id="btnExportarExcel" class="sidebar-btn" onclick="exportarExcel()" style="display:none;">Exportar Excel</button>
-        <button id="btnExportarIncidencias" class="sidebar-btn" onclick="exportarIncidenciasExcel()" style="display:none; background: #fff1f2; color: #be123c; border: 1px solid #fda4af; font-weight: 600;">📥 Exportar Incidencias</button>
         <button id="btnSupervision" class="sidebar-btn" onclick="toggleSupervision()" style="display:none;">Modo Supervisión</button>
         <button id="btnToggleRefs" class="sidebar-btn" onclick="toggleReferenciasPermisos()" style="display:none; background-color: #ffeb3b; color: #333 !important;">👁️ Ver Permisos (Admin)</button>
     </div>
@@ -2245,7 +2245,27 @@ function actualizarGraficoDetalle() {
               backgroundColor: 'rgba(255,255,255,0.85)',
               borderRadius: 6,
               borderColor: 'rgba(21, 50, 68, 0.2)',
-              borderWidth: 1
+              borderWidth: 1,
+              listeners: {
+                click: function(context, event) {
+                  if (!res.esAnual) {
+                    const index = context.dataIndex;
+                    const diaLabel = res.labels[index];
+                    const dia = diaLabel.replace("Día ", "");
+                    abrirDetalleDia(estacionDetalleActual.estacion, mes, dia);
+                  }
+                },
+                enter: function(context, event) {
+                  if (!res.esAnual) {
+                    context.chart.canvas.style.cursor = 'pointer';
+                  }
+                },
+                leave: function(context, event) {
+                  if (!res.esAnual) {
+                    context.chart.canvas.style.cursor = 'default';
+                  }
+                }
+              }
             }
           }
         }

@@ -6453,7 +6453,7 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
   let filas = datos.slice(1);
 
   // --- BUSQUEDA BAJO DEMANDA DE HISTORICOS (2024/2025) ---
-  const necesitaHistorico = (modo === "comparacion" || (filtroMeses && filtroMeses.some(m => m.startsWith("2024") || m.startsWith("2025"))));
+  const necesitaHistorico = (modo === "comparacion" || !filtroMeses || filtroMeses.length === 0 || (filtroMeses && filtroMeses.some(m => m.startsWith("2024") || m.startsWith("2025"))));
   
   if (necesitaHistorico) {
     try {
