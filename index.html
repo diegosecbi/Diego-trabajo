@@ -4293,7 +4293,7 @@ function renderizarCharts(data) {
     let totalP = 0, totalU = 0, countM = 0;
     claves.forEach(c => {
         totalP += data.resultados[c].mensual.reduce((a, b) => a + (b[1] || 0), 0);
-        totalU += data.resultados[c].mensual.reduce((a, b) => a + (b[2] || 0), 0);
+        totalU += data.resultados[c].totalUnicosGlobal || 0;
         countM += data.resultados[c].mensual.length || 1;
     });
     document.getElementById("flashParticipaciones").textContent = totalP.toLocaleString();

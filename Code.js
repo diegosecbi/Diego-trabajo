@@ -5741,7 +5741,7 @@ function crearDocumentoInformeDashboard_(datos, imagenes) {
     resumenTexto += `- Estaciones LÃ­deres: ${r.estaciones.slice(0, 8).map(e => e[0] + " (" + e[1] + " part.)").join(", ")}\n`;
     resumenTexto += `- Actividades Predominantes: ${r.actividades.slice(0, 8).map(a => a[0] + " (" + a[1] + " part.)").join(", ")}\n`;
     const totalP = r.mensual.reduce((a, b) => a + b[1], 0);
-    const totalU = r.mensual.reduce((a, b) => a + b[2], 0);
+    const totalU = r.totalUnicosGlobal || 0;
     resumenTexto += `- MÃ©tricas Consolidadas: ${totalP} participaciones totales / ${totalU} usuarios Ãºnicos\n`;
   });
 
@@ -6536,7 +6536,7 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
 
     const clave = (modo === "comparacion") ? m : "acumulado";
     if (!dataAgrupada[clave]) {
-      dataAgrupada[clave] = { est: {}, act: {}, prof: {}, mesCounts: {}, mesUnicos: {}, dias: {} };
+      dataAgrupada[clave] = { est: {}, act: {}, prof: {}, mesCounts: {}, mesUnicos: {}, dias: {}, globalUnicos: {} };
     }
     
     const target = dataAgrupada[clave];
@@ -6555,6 +6555,9 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     target.mesCounts[m] = (target.mesCounts[m] || 0) + 1;
     if (!target.mesUnicos[m]) target.mesUnicos[m] = {};
     if (d) target.mesUnicos[m][d] = true;
+
+    // Acumulador de Personas Únicas Globales deduplicadas en todo el período
+    if (d) target.globalUnicos[d] = true;
 
     // Desglose por dÃ­a del mes (1-31)
     const dia = f.getDate();
@@ -6590,6 +6593,7 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
   Object.keys(dataAgrupada).forEach(clave => {
     const t = dataAgrupada[clave];
     resultados[clave] = {
+      totalUnicosGlobal: Object.keys(t.globalUnicos || {}).length,
       estaciones: Object.entries(t.est)
         .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length])
         .sort((a,b) => b[1] - a[1]),
