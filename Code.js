@@ -6774,6 +6774,7 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
   const esAnual = mesClave === "TOTAL_2026";
   const dataAgrupada = {}; 
   const tz = Session.getScriptTimeZone();
+  const globalUnicos = {}; // Acumulador de personas únicas en todo el periodo filtrado
 
   // Si es anual, inicializamos los 365 días del año para asegurar eje X completo
   if (esAnual) {
@@ -6810,7 +6811,10 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     }
     
     dataAgrupada[clave].participaciones++;
-    if (dni) dataAgrupada[clave].unicos[dni] = true;
+    if (dni) {
+      dataAgrupada[clave].unicos[dni] = true;
+      globalUnicos[dni] = true; // Acumular DNI a nivel periodo completo
+    }
   });
 
   // Ordenamiento cronológico: Numérico si es por día, alfabético si es MM-DD (que ya coincide con cronológico)
@@ -6839,7 +6843,7 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     unicos: unicos,
     mesesData: mesesData,
     totalParticipaciones: participaciones.reduce((a,b) => a+b, 0),
-    totalUnicos: unicos.reduce((a,b) => a+b, 0)
+    totalUnicos: Object.keys(globalUnicos).length
   };
 }
 

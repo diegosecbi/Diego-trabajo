@@ -195,6 +195,7 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 - **Filtro SADOFE Robusto**: Lógica de detección de días mejorada que cruza etiquetas de "Tipo de Día" con el calendario perpetuo (Sábado/Domingo/Feriados).
 - **Normalización de Históricos**: Herramienta para procesar masivamente el `2025_HISTORICO` y habilitar filtros precisos por tipo de día.
 - **Vista Analítica Anual (TOTAL 2026)**: Implementación de vista "Full 2026" con agrupamiento mensual, colores segmentados por año (Turquesa 2025 / Azul 2026) y separadores verticales.
+- **Corrección de Conteo de Personas Únicas**: Se corrigió el cálculo de `totalUnicos` en `obtenerEstadisticasEstacionDetalle` (modal de detalle de estación) para usar un acumulador global de DNIs en el periodo, evitando la duplicación de usuarios por sumar recuentos diarios individuales (por ejemplo, corrigiendo el total de Parque Patricios de 5483 a 1036 personas únicas reales).
 
 ### 🛰️ Sincronización Manual y Monitoreo
 - **Gatillo Manual de TALLERES**: Botón de sincronización manual para la solapa TALLERES con estados visuales de carga.
@@ -240,3 +241,7 @@ La exclusion se resuelve por `SECTOR_DE_CARGA`, categorias y patrones de activid
 ### 📅 Aislamiento del Calendario y Estética Premium (17/05/2026)
 - **Aislamiento Robusto de Incidencias/Eventos**: Se rediseñó la función `obtenerGestionOperativa(estacion)` en [Code.js](file:///c:/Users/20316047409/Desktop/ANTIGRAVITY/Diego-trabajo/Code.js) para que use la normalización de nombre robusta centralizada y la búsqueda bidireccional de alias de estaciones. Esto garantiza que cada estación vea únicamente sus propias incidencias y eventos de gestión, impidiendo que registros de otras estaciones o eventos generales se filtren o mezclen.
 - **Resaltado Estético de la Fecha Actual**: Se actualizó el estilo CSS de `.cal-hoy` en [index.html](file:///c:/Users/20316047409/Desktop/ANTIGRAVITY/Diego-trabajo/index.html) para pintar el casillero del día actual con un color celeste pastel traslúcido profesional (`rgba(56, 189, 248, 0.15)`), un borde refinado azul cielo y un sutil sombreado interno (`box-shadow`), proporcionando un aspecto de alta gama interactivo.
+
+### 🚀 Gestión de Despliegues y Limitaciones de Apps Script (19/05/2026)
+- **Límite de Versiones Activas**: Google Apps Script impone un límite rígido de hasta 20 despliegues versionados activos. Al intentar realizar `clasp deploy` directamente, el sistema fallaba debido a la saturación de despliegues históricos (llegando a 69 versiones).
+- **Estrategia de Re-despliegue Dirigido**: Para eludir esta limitación sin romper enlaces de producción, se implementó la actualización in-situ de las tres implementaciones activas clave (`@72`, `@71`, y `@70`) apuntándolas directamente a los nuevos releases de versión generados (`@74`, `@75`, `@76`) usando `clasp deploy -i <deploymentId>`. Esto evita la creación innecesaria de nuevos IDs de despliegue y mantiene intacta la disponibilidad y estabilidad del frontend.
