@@ -1056,11 +1056,11 @@ grid-template-columns:1fr;
 
     <div class="sidebar-label">Panel de Control</div>
     <div id="sidebarMenu">
-        <button id="btnPersonasUnicas" class="sidebar-btn" onclick="abrirModalPersonasUnicas()" style="display:none; background: #e6f0ff; color: #004d99; border: 1px solid #004d99; font-weight: bold;">👤 Personas Únicas</button>
+        <button id="btnPersonasUnicas" class="sidebar-btn" onclick="abrirModalPersonasUnicas()" style="display:none; background: #e6f0ff; color: #004d99; border: 1px solid #004d99; font-weight: bold;">👤 PERSONAS</button>
         <button id="btnSincronizarTalleres" class="sidebar-btn" onclick="sincronizarTalleresManual()" style="display:none; background: #f0fdf4; color: #166534; border: 1px solid #166534; font-weight: bold;">🔄 Sincronizar TALLERES</button>
-        <div id="lastSyncLabel" style="font-size: 9px; color: #166534; margin: -5px 0 10px 12px; font-style: italic; display: none;">Última sincro: ---</div>
+        <div id="lastSyncLabel" style="font-size: 9px; color: #2dd4bf; margin: -5px 0 10px 12px; font-style: italic; display: none;">Última sincro: ---</div>
         <button id="btnExportarIncidencias" class="sidebar-btn" onclick="exportarIncidenciasExcel()" style="display:none; background: #fff1f2; color: #be123c; border: 1px solid #fda4af; font-weight: 600;">📥 Exportar Incidencias</button>
-        <button id="btnDashboardGraficos" class="sidebar-btn" onclick="abrirDashboardGraficos()" style="display:none;">Ver Estadísticas</button>
+        <button id="btnDashboardGraficos" class="sidebar-btn" onclick="abrirDashboardGraficos()" style="display:none;">📊 GRAFICAS ESTADISTICAS</button>
         <button id="btnExportarExcel" class="sidebar-btn" onclick="exportarExcel()" style="display:none;">Exportar Excel</button>
         <button id="btnSupervision" class="sidebar-btn" onclick="toggleSupervision()" style="display:none;">Modo Supervisión</button>
         <button id="btnToggleRefs" class="sidebar-btn" onclick="toggleReferenciasPermisos()" style="display:none; background-color: #ffeb3b; color: #333 !important;">👁️ Ver Permisos (Admin)</button>
@@ -1772,6 +1772,12 @@ function render(data){
     
     if (data.usuario.permisos) {
       aplicarPermisosUI(data.usuario.permisos, data.usuario.restricciones);
+    }
+    
+    // Inicializar el timestamp de última sincronización si existe
+    const lastSync = document.getElementById("lastSyncLabel");
+    if (lastSync && data.usuario.lastSyncTalleres) {
+      lastSync.innerText = "Última sincro: " + data.usuario.lastSyncTalleres;
     }
   }
 }
@@ -4208,7 +4214,7 @@ function aplicarFiltrosGraficos() {
     const meses = obtenerMesesSeleccionados();
     
     const btn = document.getElementById("btnDashboardGraficos");
-    if(btn) btn.innerText = "⏳ Calculando...";
+    if(btn) btn.innerText = "⏳ GRAFICAS ESTADISTICAS";
 
     // Limpiar instancias previas
     Object.values(chartsInstancias).forEach(chart => {
@@ -4220,7 +4226,7 @@ function aplicarFiltrosGraficos() {
     google.script.run
         .withSuccessHandler(function(res) {
             datosGraficosActuales = res;
-            if(btn) btn.innerText = "📊 Ver Gráficos";
+            if(btn) btn.innerText = "📊 GRAFICAS ESTADISTICAS";
             if (!res.ok) {
                 alert("No se pudieron obtener los datos: " + (res.msg || "Sin datos"));
                 return;
