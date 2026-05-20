@@ -1166,6 +1166,8 @@ grid-template-columns:1fr;
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div class="resumenLabel" style="font-weight: 800; margin-bottom: 0;">Rendimiento 2026</div>
             <div style="display: flex; gap: 10px;">
+              <select id="filtroSubUbicacionDetalle" class="campoTexto" style="height: 38px; font-size: 13px; min-width: 180px; padding: 0 10px; display: none;" onchange="actualizarGraficoDetalle()">
+              </select>
               <select id="filtroMesDetalle" class="campoTexto" style="height: 38px; font-size: 13px; min-width: 140px; padding: 0 10px;" onchange="actualizarGraficoDetalle()"></select>
               <select id="filtroDiaDetalle" class="campoTexto" style="height: 38px; font-size: 13px; min-width: 160px; padding: 0 10px;" onchange="actualizarGraficoDetalle()">
                 <option value="Todos">Días: Todos</option>
@@ -2031,6 +2033,47 @@ function abrirModalDetalleEstacionByName(nombre) {
     });
   }
 
+  // Lógica para mostrar/ocultar y poblar filtro de sub-ubicación de Móvil 1 y 2
+  const selectSub = document.getElementById("filtroSubUbicacionDetalle");
+  if (selectSub) {
+    const esMovil1 = est.estacion.toLowerCase().includes("movil 1") || est.estacion.toLowerCase().includes("móvil 1");
+    const esMovil2 = est.estacion.toLowerCase().includes("movil 2") || est.estacion.toLowerCase().includes("móvil 2");
+    
+    if (esMovil1 || esMovil2) {
+      selectSub.style.display = "block";
+      selectSub.innerHTML = '<option value="TODAS">Sub-ubicación: TODAS</option>';
+      
+      let opciones = [];
+      if (esMovil1) {
+        opciones = [
+          "Móvil 1. Plaza LA REDONDA (Mx)",
+          "Móvil 1. Belgrano (Mx)",
+          "Móvil 1. PLAZA SUDAMERICA (M y V)",
+          "Móvil 1. Parque Lezama (L)",
+          "Móvil 1. PLAZA ECHEVERRIA (J)"
+        ];
+      } else if (esMovil2) {
+        opciones = [
+          "Móvil 2. PLAZA IRLANDA (Mx)",
+          "Móvil 2. CORRALON DE FLORESTA (V)",
+          "Móvil 2. Parque Ferroviario (L)",
+          "Móvil 2. PLAZA DEMOCRACIA (J)"
+        ];
+      }
+      
+      opciones.forEach(opc => {
+        let opt = document.createElement("option");
+        opt.value = opc;
+        opt.innerText = opc;
+        selectSub.appendChild(opt);
+      });
+      
+      selectSub.value = "TODAS";
+    } else {
+      selectSub.style.display = "none";
+    }
+  }
+
   const modal = document.getElementById("modalDetalleEstacion");
   if(modal) {
     modal.classList.add("visible");
@@ -2051,6 +2094,9 @@ function actualizarGraficoDetalle() {
   
   const mes = document.getElementById("filtroMesDetalle").value;
   const tipoDia = document.getElementById("filtroDiaDetalle").value;
+  const selectSub = document.getElementById("filtroSubUbicacionDetalle");
+  const subUbicacion = selectSub ? selectSub.value : "TODAS";
+  
   const containerMetricas = document.getElementById("metricasDetalleEstacion");
   const overlay = document.getElementById("loadingChartDetalle");
   
@@ -2187,7 +2233,9 @@ function actualizarGraficoDetalle() {
               const index = elements[0].index;
               const diaLabel = res.labels[index];
               const dia = diaLabel.replace("Día ", "");
-              abrirDetalleDia(estacionDetalleActual.estacion, mes, dia);
+              const selectSub = document.getElementById("filtroSubUbicacionDetalle");
+              const subUbicacion = selectSub ? selectSub.value : "TODAS";
+              abrirDetalleDia(estacionDetalleActual.estacion, mes, dia, subUbicacion);
             }
           },
           scales: {
@@ -2277,7 +2325,7 @@ function actualizarGraficoDetalle() {
         }
       });
     })
-    .obtenerEstadisticasEstacionDetalle(estacionDetalleActual.estacion, mes, tipoDia);
+    .obtenerEstadisticasEstacionDetalle(estacionDetalleActual.estacion, mes, tipoDia, subUbicacion);
 }
 
 function renderCalendarioGestion() {
@@ -2348,7 +2396,7 @@ function renderCalendarioGestion() {
     .obtenerFeriados2026();
 }
 
-function abrirDetalleDia(estacion, mesClave, dia) {
+function abrirDetalleDia(estacion, mesClave, dia, subUbicacion) {
   const modal = document.getElementById("modalDetalleDia");
   const titulo = document.getElementById("tituloDetalleDia");
   const subtitulo = document.getElementById("subtituloDetalleDia");
@@ -2426,7 +2474,7 @@ function abrirDetalleDia(estacion, mesClave, dia) {
     .withFailureHandler(function(err) {
       body.innerHTML = '<div class="estadoVacio" style="color:#991b1b;">Error crítico: ' + err.message + '</div>';
     })
-    .obtenerDetalleDiaEstacion(estacion, mesClave, dia);
+    .obtenerDetalleDiaEstacion(estacion, mesClave, dia, subUbicacion);
 }
 
 function cerrarModalDetalleDia(event) {

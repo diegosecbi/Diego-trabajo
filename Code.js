@@ -6738,7 +6738,7 @@ function obtenerFeriados2026() {
 /**
  * Obtiene estadísticas específicas para el detalle de una estación.
  */
-function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
+function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbicacion) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const hojaTalleres = ss.getSheetByName("TALLERES");
   if (!hojaTalleres) return { ok: false };
@@ -6798,6 +6798,12 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
     const eNorm = normalizarNombreEstacion_(fila[idxEstacion]);
     if (!nombresABuscar.includes(eNorm)) return;
 
+    // Filtro por sub-ubicación si aplica
+    if (subUbicacion && subUbicacion !== "TODAS" && subUbicacion !== "CONJUNTO") {
+      const subNorm = normalizarNombreEstacion_(subUbicacion);
+      if (!eNorm.includes(subNorm)) return;
+    }
+
     const tDia = idxTipoDia !== -1 ? String(fila[idxTipoDia]).toUpperCase() : "";
     if (tipoDia !== "Todos" && !tDia.includes(tipoDia)) return;
 
@@ -6850,7 +6856,7 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia) {
 /**
  * Obtiene el detalle de actividades de una estación en un día específico.
  */
-function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
+function obtenerDetalleDiaEstacion(estacion, mesClave, dia, subUbicacion) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const hojaTalleres = ss.getSheetByName("TALLERES");
@@ -6892,6 +6898,12 @@ function obtenerDetalleDiaEstacion(estacion, mesClave, dia) {
       if (m === mesClave && String(d) === String(dia)) {
         const eNorm = normalizarNombreEstacion_(fila[idxEstacion]);
         if (nombresABuscar.includes(eNorm)) {
+          // Filtro por sub-ubicación si aplica
+          if (subUbicacion && subUbicacion !== "TODAS" && subUbicacion !== "CONJUNTO") {
+            const subNorm = normalizarNombreEstacion_(subUbicacion);
+            if (!eNorm.includes(subNorm)) return;
+          }
+          
           const actividad = String(fila[idxActividad] || "Sin Actividad").trim();
           const profesor = String(fila[idxProfesor] || "Sin Profesor").trim();
           const dni = String(fila[idxDni] || "").trim();
