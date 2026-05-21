@@ -1097,9 +1097,6 @@ function obtenerFuentesTalleresDesdeDatos_(ss) {
   celdas.forEach(function(valor) {
     const spreadsheetId = extraerSpreadsheetIdDesdeTexto_(valor);
     if (!spreadsheetId || vistos[spreadsheetId]) {
-      return;
-    }
-
     vistos[spreadsheetId] = true;
     salida.push({
       spreadsheetId: spreadsheetId
@@ -3203,6 +3200,81 @@ function obtenerResumenSolapaEspecialDesdeOrigen_(ss, nombreSolapa, filtros) {
   return obtenerResumenSolapaEspecial_(hoja, nombreSolapa);
 }
 
+var mapaPrimerAparicionCache_ = null;
+
+function obtenerMapaPrimerAparicionMes_(ss) {
+  if (mapaPrimerAparicionCache_) {
+    return mapaPrimerAparicionCache_;
+  }
+  
+  const mapa = {};
+  
+  const procesarHoja = function(hoja) {
+    if (!hoja || hoja.getLastRow() < 2) return;
+    const datos = hoja.getDataRange().getValues();
+    const headers = datos[0].map(h => String(h || "").toUpperCase().trim());
+    
+    let idxDni = headers.indexOf("DNI");
+    if (idxDni === -1) idxDni = headers.findIndex(h => h.includes("DNI"));
+    if (idxDni === -1) idxDni = 0;
+    
+    let idxFecha = headers.indexOf("FECHA ACTIVIDAD");
+    if (idxFecha === -1) idxFecha = headers.indexOf("FECHA");
+    if (idxFecha === -1) idxFecha = headers.findIndex(h => h.includes("FECHA"));
+    if (idxFecha === -1) idxFecha = 1;
+    
+    for (let i = 1; i < datos.length; i++) {
+      const fila = datos[i];
+      const valDni = fila[idxDni];
+      const dniLimpio = normalizarDni_(valDni);
+      if (!dniLimpio) continue;
+      
+      const fechaRaw = fila[idxFecha];
+      if (!fechaRaw) continue;
+      
+      let fechaObj = null;
+      if (fechaRaw instanceof Date) {
+        fechaObj = fechaRaw;
+      } else {
+        let parts = String(fechaRaw).split("/");
+        if (parts.length >= 3) {
+          let year = parts[2].split(" ")[0];
+          if (year.length === 2) year = "20" + year;
+          fechaObj = new Date(year, parseInt(parts[1])-1, parseInt(parts[0]));
+        }
+      }
+      if (!fechaObj || isNaN(fechaObj.getTime())) continue;
+      
+      const anio = String(fechaObj.getFullYear());
+      if (anio !== "2025" && anio !== "2026") continue;
+      
+      const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+      const mesAnio = anio + "-" + mes;
+      
+      if (!mapa[dniLimpio] || mesAnio < mapa[dniLimpio]) {
+        mapa[dniLimpio] = mesAnio;
+      }
+    }
+  };
+  
+  // Procesar 2025_HISTORICO localmente
+  const hojaHistorico = ss.getSheetByName("2025_HISTORICO");
+  if (hojaHistorico) {
+    procesarHoja(hojaHistorico);
+  } else {
+    console.warn("La solapa 2025_HISTORICO no existe. Se omitirá el histórico local.");
+  }
+  
+  // Procesar TALLERES
+  const hojaTalleres = ss.getSheetByName("TALLERES");
+  if (hojaTalleres) {
+    procesarHoja(hojaTalleres);
+  }
+  
+  mapaPrimerAparicionCache_ = mapa;
+  return mapa;
+}
+
 function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   console.log("[STATS] Iniciando obtención de Personas Únicas con filtros:", JSON.stringify(filtros));
@@ -3259,14 +3331,9 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
       if (anioReal !== "2025" && anioReal !== "2026") continue;
 
       let valDni = fila[idxDni];
-      let dniLimpio = "";
-      if (typeof valDni === "number") {
-        dniLimpio = Math.floor(valDni).toString();
-      } else {
-        dniLimpio = String(valDni || "").replace(/[^\d]/g, "");
-      }
+      let dniLimpio = normalizarDni_(valDni);
       
-      if (!dniLimpio || dniLimpio.length < 6) continue;
+      if (!dniLimpio) continue;
 
       todosLosRegistros.push({
         dni: dniLimpio,
@@ -3284,16 +3351,7 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
      console.log("[STATS] Leyendo 2025 local (2025_HISTORICO)");
      leerHoja(hojaHistorico2025, "2025");
   } else {
-     const fuente = FUENTES_ESPECIALES_EXTERNAS["TALLERES"];
-     if (fuente) {
-       try {
-         console.log("[STATS] Leyendo 2025 desde fuente externa");
-         let libroExterno = SpreadsheetApp.openById(fuente.spreadsheetId);
-         leerHoja(libroExterno.getSheetByName("2025"), "2025");
-       } catch(e) {
-         console.error("Error leyendo fuente externa 2025: " + e.message);
-       }
-     }
+     console.warn("[STATS] No se encontró 2025_HISTORICO local. Se omitirá el histórico 2025.");
   }
 
   // Cargar datos del 2026 (TALLERES)
@@ -3305,16 +3363,13 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
 
   console.log("[STATS] Total registros cargados (2025+2026):", todosLosRegistros.length);
 
-  // 2. Ordenar por Fecha para detectar primer contacto (Nuevas)
-  todosLosRegistros.sort((a, b) => a.fecha - b.fecha);
-
-  // 3. Detectar Primer Año de visita para cada DNI (Baseline de fidelización)
-  let primerAnioDni = {};
-  todosLosRegistros.forEach(reg => {
-    const anio = reg.anioHoja;
-    if (!primerAnioDni[reg.dni] || anio < primerAnioDni[reg.dni]) {
-      primerAnioDni[reg.dni] = anio;
-    }
+  // 2. Detectar el mes de primera aparición absoluta usando el histórico local
+  const mapaPrimerAparicion = obtenerMapaPrimerAparicionMes_(ss);
+  const totalUnicasHistorico = Object.keys(mapaPrimerAparicion).length;
+  const primerAnioDni = {};
+  Object.keys(mapaPrimerAparicion).forEach(dni => {
+    const mes = mapaPrimerAparicion[dni];
+    primerAnioDni[dni] = mes ? mes.split("-")[0] : null;
   });
 
   // 4. Aplicar Filtros y Agrupar
@@ -3325,6 +3380,11 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   const fMesesP1 = filtros && filtros.mesesP1 && filtros.mesesP1.length > 0 ? filtros.mesesP1 : null;
   const fMesesP2 = filtros && filtros.mesesP2 && filtros.mesesP2.length > 0 ? filtros.mesesP2 : null;
   const modo = (filtros && filtros.modo) || "general";
+  const primerMesSeleccionado = fMeses && fMeses.length
+    ? fMeses.slice().sort()[0]
+    : (fAnios.length === 1 ? fAnios[0] + "-01" : "2025-01");
+  const primerMesP1 = fMesesP1 && fMesesP1.length ? fMesesP1.slice().sort()[0] : null;
+  const primerMesP2 = fMesesP2 && fMesesP2.length ? fMesesP2.slice().sort()[0] : null;
   
   // Diagnóstico de filtros
   let diagnostico = {
@@ -3350,15 +3410,22 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   let unicasFiltradasSet = {};
 
   if (modo === "comparacion") {
-    res.periodo1 = { unicasSet: {}, prestaciones: 0, nuevas: 0 };
-    res.periodo2 = { unicasSet: {}, prestaciones: 0, nuevas: 0 };
+    res.periodo1 = { unicasSet: {}, prestaciones: 0, nuevasSet: {}, fidelizadasSet: {} };
+    res.periodo2 = { unicasSet: {}, prestaciones: 0, nuevasSet: {}, fidelizadasSet: {} };
   }
+
+  let unicasNuevasSet = {};
+  let unicasFidelizadasSet = {};
 
   todosLosRegistros.forEach(reg => {
     const anioReg = String(reg.anioHoja);
     const mesReg = String(reg.fecha.getMonth() + 1).padStart(2, '0');
     const mesAnio = anioReg + "-" + mesReg;
-    
+    const primeraAparicion = mapaPrimerAparicion[reg.dni] || mesAnio;
+    const esNuevaEnMes = primeraAparicion === mesAnio;
+    const esFidelizada = primeraAparicion < mesAnio;
+    const esNuevaPorFallback = !mapaPrimerAparicion[reg.dni] || primeraAparicion > mesAnio;
+
     res.mesesDisponiblesSet[mesAnio] = true;
 
     // Filtro Año
@@ -3398,37 +3465,37 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
       }
     }
 
-    const anioNum = parseInt(anioReg);
-    const primerAnioNum = parseInt(primerAnioDni[reg.dni] || 0);
-    const esNuevaEnSistema = (primerAnioNum === anioNum);
-    const esFidelizadaDeAniosAnteriores = (primerAnioNum > 0 && primerAnioNum < anioNum);
-
     if (modo === "comparacion") {
       let enP1 = (fMesesP1 && fMesesP1.includes(mesAnio));
       let enP2 = (fMesesP2 && fMesesP2.includes(mesAnio));
-      
+
       if (enP1) {
         res.periodo1.prestaciones++;
         res.periodo1.unicasSet[reg.dni] = true;
-        // En comparación, "nuevas" son las que su primera visita histórica fue en este periodo o año
-        // Pero para mantener consistencia, usamos la marca de "primera vez en el sistema"
-        if (esNuevaEnSistema) {
-           // Check adicional: ¿es su primera visita absoluta?
-           // Para simplificar al usuario: si su primer año es este, y es su primer registro
-           // Pero la lógica anual es más robusta.
-           res.periodo1.nuevasSet = res.periodo1.nuevasSet || {};
-           res.periodo1.nuevasSet[reg.dni] = true;
+        const esNuevaEnP1 = !mapaPrimerAparicion[reg.dni] || (fMesesP1 && fMesesP1.includes(primeraAparicion));
+        const esFidelizadaEnP1 = mapaPrimerAparicion[reg.dni] && primerMesP1 && primeraAparicion < primerMesP1;
+        if (esNuevaEnP1) {
+          res.periodo1.nuevasSet[reg.dni] = true;
+        } else if (esFidelizadaEnP1) {
+          res.periodo1.fidelizadasSet[reg.dni] = true;
+        } else {
+          res.periodo1.nuevasSet[reg.dni] = true;
         }
       }
       if (enP2) {
         res.periodo2.prestaciones++;
         res.periodo2.unicasSet[reg.dni] = true;
-        if (esNuevaEnSistema) {
-           res.periodo2.nuevasSet = res.periodo2.nuevasSet || {};
-           res.periodo2.nuevasSet[reg.dni] = true;
+        const esNuevaEnP2 = !mapaPrimerAparicion[reg.dni] || (fMesesP2 && fMesesP2.includes(primeraAparicion));
+        const esFidelizadaEnP2 = mapaPrimerAparicion[reg.dni] && primerMesP2 && primeraAparicion < primerMesP2;
+        if (esNuevaEnP2) {
+          res.periodo2.nuevasSet[reg.dni] = true;
+        } else if (esFidelizadaEnP2) {
+          res.periodo2.fidelizadasSet[reg.dni] = true;
+        } else {
+          res.periodo2.nuevasSet[reg.dni] = true;
         }
       }
-      
+
       if (enP1 || enP2) {
         diagnostico.procesadosFinal++;
       } else {
@@ -3456,11 +3523,26 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
       
       res.resumenAnual[anioReg].prestaciones++;
       res.resumenAnual[anioReg].unicasSet[reg.dni] = true;
-      
-      if (esNuevaEnSistema) {
+
+      const esNuevaEnAnio = !mapaPrimerAparicion[reg.dni] || primeraAparicion.startsWith(anioReg);
+      const esFidelizadaEnAnio = mapaPrimerAparicion[reg.dni] && primeraAparicion < `${anioReg}-01`;
+      const esNuevaEnSeleccion = !mapaPrimerAparicion[reg.dni] || primeraAparicion >= primerMesSeleccionado;
+      const esFidelizadaEnSeleccion = mapaPrimerAparicion[reg.dni] && primeraAparicion < primerMesSeleccionado;
+
+      if (esNuevaEnAnio) {
         res.resumenAnual[anioReg].nuevasSet[reg.dni] = true;
-      } else if (esFidelizadaDeAniosAnteriores) {
+      } else if (esFidelizadaEnAnio) {
         res.resumenAnual[anioReg].fidelizadasSet[reg.dni] = true;
+      } else {
+        res.resumenAnual[anioReg].nuevasSet[reg.dni] = true;
+      }
+
+      if (esNuevaEnSeleccion) {
+        unicasNuevasSet[reg.dni] = true;
+      } else if (esFidelizadaEnSeleccion) {
+        unicasFidelizadasSet[reg.dni] = true;
+      } else {
+        unicasNuevasSet[reg.dni] = true;
       }
     }
   });
@@ -3471,10 +3553,12 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
   
   if (modo === "comparacion") {
     res.periodo1.unicas = Object.keys(res.periodo1.unicasSet).length;
-    res.periodo1.nuevas = res.periodo1.nuevasSet ? Object.keys(res.periodo1.nuevasSet).length : 0;
+    res.periodo1.nuevas = Object.keys(res.periodo1.nuevasSet).length;
+    res.periodo1.fidelizadas = Object.keys(res.periodo1.fidelizadasSet).length;
     
     res.periodo2.unicas = Object.keys(res.periodo2.unicasSet).length;
-    res.periodo2.nuevas = res.periodo2.nuevasSet ? Object.keys(res.periodo2.nuevasSet).length : 0;
+    res.periodo2.nuevas = Object.keys(res.periodo2.nuevasSet).length;
+    res.periodo2.fidelizadas = Object.keys(res.periodo2.fidelizadasSet).length;
     
     // El total de la selección es la unión de ambos períodos (personas únicas totales en el rango)
     const unionSet = {};
@@ -3482,12 +3566,26 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
     Object.keys(res.periodo2.unicasSet).forEach(k => unionSet[k] = true);
     res.totalUnicasSeleccion = Object.keys(unionSet).length;
     
+    const unionNuevas = {};
+    Object.keys(res.periodo1.nuevasSet).forEach(k => unionNuevas[k] = true);
+    Object.keys(res.periodo2.nuevasSet).forEach(k => unionNuevas[k] = true);
+    res.totalNuevasSeleccion = Object.keys(unionNuevas).length;
+
+    const unionFidelizadas = {};
+    Object.keys(res.periodo1.fidelizadasSet).forEach(k => unionFidelizadas[k] = true);
+    Object.keys(res.periodo2.fidelizadasSet).forEach(k => unionFidelizadas[k] = true);
+    res.totalFidelizadasSeleccion = Object.keys(unionFidelizadas).length;
+    
     delete res.periodo1.unicasSet;
     delete res.periodo1.nuevasSet;
+    delete res.periodo1.fidelizadasSet;
     delete res.periodo2.unicasSet;
     delete res.periodo2.nuevasSet;
+    delete res.periodo2.fidelizadasSet;
   } else {
     res.totalUnicasSeleccion = Object.keys(unicasFiltradasSet).length;
+    res.totalNuevasSeleccion = Object.keys(unicasNuevasSet).length;
+    res.totalFidelizadasSeleccion = Object.keys(unicasFidelizadasSet).length;
     let finalAnual = [];
     Object.keys(res.resumenAnual).forEach(anio => {
       finalAnual.push({
@@ -3501,6 +3599,7 @@ function obtenerEstadisticasPersonasUnicasGlobal(filtros) {
     res.resumenAnual = finalAnual.sort((a, b) => b.anio.localeCompare(a.anio));
   }
 
+  res.totalUnicasHistorico = totalUnicasHistorico;
   res.diagnostico = diagnostico;
   console.log("[STATS] Finalizado. Diagnóstico:", JSON.stringify(diagnostico));
   return res;
@@ -6451,38 +6550,10 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
   let datos = hojaTalleres.getDataRange().getValues();
   let headers = datos[0].map(h => String(h).toUpperCase().trim());
   let filas = datos.slice(1);
+  const mapaPrimerAparicion = obtenerMapaPrimerAparicionMes_(ss);
 
   // --- BUSQUEDA BAJO DEMANDA DE HISTORICOS (2024/2025) ---
   const necesitaHistorico = (modo === "comparacion" || !filtroMeses || filtroMeses.length === 0 || (filtroMeses && filtroMeses.some(m => m.startsWith("2024") || m.startsWith("2025"))));
-  
-  if (necesitaHistorico) {
-    try {
-      const fuenteExtra = FUENTES_ESPECIALES_EXTERNAS["TALLERES"];
-      const libroExtra = SpreadsheetApp.openById(fuenteExtra.spreadsheetId);
-      const aniosABuscar = ["2025"];
-      
-      aniosABuscar.forEach(function(anio) {
-        const hojaAnio = libroExtra.getSheetByName(anio);
-        if (hojaAnio) {
-          const uFila = hojaAnio.getLastRow();
-          if (uFila > 1) {
-             const datosExtra = hojaAnio.getRange(2, 1, uFila - 1, 6).getValues();
-             datosExtra.forEach(function(f) {
-               const fDate = (f[1] instanceof Date) ? f[1] : null;
-               let tDia = "SEMANA";
-               if (fDate) {
-                 const d = fDate.getDay();
-                 if (d === 0 || d === 6) tDia = "SADOFE";
-               }
-               // Mapeamos al formato de TALLERES local: DNI, FECHA, ESTACION, PROFESOR, ACTIVIDAD, SECTOR, TIPO DIA, CODIGO
-               filas.push([f[0], f[1], f[2], f[3], f[4], f[5], tDia, ""]);
-             });
-          }
-        }
-      });
-    } catch(e) { console.log("Error trayendo historicos: " + e); }
-  }
-
   const idxDni = headers.indexOf("DNI");
   const idxFecha = headers.indexOf("FECHA ACTIVIDAD");
   
@@ -6503,9 +6574,59 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
   }
   if (idxTipoDia === -1) idxTipoDia = headers.length - 1;
 
+  const mesInicioSeleccionado = (filtroMeses && filtroMeses.length > 0)
+    ? filtroMeses.slice().sort()[0]
+    : "2025-01";
+
+  if (necesitaHistorico) {
+    const hojaHistorico = ss.getSheetByName("2025_HISTORICO");
+    if (hojaHistorico && hojaHistorico.getLastRow() > 1) {
+      const datosHist = hojaHistorico.getDataRange().getValues();
+      const headersHist = datosHist[0].map(h => String(h).toUpperCase().trim());
+      const idxDniH = headersHist.indexOf("DNI") >= 0 ? headersHist.indexOf("DNI") : headersHist.findIndex(h => h.includes("DNI"));
+      let idxFechaH = headersHist.indexOf("FECHA ACTIVIDAD");
+      if (idxFechaH === -1) idxFechaH = headersHist.indexOf("FECHA");
+      if (idxFechaH === -1) idxFechaH = headersHist.findIndex(h => h.includes("FECHA"));
+      let idxEstacionH = headersHist.indexOf("ESTACION");
+      if (idxEstacionH === -1) idxEstacionH = headersHist.findIndex(h => h.includes("ESTACION"));
+      let idxActividadH = headersHist.indexOf("ACTIVIDAD");
+      if (idxActividadH === -1) idxActividadH = headersHist.findIndex(h => h.includes("ACTIVIDAD"));
+      let idxProfesorH = headersHist.indexOf("PROFESOR");
+      if (idxProfesorH === -1) idxProfesorH = headersHist.findIndex(h => h.includes("PROFESOR"));
+      let idxTipoDiaH = headersHist.findIndex(h => h.includes("TIPO") && h.includes("DIA"));
+      if (idxTipoDiaH === -1) idxTipoDiaH = headersHist.findIndex(h => h.includes("FERIADO") || h.includes("FINDE") || h.includes("SADOFE"));
+
+      const parseFecha = function(valor) {
+        if (valor instanceof Date) return valor;
+        const raw = String(valor || "").trim();
+        const parts = raw.split("/");
+        if (parts.length >= 3) {
+          let year = parts[2].split(" ")[0];
+          if (year.length === 2) year = "20" + year;
+          return new Date(Number(year), Number(parts[1]) - 1, Number(parts[0]));
+        }
+        return null;
+      };
+
+      for (let i = 1; i < datosHist.length; i++) {
+        const filaHist = datosHist[i];
+        const filaExtra = Array(headers.length).fill("");
+        if (idxDni >= 0 && idxDniH >= 0) filaExtra[idxDni] = filaHist[idxDniH] || "";
+        if (idxFecha >= 0 && idxFechaH >= 0) filaExtra[idxFecha] = parseFecha(filaHist[idxFechaH]);
+        if (idxEstacion >= 0 && idxEstacionH >= 0) filaExtra[idxEstacion] = filaHist[idxEstacionH] || "";
+        if (idxActividad >= 0 && idxActividadH >= 0) filaExtra[idxActividad] = filaHist[idxActividadH] || "";
+        if (idxProfesor >= 0 && idxProfesorH >= 0) filaExtra[idxProfesor] = filaHist[idxProfesorH] || "";
+        if (idxTipoDia >= 0 && idxTipoDiaH >= 0) filaExtra[idxTipoDia] = filaHist[idxTipoDiaH] || "";
+        filas.push(filaExtra);
+      }
+    }
+  }
+
   const mesesDisponibles = {};
   const dataAgrupada = {}; 
   const totalUnicosGlobalRequest = {}; // Acumulador neto de todo el request
+  const totalNuevasGlobalRequest = {};
+  const totalFidelizadasGlobalRequest = {};
 
   filas.forEach(fila => {
     const f = fila[idxFecha];
@@ -6525,6 +6646,11 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     if (filtroEstacion && e !== filtroEstacion) return;
 
     let isFinde = false;
+    const primeraAparicion = d ? (mapaPrimerAparicion[d] || m) : m;
+    const esNuevaPorMes = primeraAparicion === m || !mapaPrimerAparicion[d] || primeraAparicion > m;
+    const esFidelizadaPorMes = primeraAparicion < m;
+    const esNuevaPorPeriodo = !mapaPrimerAparicion[d] || primeraAparicion >= mesInicioSeleccionado;
+    const esFidelizadaPorPeriodo = mapaPrimerAparicion[d] && primeraAparicion < mesInicioSeleccionado;
     const tipoColVal = String(fila[idxTipoDia] || "").toUpperCase();
     if (tipoColVal.includes("FINDE") || tipoColVal.includes("FERIADO") || tipoColVal.includes("SAB") || tipoColVal.includes("DOM") || tipoColVal.includes("SADOFE")) {
       isFinde = true;
@@ -6538,31 +6664,45 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
 
     const clave = (modo === "comparacion") ? m : "acumulado";
     if (!dataAgrupada[clave]) {
-      dataAgrupada[clave] = { est: {}, act: {}, prof: {}, mesCounts: {}, mesUnicos: {}, dias: {}, globalUnicos: {} };
+      dataAgrupada[clave] = { est: {}, act: {}, prof: {}, mesCounts: {}, mesUnicos: {}, mesNuevas: {}, mesFidelizadas: {}, dias: {}, globalUnicos: {} };
     }
     
     const target = dataAgrupada[clave];
     if (e.includes("*")) {
-      if (!target.est[e]) target.est[e] = { participaciones: 0, unicos: {} };
+      if (!target.est[e]) target.est[e] = { participaciones: 0, unicos: {}, nuevas: {}, fidelizadas: {} };
       target.est[e].participaciones++;
-      if (d) target.est[e].unicos[d] = true;
+      if (d) {
+        target.est[e].unicos[d] = true;
+        if (esNuevaPorPeriodo) target.est[e].nuevas[d] = true;
+        if (esFidelizadaPorPeriodo) target.est[e].fidelizadas[d] = true;
+      }
     }
     
     target.act[a] = (target.act[a] || 0) + 1;
     
-    if (!target.prof[p]) target.prof[p] = { participaciones: 0, unicos: {} };
+    if (!target.prof[p]) target.prof[p] = { participaciones: 0, unicos: {}, nuevas: {}, fidelizadas: {} };
     target.prof[p].participaciones++;
-    if (d) target.prof[p].unicos[d] = true;
+    if (d) {
+      target.prof[p].unicos[d] = true;
+      if (esNuevaPorPeriodo) target.prof[p].nuevas[d] = true;
+      if (esFidelizadaPorPeriodo) target.prof[p].fidelizadas[d] = true;
+    }
     
     target.mesCounts[m] = (target.mesCounts[m] || 0) + 1;
     if (!target.mesUnicos[m]) target.mesUnicos[m] = {};
+    if (!target.mesNuevas[m]) target.mesNuevas[m] = {};
+    if (!target.mesFidelizadas[m]) target.mesFidelizadas[m] = {};
     if (d) {
       target.mesUnicos[m][d] = true;
+      if (esNuevaPorMes) target.mesNuevas[m][d] = true;
+      if (esFidelizadaPorMes) target.mesFidelizadas[m][d] = true;
       target.globalUnicos[d] = true;
       totalUnicosGlobalRequest[d] = true;
+      if (esNuevaPorPeriodo) totalNuevasGlobalRequest[d] = true;
+      if (esFidelizadaPorPeriodo) totalFidelizadasGlobalRequest[d] = true;
     }
 
-    // Desglose por dÃ­a del mes (1-31)
+    // Desglose por día del mes (1-31)
     const dia = f.getDate();
     if (!target.dias[dia]) target.dias[dia] = { participaciones: 0, unicos: {} };
     target.dias[dia].participaciones++;
@@ -6598,13 +6738,13 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     resultados[clave] = {
       totalUnicosGlobal: Object.keys(t.globalUnicos || {}).length,
       estaciones: Object.entries(t.est)
-        .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length])
+        .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length, Object.keys(data.nuevas || {}).length, Object.keys(data.fidelizadas || {}).length])
         .sort((a,b) => b[1] - a[1]),
       actividades: Object.entries(t.act).sort((a,b) => b[1] - a[1]).slice(0, 10),
       profesores: Object.entries(t.prof)
-        .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length])
+        .map(([nombre, data]) => [nombre, data.participaciones, Object.keys(data.unicos).length, Object.keys(data.nuevas || {}).length, Object.keys(data.fidelizadas || {}).length])
         .sort((a, b) => b[1] - a[1]).slice(0, 10),
-      mensual: Object.keys(t.mesCounts).sort().map(m => [m, t.mesCounts[m], Object.keys(t.mesUnicos[m]).length]),
+      mensual: Object.keys(t.mesCounts).sort().map(m => [m, t.mesCounts[m], Object.keys(t.mesUnicos[m]).length, Object.keys(t.mesNuevas[m] || {}).length, Object.keys(t.mesFidelizadas[m] || {}).length]),
       dias: Object.keys(t.dias).sort((a, b) => a - b).map(d => [d, t.dias[d].participaciones, Object.keys(t.dias[d].unicos).length])
     };
   });
@@ -6620,6 +6760,8 @@ function obtenerDatosGraficos(filtroEstacion, filtroDias, filtroMeses, modo) {
     modo: modo || "periodo",
     resultados: resultados,
     totalUnicosGlobalRequest: Object.keys(totalUnicosGlobalRequest).length,
+    totalNuevasGlobalRequest: Object.keys(totalNuevasGlobalRequest).length,
+    totalFidelizadasGlobalRequest: Object.keys(totalFidelizadasGlobalRequest).length,
     mesesDisponibles: Object.keys(mesesDisponibles).sort(),
     listaEstaciones: Object.keys(listaEstaciones).sort()
   };
@@ -6740,6 +6882,7 @@ function obtenerFeriados2026() {
  */
 function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbicacion) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const mapaPrimerAparicion = obtenerMapaPrimerAparicionMes_(ss);
   const hojaTalleres = ss.getSheetByName("TALLERES");
   if (!hojaTalleres) return { ok: false };
 
@@ -6781,7 +6924,7 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbic
     const iter = new Date(2026, 0, 1);
     while (iter.getFullYear() === 2026) {
       const k = Utilities.formatDate(iter, tz, "MM-dd");
-      dataAgrupada[k] = { participaciones: 0, unicos: {}, mes: iter.getMonth() + 1 };
+      dataAgrupada[k] = { participaciones: 0, unicos: {}, nuevas: {}, fidelizadas: {}, mes: iter.getMonth() + 1 };
       iter.setDate(iter.getDate() + 1);
     }
   }
@@ -6809,16 +6952,24 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbic
 
     // CLAVE: Para anual usamos "MM-DD" para asegurar orden cronológico correcto
     const clave = esAnual ? Utilities.formatDate(f, tz, "MM-dd") : f.getDate();
-    const dni = String(fila[idxDni] || "").trim();
+    const dni = normalizarDni_(fila[idxDni]);
 
     if (!dataAgrupada[clave]) {
       if (esAnual) return; // No debería pasar si inicializamos bien
-      dataAgrupada[clave] = { participaciones: 0, unicos: {}, mes: f.getMonth() + 1 };
+      dataAgrupada[clave] = { participaciones: 0, unicos: {}, nuevas: {}, fidelizadas: {}, mes: f.getMonth() + 1 };
     }
-    
+
+    // Determinar si el DNI es nuevo o fidelizado respecto al mes actual
+    const mesAnio = f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, '0');
+    const primeraApar = dni ? mapaPrimerAparicion[dni] : null;
+    const esNueva = !primeraApar || primeraApar === mesAnio || primeraApar > mesAnio;
+    const esFidelizada = primeraApar && primeraApar < mesAnio;
+
     dataAgrupada[clave].participaciones++;
     if (dni) {
       dataAgrupada[clave].unicos[dni] = true;
+      if (esNueva) dataAgrupada[clave].nuevas[dni] = true;
+      if (esFidelizada) dataAgrupada[clave].fidelizadas[dni] = true;
       globalUnicos[dni] = true; // Acumular DNI a nivel periodo completo
     }
   });
@@ -6832,6 +6983,8 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbic
   });
   const participaciones = labelsRaw.map(k => dataAgrupada[k].participaciones);
   const unicos = labelsRaw.map(k => Object.keys(dataAgrupada[k].unicos).length);
+  const nuevas = labelsRaw.map(k => Object.keys(dataAgrupada[k].nuevas || {}).length);
+  const fidelizadas = labelsRaw.map(k => Object.keys(dataAgrupada[k].fidelizadas || {}).length);
   const mesesData = labelsRaw.map(k => dataAgrupada[k].mes);
 
   let labels = labelsRaw;
@@ -6841,15 +6994,43 @@ function obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbic
     labels = labelsRaw.map(d => "Día " + d);
   }
 
+  let nuevasG = 0;
+  let fidelizadasG = 0;
+  Object.keys(globalUnicos).forEach(dni => {
+    const p = mapaPrimerAparicion[dni];
+    if (!p) {
+      nuevasG++;
+      return;
+    }
+
+    if (mesClave === "TOTAL_2026") {
+      if (p.startsWith("2026")) nuevasG++;
+      else fidelizadasG++;
+      return;
+    }
+
+    if (p === mesClave) {
+      nuevasG++;
+    } else if (p < mesClave) {
+      fidelizadasG++;
+    } else {
+      nuevasG++;
+    }
+  });
+
   return {
     ok: true,
     esAnual: esAnual,
     labels: labels,
     participaciones: participaciones,
     unicos: unicos,
+    nuevas: nuevas,
+    fidelizadas: fidelizadas,
     mesesData: mesesData,
     totalParticipaciones: participaciones.reduce((a,b) => a+b, 0),
-    totalUnicos: Object.keys(globalUnicos).length
+    totalUnicos: Object.keys(globalUnicos).length,
+    totalNuevas: nuevasG,
+    totalFidelizados: fidelizadasG
   };
 }
 

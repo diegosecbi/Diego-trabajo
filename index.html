@@ -2112,13 +2112,18 @@ function actualizarGraficoDetalle() {
       }
 
       containerMetricas.innerHTML = `
-        <div style="flex:1; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0">
-          <div style="font-size:10px; color:#64748b; text-transform:uppercase">Participaciones</div>
-          <div style="font-size:18px; font-weight:800; color:#153244">${res.totalParticipaciones}</div>
+        <div style="flex:1; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; text-align:center;">
+          <div style="font-size:10px; color:#64748b; text-transform:uppercase; font-weight:bold;">Participaciones</div>
+          <div style="font-size:24px; font-weight:800; color:#153244; margin:5px 0;">${res.totalParticipaciones}</div>
         </div>
-        <div style="flex:1; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0">
-          <div style="font-size:10px; color:#64748b; text-transform:uppercase">Personas Únicas</div>
-          <div style="font-size:18px; font-weight:800; color:#153244">${res.totalUnicos}</div>
+        <div style="flex:1; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; text-align:center;">
+          <div style="font-size:10px; color:#64748b; text-transform:uppercase; font-weight:bold;">Personas Únicas Activas</div>
+          <div style="font-size:24px; font-weight:800; color:#153244; margin:5px 0;">
+            ${res.totalUnicos}
+          </div>
+          <div style="font-size:11px; font-weight:bold; color:#64748b; background:#f1f5f9; padding:4px; border-radius:4px; display:inline-block;">
+             <span style="color:#1d4ed8;">${res.totalNuevas || 0} Nuevas</span> • <span style="color:#15803d;">${res.totalFidelizados || 0} Fidelizadas</span>
+          </div>
         </div>
       `;
 
@@ -4350,6 +4355,12 @@ function renderizarCharts(data) {
         countM += data.resultados[c].mensual.length || 1;
     });
     totalU = data.totalUnicosGlobalRequest !== undefined ? data.totalUnicosGlobalRequest : 0;
+    let totalNue = data.totalNuevasGlobalRequest !== undefined ? data.totalNuevasGlobalRequest : 0;
+    let totalFid = data.totalFidelizadasGlobalRequest !== undefined ? data.totalFidelizadasGlobalRequest : 0;
+    const elNue = document.getElementById("flashNuevas");
+    const elFid = document.getElementById("flashFidelizadas");
+    if(elNue) elNue.textContent = totalNue.toLocaleString() + " Nuevas";
+    if(elFid) elFid.textContent = totalFid.toLocaleString() + " Fidelizadas";
     document.getElementById("flashParticipaciones").textContent = totalP.toLocaleString();
     document.getElementById("flashUnicas").textContent = totalU.toLocaleString();
     document.getElementById("flashPromedio").textContent = Math.round(totalP / (countM || 1)).toLocaleString();
@@ -4553,7 +4564,23 @@ function crearGraficoEvolucion(clave, mensual) {
         options: { 
             animation: false, responsive: true, maintainAspectRatio: false, 
             scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
-            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+            plugins: { 
+                legend: { labels: { font: FONT_SETTINGS } }, 
+                datalabels: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            if (context.dataset.label.includes('Personas')) {
+                                let i = context.dataIndex;
+                                let nuevas = mensual[i][3] || 0;
+                                let fidelizadas = mensual[i][4] || 0;
+                                return ['  ──────────────────────────────', '  ↳ Nuevas Históricas: ' + nuevas, '  ↳ Fidelizadas Previas: ' + fidelizadas];
+                            }
+                            return null;
+                        }
+                    }
+                }
+            } 
         }
     });
 }
@@ -4572,7 +4599,19 @@ function crearGraficoEstaciones(clave, estaciones) {
         options: { 
             animation: false, indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
             scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 15, font: FONT_SETTINGS } }, datalabels: { display: false } } 
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 15, font: FONT_SETTINGS } }, datalabels: { display: false }, tooltip: {
+                callbacks: {
+                    afterLabel: function(context) {
+                        if (context.dataset.label.includes('Personas')) {
+                            const item = estaciones[context.dataIndex] || [];
+                            const nuevas = item[3] || 0;
+                            const fidelizadas = item[4] || 0;
+                            return ['  ──────────────────────────────', '  ↳ Nuevas Históricas: ' + nuevas, '  ↳ Fidelizadas Previas: ' + fidelizadas];
+                        }
+                        return null;
+                    }
+                }
+            }} 
         }
     });
 }
@@ -4591,7 +4630,19 @@ function crearGraficoProfesores(clave, profesores) {
         options: { 
             animation: false, indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
             scales: { x: { ticks: { font: FONT_SETTINGS_TICKS } }, y: { ticks: { font: FONT_SETTINGS_TICKS } } },
-            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false } } 
+            plugins: { legend: { labels: { font: FONT_SETTINGS } }, datalabels: { display: false }, tooltip: {
+                callbacks: {
+                    afterLabel: function(context) {
+                        if (context.dataset.label.includes('Personas')) {
+                            const item = profesores[context.dataIndex] || [];
+                            const nuevas = item[3] || 0;
+                            const fidelizadas = item[4] || 0;
+                            return ['  ──────────────────────────────', '  ↳ Nuevas Históricas: ' + nuevas, '  ↳ Fidelizadas Previas: ' + fidelizadas];
+                        }
+                        return null;
+                    }
+                }
+            }} 
         }
     });
 }
