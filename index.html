@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -1189,6 +1189,11 @@ grid-template-columns:1fr;
       <div class="resumenCard" style="border-top: 4px solid var(--color-azul-gcba);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
            <div class="resumenLabel" style="font-weight: 800; margin-bottom: 0;">Calendario de Gestión Operativa</div>
+           <div style="display:flex; align-items:center; gap:10px;">
+             <button id="btnCalendarioPrev" class="cal-nav-btn" onclick="navegarCalendarioGestion(-1)">Anterior</button>
+             <div id="calendarioGestionMesActual" style="font-size:12px; font-weight:800; color:#1e293b; min-width:125px; text-align:center;">Enero 2026</div>
+             <button id="btnCalendarioNext" class="cal-nav-btn" onclick="navegarCalendarioGestion(1)">Siguiente</button>
+           </div>
            <div style="font-size: 11px; color: #64748b;">🟢 Eventos | 🔴 Incidencias (Haz clic en un día para registrar)</div>
         </div>
         <div id="calendarioGestion" class="calendario-grid">
@@ -1228,6 +1233,21 @@ grid-template-columns:1fr;
   border: 2px solid #0284c7 !important; 
   font-weight: 800; 
   box-shadow: inset 0 0 6px rgba(14, 165, 233, 0.2); 
+}
+.cal-nav-btn {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 8px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cal-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .cal-item {
   font-size: 9px;
@@ -1717,9 +1737,17 @@ nodo.textContent=sesionActual && sesionActual.email ? sesionActual.email : ""
 
 function cerrarSesionManual(){
   if(confirm("¿Estás seguro de que deseas cerrar sesión?")){
-    sesionActual=null;
-    // Forzamos recarga para limpiar cualquier estado de permisos en memoria
-    window.location.reload();
+    sesionActual = null;
+
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.style.display = "none";
+
+    const inputMail = document.getElementById("loginCorreo");
+    const inputPass = document.getElementById("loginPass");
+    if (inputMail) inputMail.value = "";
+    if (inputPass) inputPass.value = "";
+
+    mostrarPantallaLogin("Sesion cerrada. Ingresa las credenciales del siguiente usuario.");
   }
 }
 
@@ -1998,6 +2026,9 @@ function sincronizarTalleresManual() {
 let estacionDetalleActual = null;
 let chartInstanciaDetalle = null;
 const NOMBRES_MESES_CORTOS_EJE = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const NOMBRES_MESES_CALENDARIO = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const ANIO_CALENDARIO_GESTION = 2026;
+let mesCalendarioGestionActual = Math.min(11, Math.max(0, new Date().getMonth()));
 
 function parseFechaEje_(valor) {
   const texto = String(valor || "").trim();
@@ -2158,6 +2189,7 @@ function abrirModalDetalleEstacionByName(nombre) {
   if(modal) {
     modal.classList.add("visible");
     actualizarGraficoDetalle();
+    inicializarCalendarioGestion();
     renderCalendarioGestion();
   } else {
     console.error("No se encontró el elemento modalDetalleEstacion");
@@ -2411,9 +2443,9 @@ function renderCalendarioGestion() {
   if (!estacionDetalleActual) return;
   
   const container = document.getElementById("calendarioGestion");
-  const mesActual = new Date();
-  const anio = mesActual.getFullYear();
-  const mes = mesActual.getMonth();
+  const anio = ANIO_CALENDARIO_GESTION;
+  const mes = mesCalendarioGestionActual;
+  actualizarControlesCalendarioGestion();
   
   const primerDia = new Date(anio, mes, 1).getDay();
   const diasEnMes = new Date(anio, mes + 1, 0).getDate();
@@ -2473,6 +2505,44 @@ function renderCalendarioGestion() {
         .obtenerGestionOperativa(estacionDetalleActual.estacion);
     })
     .obtenerFeriados2026();
+}
+
+function inicializarCalendarioGestion() {
+  const selectMes = document.getElementById("filtroMesDetalle");
+  const value = selectMes ? String(selectMes.value || "") : "";
+  const match = value.match(/^2026-(\d{2})$/);
+
+  if (match) {
+    mesCalendarioGestionActual = Math.min(11, Math.max(0, Number(match[1]) - 1));
+  } else {
+    mesCalendarioGestionActual = Math.min(11, Math.max(0, new Date().getMonth()));
+  }
+
+  actualizarControlesCalendarioGestion();
+}
+
+function actualizarControlesCalendarioGestion() {
+  const etiquetaMes = document.getElementById("calendarioGestionMesActual");
+  const btnPrev = document.getElementById("btnCalendarioPrev");
+  const btnNext = document.getElementById("btnCalendarioNext");
+
+  if (etiquetaMes) {
+    etiquetaMes.innerText = `${NOMBRES_MESES_CALENDARIO[mesCalendarioGestionActual]} ${ANIO_CALENDARIO_GESTION}`;
+  }
+
+  if (btnPrev) btnPrev.disabled = mesCalendarioGestionActual <= 0;
+  if (btnNext) btnNext.disabled = mesCalendarioGestionActual >= 11;
+}
+
+function navegarCalendarioGestion(deltaMes) {
+  const delta = Number(deltaMes || 0);
+  if (!delta) return;
+
+  const siguienteMes = mesCalendarioGestionActual + delta;
+  if (siguienteMes < 0 || siguienteMes > 11) return;
+
+  mesCalendarioGestionActual = siguienteMes;
+  renderCalendarioGestion();
 }
 
 function abrirDetalleDia(estacion, mesClave, dia, subUbicacion) {
@@ -5090,3 +5160,6 @@ function renderModalPersonasUnicas(data) {
 </script>
 </body>
 </html>
+
+
+

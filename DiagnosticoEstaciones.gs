@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DIAGNÓSTICO: Cruza los nombres de las solapas (*) contra los valores de ESTACION en TALLERES
  * para identificar qué estaciones tienen datos y cuáles no aparecen.
  * Ejecutar desde el menú: Extensiones > Apps Script > diagnosticarEstacionesVsTabla
@@ -199,3 +199,4 @@ function diagnosticarEstacionesVsTabla() {
   console.log("FIN DEL DIAGNÓSTICO");
   console.log("========================================");
 }
+

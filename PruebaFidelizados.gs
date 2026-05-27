@@ -1,4 +1,4 @@
-function debugFidelizadosPatricios() {
+﻿function debugFidelizadosPatricios() {
   const filtros = {
     estacion: "Parque Patricios",
     anios: ["2025", "2026"],
@@ -549,3 +549,4 @@ function debugValidacionFuncionesReales() {
   console.log("FIN DE VALIDACIÓN DE FUNCIONES REALES");
   console.log("═".repeat(70) + "\n");
 }
+

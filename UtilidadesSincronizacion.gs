@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sincroniza las solapas con '*' restaurando nombres (Col B) y datos S1 (Col C).
  * Optimiza el rendimiento al evitar múltiples IMPORTRANGE en las celdas.
  */
@@ -107,3 +107,4 @@ function extraerIdDeUrl_(valor) {
   }
   return !texto.includes("/") ? texto : null;
 }
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Normaliza la columna F (Tipo de Día) en la solapa 2025_HISTORICO
  * Basado en el calendario oficial de feriados 2025 de Argentina.
  */
@@ -83,3 +83,4 @@ function normalizarTipoDia2025() {
   
   SpreadsheetApp.getUi().alert("Proceso completado. Columna F (Tipo de Día) actualizada en 2025_HISTORICO.");
 }
+

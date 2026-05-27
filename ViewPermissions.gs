@@ -1,4 +1,4 @@
-// VISTA PERMISSIONS - Control de interfaz por rol basado en RBAC
+﻿// VISTA PERMISSIONS - Control de interfaz por rol basado en RBAC
 // Definido: 2026-04-23
 // Propósito: Centralizar permisos de visualización sin tocar la lógica funcional
 
@@ -179,3 +179,4 @@ function debeVerSolapa(perfil, nombreSolapa) {
   
   return false;
 }
+
