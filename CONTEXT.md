@@ -2541,3 +2541,262 @@ Si los tests fallan:
   - persona activa
   - persona fidelizada
 - Ante conflicto entre un cambio nuevo y la logica actual, prevalece la logica actual.
+
+---
+
+## ACTUALIZACION 2026-06-04 - PILOTO DE CACHE PARA PARQUE PATRICIOS 2026
+
+### Estado actual del analisis
+
+- No se realizaron cambios funcionales todavia para la optimizacion de rendimiento.
+- Ya se analizo el flujo actual y el cuello de botella principal esta en Apps Script, no en el navegador.
+- El objetivo del piloto es evitar recalculo repetitivo al abrir una estacion, cambiar mes, filtrar por tipo de dia o abrir el detalle diario.
+- El caso inicial de trabajo queda acotado a:
+  - Estacion Saludable Parque Patricios
+  - anio 2026
+
+### Funciones pesadas detectadas
+
+Las funciones que hoy recalculan leyendo hojas completas son:
+
+- `obtenerEstadisticasEstacionDetalle(estacion, mesClave, tipoDia, subUbicacion)`
+  - Lee `TALLERES` completa
+  - filtra 2026
+  - filtra por estacion / mes / tipo de dia
+  - agrupa por fecha
+  - calcula:
+    - participaciones
+    - personas unicas
+    - nuevas
+    - fidelizadas
+    - totales del periodo
+
+- `obtenerDetalleDiaEstacion(estacion, mesClave, dia, subUbicacion)`
+  - Lee `TALLERES` completa
+  - filtra por fecha y estacion
+  - agrupa por actividad y profesor
+  - calcula:
+    - participaciones
+    - personas unicas
+
+- `obtenerMapaPrimerAparicionMes_(ss)`
+  - Recorre `2025_HISTORICO` y `TALLERES`
+  - construye el mapa global `DNI -> primer mes YYYY-MM`
+  - este mapa es necesario para mantener la logica actual de nuevas/fidelizadas
+
+### Estrategia elegida para el piloto
+
+Se propone una estrategia de materializacion/cache en Sheets:
+
+1. calcular una vez
+2. guardar resultados listos
+3. hacer que la web app lea esos resultados ya preparados
+4. mantener el contrato del frontend lo mas estable posible
+
+### Alcance del piloto
+
+El piloto NO toca todavia:
+
+- cronograma y cumplimiento
+- exportaciones
+- graficos / colores / etiquetas
+- badges visuales
+- carga inicial general del dashboard
+
+El piloto SI apunta a optimizar:
+
+- apertura del modal de detalle de estacion
+- cambio de mes
+- filtro por tipo de dia
+- apertura del detalle diario por fecha
+
+### Tablas auxiliares recomendadas
+
+Se recomienda crear una solapa tecnica oculta para cache de Parque Patricios:
+
+- `_CACHE_PP_2026`
+
+y una solapa tecnica oculta global:
+
+- `_CACHE_GLOBAL_DNI`
+
+#### 1. Helper global
+
+Bloque logico:
+
+- `CACHE_GLOBAL_PRIMERA_APARICION_DNI`
+
+Columnas sugeridas:
+
+- `dni_normalizado`
+- `primer_mes_yyyy_mm`
+- `primer_anio`
+- `origen`
+- `ultima_actualizacion`
+
+#### 2. Meta de Parque Patricios
+
+Bloque logico:
+
+- `PP_META_2026`
+
+Columnas sugeridas:
+
+- `estacion_canonica`
+- `anio`
+- `ultima_actualizacion_cache`
+- `source_last_sync_talleres`
+- `source_row_count_pp_2026`
+- `ultima_fecha_carga`
+- `total_participaciones`
+- `total_unicos`
+- `total_nuevas`
+- `total_fidelizadas`
+
+#### 3. Resumen mensual
+
+Bloque logico:
+
+- `PP_RESUMEN_MENSUAL_2026`
+
+Columnas sugeridas:
+
+- `estacion_canonica`
+- `anio`
+- `mes_clave`
+- `mes_num`
+- `bucket_tipo_dia`
+- `participaciones`
+- `personas_unicas`
+- `nuevas`
+- `fidelizadas`
+- `fechas_con_carga`
+- `ultima_fecha_carga_mes`
+
+#### 4. Resumen diario
+
+Bloque logico:
+
+- `PP_RESUMEN_DIARIO_2026`
+
+Columnas sugeridas:
+
+- `estacion_canonica`
+- `fecha_iso`
+- `anio`
+- `mes_clave`
+- `mes_num`
+- `dia_num`
+- `bucket_tipo_dia`
+- `participaciones`
+- `personas_unicas`
+- `nuevas`
+- `fidelizadas`
+- `con_carga`
+
+#### 5. Detalle diario
+
+Bloque logico:
+
+- `PP_DETALLE_DIA_2026`
+
+Columnas sugeridas:
+
+- `estacion_canonica`
+- `fecha_iso`
+- `mes_clave`
+- `dia_num`
+- `bucket_tipo_dia`
+- `actividad`
+- `profesor`
+- `participaciones`
+- `personas_unicas`
+
+### Flujo recomendado de actualizacion
+
+Para el piloto, la opcion mas segura es rebuild completo, no incremental:
+
+1. sincronizar `TALLERES`
+2. reconstruir `CACHE_GLOBAL_PRIMERA_APARICION_DNI`
+3. reconstruir `PP_RESUMEN_DIARIO_2026`
+4. reconstruir `PP_RESUMEN_MENSUAL_2026`
+5. reconstruir `PP_DETALLE_DIA_2026`
+6. reconstruir `PP_META_2026`
+
+### Contrato de frontend a preservar
+
+El frontend actual espera, para el detalle de estacion, una respuesta con campos como:
+
+- `ok`
+- `esAnual`
+- `labels`
+- `fechasEje`
+- `participaciones`
+- `unicos`
+- `nuevas`
+- `fidelizadas`
+- `mesesData`
+- `totalParticipaciones`
+- `totalUnicos`
+- `totalNuevas`
+- `totalFidelizados`
+
+La recomendacion es NO cambiar ese contrato.
+El backend debe seguir devolviendo el mismo formato, pero leyendo desde tablas precalculadas cuando la estacion sea Parque Patricios 2026.
+
+### Adaptaciones minimas previstas
+
+Las funciones candidatas a adaptacion para el piloto son:
+
+- `obtenerEstadisticasEstacionDetalle(...)`
+- `obtenerDetalleDiaEstacion(...)`
+- `obtenerMapaPrimerAparicionMes_(...)` como fuente del helper global
+
+Condicion recomendada:
+
+- si la estacion canonica es Parque Patricios y el anio es 2026, leer cache
+- si no, mantener la logica actual
+- si el cache falta o esta inconsistente, usar fallback a la logica actual
+
+### Beneficios esperados
+
+- menos lecturas completas de `TALLERES`
+- menos relecturas de `2025_HISTORICO`
+- apertura mas rapida del modal de estacion
+- filtros de mes y tipo de dia mas rapidos
+- menor riesgo de timeout en Apps Script
+- resultados auditables directamente en Sheets
+
+### Riesgos y cuidados
+
+- cache desactualizado si no se reconstruye tras sincronizar `TALLERES`
+- inconsistencia en nuevas/fidelizadas si el helper global queda viejo
+- riesgo de romper equivalencia con la logica actual si no se replica exactamente el criterio vigente
+- no mezclar cache con filas operativas raw
+- mantener fallback a logica actual para estaciones fuera del piloto
+
+### Cambio local detectado y respaldado en esta etapa
+
+Se detecto una modificacion local en `index.html` antes del backup:
+
+- archivo: `index.html`
+- ultima modificacion local visible: `2026-05-28 15:21:34`
+- tipo de cambio: rediseño visual de sidebar, buscador y cierre de sesion
+- impacto observado:
+  - cambios de CSS de botones laterales
+  - nuevo wrapper del buscador
+  - nuevo boton para limpiar busqueda
+  - nuevo boton lateral de cierre de sesion
+  - ajuste de permisos UI para el wrapper del buscador
+
+No se detecto, en ese diff, un cambio directo sobre la logica de negocio de:
+
+- personas unicas
+- nuevas/fidelizadas
+- cronograma
+- TALLERES
+
+### Decision actual
+
+- Se mantiene el criterio de no cambiar codigo funcional todavia.
+- La siguiente etapa segura, si el usuario la aprueba explicitamente, es implementar el piloto de cache/materializacion para Parque Patricios 2026 manteniendo intacto el contrato del frontend.
